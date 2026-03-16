@@ -1,0 +1,51 @@
+PODS:
+  - file_selector_ios (0.0.1):
+    - Flutter
+  - Flutter (1.0.0)
+  - flutter_inappwebview_ios (0.0.1):
+    - Flutter
+    - flutter_inappwebview_ios/Core (= 0.0.1)
+    - OrderedSet (~> 6.0.3)
+  - flutter_inappwebview_ios/Core (0.0.1):
+    - Flutter
+    - OrderedSet (~> 6.0.3)
+  - integration_test (0.0.1):
+    - Flutter
+  - OrderedSet (6.0.3)
+  - rust_lib_quarkdrop (0.0.1):
+    - Flutter
+
+DEPENDENCIES:
+  - file_selector_ios (from `.symlinks/plugins/file_selector_ios/ios`)
+  - Flutter (from `Flutter`)
+  - flutter_inappwebview_ios (from `.symlinks/plugins/flutter_inappwebview_ios/ios`)
+  - integration_test (from `.symlinks/plugins/integration_test/ios`)
+  - rust_lib_quarkdrop (from `.symlinks/plugins/rust_lib_quarkdrop/ios`)
+
+SPEC REPOS:
+  trunk:
+    - OrderedSet
+
+EXTERNAL SOURCES:
+  file_selector_ios:
+    :path: ".symlinks/plugins/file_selector_ios/ios"
+  Flutter:
+    :path: Flutter
+  flutter_inappwebview_ios:
+    :path: ".symlinks/plugins/flutter_inappwebview_ios/ios"
+  integration_test:
+    :path: ".symlinks/plugins/integration_test/ios"
+  rust_lib_quarkdrop:
+    :path: ".symlinks/plugins/rust_lib_quarkdrop/ios"
+
+SPEC CHECKSUMS:
+  file_selector_ios: ec57ec07954363dd730b642e765e58f199bb621a
+  Flutter: cabc95a1d2626b1b06e7179b784ebcf0c0cde467
+  flutter_inappwebview_ios: b89ba3482b96fb25e00c967aae065701b66e9b99
+  integration_test: 4a889634ef21a45d28d50d622cf412dc6d9f586e
+  OrderedSet: e539b66b644ff081c73a262d24ad552a69be3a94
+  rust_lib_quarkdrop: 6f0c99e7cfcff849feb856ddf0105f4aef2d442e
+
+PODFILE CHECKSUM: 3c63482e143d1b91d2d2560aee9fb04ecc74ac7e
+
+COCOAPODS: 1.16.2
