@@ -15,6 +15,8 @@ use libquarkpan::QuarkPan;
 #[derive(Clone, Debug)]
 pub enum AuthState {
     LoginRequired,
+    NeedCreatePassword,
+    NeedVerifyPassword,
     Ready,
 }
 
@@ -145,6 +147,37 @@ pub async fn shell_snapshot() -> anyhow::Result<ShellSnapshot> {
             });
         }
     };
+
+    // Check cloud password status before accessing mailbox
+    let has_verify = device::has_cloud_password_verify_cached(&quark).await.unwrap_or(false);
+    let key_unlocked = device::is_key_unlocked();
+    if !has_verify {
+        device_snapshot.mailbox_status_label = "Password setup required".to_string();
+        device_snapshot.mailbox_summary =
+            "Set a cloud password to encrypt and protect your device keys.".to_string();
+        return Ok(ShellSnapshot {
+            auth_state: AuthState::NeedCreatePassword,
+            protocol_names,
+            device_snapshot,
+            inbox_previews: Vec::new(),
+            peer_devices: Vec::new(),
+            transfer_previews,
+        });
+    }
+    if !key_unlocked {
+        device_snapshot.mailbox_status_label = "Password required".to_string();
+        device_snapshot.mailbox_summary =
+            "Enter your cloud password to unlock this device.".to_string();
+        return Ok(ShellSnapshot {
+            auth_state: AuthState::NeedVerifyPassword,
+            protocol_names,
+            device_snapshot,
+            inbox_previews: Vec::new(),
+            peer_devices: Vec::new(),
+            transfer_previews,
+        });
+    }
+
     let mailbox_state = match device::ensure_mailbox_state(
         &quark,
         &protocol_names.manifest_name,
@@ -324,6 +357,47 @@ pub fn poll_interval_seconds() -> anyhow::Result<u32> {
 #[flutter_rust_bridge::frb(sync)]
 pub fn set_poll_interval_seconds(seconds: u32) -> anyhow::Result<u32> {
     preferences::set_poll_interval_seconds(seconds)
+}
+
+pub async fn create_cloud_password(password: String) -> anyhow::Result<()> {
+    let cookie_session = session::current_session();
+    anyhow::ensure!(cookie_session.is_configured(), "Login required.");
+    let quark = QuarkPan::builder()
+        .cookie(cookie_session.raw_cookie)
+        .prepare()?;
+    device::create_cloud_password(&quark, &password).await
+}
+
+pub async fn verify_cloud_password(password: String) -> anyhow::Result<()> {
+    let cookie_session = session::current_session();
+    anyhow::ensure!(cookie_session.is_configured(), "Login required.");
+    let quark = QuarkPan::builder()
+        .cookie(cookie_session.raw_cookie)
+        .prepare()?;
+    device::verify_cloud_password(&quark, &password).await
+}
+
+pub async fn change_cloud_password(
+    old_password: String,
+    new_password: String,
+) -> anyhow::Result<()> {
+    let cookie_session = session::current_session();
+    anyhow::ensure!(cookie_session.is_configured(), "Login required.");
+    let quark = QuarkPan::builder()
+        .cookie(cookie_session.raw_cookie)
+        .prepare()?;
+    device::change_cloud_password(&quark, &old_password, &new_password).await
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn open_data_folder() -> anyhow::Result<()> {
+    #[cfg(not(any(target_os = "ios", target_os = "android")))]
+    {
+        let paths = crate::workspace::app_paths()?;
+        opener::open(&paths.config_dir)
+            .map_err(|e| anyhow::anyhow!("Failed to open data folder: {e}"))?;
+    }
+    Ok(())
 }
 
 pub async fn send_local_path(

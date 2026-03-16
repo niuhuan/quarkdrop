@@ -32,6 +32,10 @@ tokio = { version = "1.47.1", features = ["fs", "macros", "rt-multi-thread", "ti
 tokio-util = { version = "0.7.16", features = ["io"] }
 uuid = { version = "1.18.1", features = ["v4"] }
 x25519-dalek = { version = "2.0.1", features = ["static_secrets"] }
+argon2 = "0.5"
+
+[target.'cfg(not(any(target_os = "ios", target_os = "android")))'.dependencies]
+opener = "0.7"
 
 [lints.rust]
 unexpected_cfgs = { level = "warn", check-cfg = ['cfg(frb_expand)'] }

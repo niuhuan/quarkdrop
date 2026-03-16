@@ -1,9 +1,12 @@
 import 'dart:async';
 import 'dart:io';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:quarkdrop/src/models/pending_send_item.dart';
 import 'package:quarkdrop/src/models/transfer_job.dart';
+import 'package:quarkdrop/src/rust/api/app.dart' as rust_api;
 import 'package:quarkdrop/src/state/app_store.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
@@ -341,7 +344,10 @@ class _SendPane extends StatelessWidget {
             sendInProgress: sendInProgress,
             selectedPeerLabel: selectedPeerLabel,
             onAddFiles: store.addFilesToSendQueue,
-            onAddFolder: store.addDirectoryToSendQueue,
+            onAddFolder: Platform.isIOS ? null : store.addDirectoryToSendQueue,
+            onAddPhotos: (Platform.isIOS || Platform.isAndroid || Platform.isMacOS)
+                ? store.addPhotosToSendQueue
+                : null,
             onClear: store.clearPendingSendItems,
             onRemoveItem: store.removePendingSendItem,
             onSend: store.sendPendingSelection,
@@ -607,6 +613,8 @@ class _TransferListTile extends StatelessWidget {
                 Expanded(
                   child: Text(
                     job.title,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
@@ -700,6 +708,8 @@ class _TransferDetailCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   job!.title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
@@ -868,6 +878,16 @@ class _SettingsPane extends StatelessWidget {
                   const SizedBox(height: 14),
                   _PollIntervalCard(store: store),
                   const SizedBox(height: 14),
+                  _PasswordCard(store: store),
+                  const SizedBox(height: 14),
+                  if (Platform.isAndroid) ...[
+                    const _BackgroundServiceCard(),
+                    const SizedBox(height: 14),
+                  ],
+                  if (kDebugMode && !Platform.isIOS && !Platform.isAndroid) ...[
+                    const _OpenDataFolderCard(),
+                    const SizedBox(height: 14),
+                  ],
                   _SignOutCard(store: store),
                   if (lastError != null) ...[
                     const SizedBox(height: 14),
@@ -1114,6 +1134,401 @@ class _DeviceSettingsCardState extends State<_DeviceSettingsCard> {
         ),
       );
     });
+  }
+}
+
+class _PasswordCard extends StatefulWidget {
+  const _PasswordCard({required this.store});
+
+  final AppStore store;
+
+  @override
+  State<_PasswordCard> createState() => _PasswordCardState();
+}
+
+class _PasswordCardState extends State<_PasswordCard> {
+  bool _editing = false;
+  final _oldController = TextEditingController();
+  final _newController = TextEditingController();
+  final _confirmController = TextEditingController();
+  String? _error;
+  bool _saving = false;
+
+  @override
+  void dispose() {
+    _oldController.dispose();
+    _newController.dispose();
+    _confirmController.dispose();
+    super.dispose();
+  }
+
+  void _toggle() {
+    setState(() {
+      _editing = !_editing;
+      _error = null;
+      if (!_editing) {
+        _oldController.clear();
+        _newController.clear();
+        _confirmController.clear();
+      }
+    });
+  }
+
+  Future<void> _save() async {
+    final newPw = _newController.text;
+    final confirm = _confirmController.text;
+    if (newPw.isEmpty) {
+      setState(() => _error = 'New password cannot be empty.');
+      return;
+    }
+    if (newPw != confirm) {
+      setState(() => _error = 'Passwords do not match.');
+      return;
+    }
+    setState(() {
+      _saving = true;
+      _error = null;
+    });
+    try {
+      await widget.store.changeCloudPassword(_oldController.text, newPw);
+      setState(() {
+        _editing = false;
+        _oldController.clear();
+        _newController.clear();
+        _confirmController.clear();
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..showSnackBar(
+            const SnackBar(
+              content: Text('Cloud password updated.'),
+              behavior: SnackBarBehavior.floating,
+              margin: EdgeInsets.fromLTRB(16, 0, 16, 24),
+            ),
+          );
+      }
+    } catch (e) {
+      setState(() => _error = e.toString());
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: Color(0xFFE7DED0)),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: _saving ? null : _toggle,
+        child: Padding(
+          padding: const EdgeInsets.all(18),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  const Icon(Icons.lock_outline_rounded, size: 22),
+                  const SizedBox(width: 12),
+                  const Expanded(
+                    child: Text(
+                      'Cloud Password',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                  ),
+                  Icon(
+                    _editing
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded,
+                    color: const Color(0xFF5C6A64),
+                  ),
+                ],
+              ),
+              if (!_editing)
+                const Padding(
+                  padding: EdgeInsets.only(top: 4),
+                  child: Text(
+                    'Change your cloud password. All device keys will be re-encrypted.',
+                    style: TextStyle(
+                      color: Color(0xFF5C6A64),
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              if (_editing) ...[
+                const SizedBox(height: 14),
+                TextField(
+                  controller: _oldController,
+                  obscureText: true,
+                  enabled: !_saving,
+                  decoration: const InputDecoration(
+                    labelText: 'Current Password',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _newController,
+                  obscureText: true,
+                  enabled: !_saving,
+                  decoration: const InputDecoration(
+                    labelText: 'New Password',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _confirmController,
+                  obscureText: true,
+                  enabled: !_saving,
+                  onSubmitted: (_) => _save(),
+                  decoration: const InputDecoration(
+                    labelText: 'Confirm New Password',
+                    border: OutlineInputBorder(),
+                  ),
+                ),
+                if (_error != null) ...[
+                  const SizedBox(height: 10),
+                  Text(
+                    _error!,
+                    style: const TextStyle(
+                      color: Color(0xFF9B3D16),
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 12),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    TextButton(
+                      onPressed: _saving ? null : _toggle,
+                      child: const Text('Cancel'),
+                    ),
+                    const SizedBox(width: 8),
+                    FilledButton(
+                      onPressed: _saving ? null : _save,
+                      child: _saving
+                          ? const SizedBox(
+                              width: 16,
+                              height: 16,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                color: Colors.white,
+                              ),
+                            )
+                          : const Text('Change Password'),
+                    ),
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _OpenDataFolderCard extends StatelessWidget {
+  const _OpenDataFolderCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: Color(0xFFE7DED0)),
+      ),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(16),
+        onTap: () {
+          try {
+            rust_api.openDataFolder();
+          } catch (e) {
+            ScaffoldMessenger.of(context)
+              ..clearSnackBars()
+              ..showSnackBar(
+                SnackBar(
+                  content: Text('Failed to open data folder: $e'),
+                  behavior: SnackBarBehavior.floating,
+                  margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+                ),
+              );
+          }
+        },
+        child: const Padding(
+          padding: EdgeInsets.all(18),
+          child: Row(
+            children: [
+              Icon(Icons.folder_open_rounded, size: 22),
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Open Data Folder',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    SizedBox(height: 4),
+                    Text(
+                      'Open the app configuration directory in the file manager. (Debug only)',
+                      style: TextStyle(
+                        color: Color(0xFF5C6A64),
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.open_in_new_rounded,
+                size: 20,
+                color: Color(0xFF5C6A64),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _BackgroundServiceCard extends StatefulWidget {
+  const _BackgroundServiceCard();
+
+  @override
+  State<_BackgroundServiceCard> createState() => _BackgroundServiceCardState();
+}
+
+class _BackgroundServiceCardState extends State<_BackgroundServiceCard> {
+  static const _channel = MethodChannel('quarkdrop/background');
+  bool _ignoringBattery = false;
+  bool _loading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _checkStatus();
+  }
+
+  Future<void> _checkStatus() async {
+    try {
+      final result = await _channel.invokeMethod<bool>(
+        'isIgnoringBatteryOptimizations',
+      );
+      if (mounted) {
+        setState(() {
+          _ignoringBattery = result ?? false;
+          _loading = false;
+        });
+      }
+    } catch (_) {
+      if (mounted) setState(() => _loading = false);
+    }
+  }
+
+  Future<void> _requestBatteryOptimization() async {
+    try {
+      await _channel.invokeMethod('requestIgnoreBatteryOptimizations');
+      await Future.delayed(const Duration(seconds: 1));
+      await _checkStatus();
+    } catch (_) {}
+  }
+
+  Future<void> _openAppSettings() async {
+    try {
+      await _channel.invokeMethod('openAppSettings');
+    } catch (_) {}
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: Color(0xFFE7DED0)),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Row(
+              children: [
+                Icon(Icons.battery_saver_rounded, size: 22),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    'Background',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (_loading)
+              const Padding(
+                padding: EdgeInsets.symmetric(vertical: 8),
+                child: Center(
+                  child: SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(strokeWidth: 2),
+                  ),
+                ),
+              )
+            else ...[
+              Text(
+                _ignoringBattery
+                    ? 'Battery optimization is disabled. The app can run in the background.'
+                    : 'Disable battery optimization to prevent background transfers from being interrupted.',
+                style: const TextStyle(
+                  color: Color(0xFF5C6A64),
+                  fontSize: 13,
+                ),
+              ),
+              const SizedBox(height: 12),
+              if (!_ignoringBattery)
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _requestBatteryOptimization,
+                    icon: const Icon(Icons.battery_alert_rounded, size: 18),
+                    label: const Text('Disable Battery Optimization'),
+                  ),
+                ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton.icon(
+                  onPressed: _openAppSettings,
+                  icon: const Icon(Icons.settings_rounded, size: 18),
+                  label: const Text('Open App Settings'),
+                ),
+              ),
+            ],
+          ],
+        ),
+      ),
+    );
   }
 }
 
@@ -1750,6 +2165,8 @@ class _InboxPane extends StatelessWidget {
                                 children: [
                                   Text(
                                     job.rootName,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
                                     style: const TextStyle(
                                       fontWeight: FontWeight.w700,
                                       fontSize: 15,
@@ -1785,6 +2202,7 @@ class _SendComposerCard extends StatelessWidget {
     required this.selectedPeerLabel,
     required this.onAddFiles,
     required this.onAddFolder,
+    required this.onAddPhotos,
     required this.onClear,
     required this.onRemoveItem,
     required this.onSend,
@@ -1794,7 +2212,8 @@ class _SendComposerCard extends StatelessWidget {
   final bool sendInProgress;
   final String? selectedPeerLabel;
   final Future<void> Function() onAddFiles;
-  final Future<void> Function() onAddFolder;
+  final Future<void> Function()? onAddFolder;
+  final Future<void> Function()? onAddPhotos;
   final VoidCallback onClear;
   final ValueChanged<String> onRemoveItem;
   final Future<void> Function() onSend;
@@ -1827,11 +2246,18 @@ class _SendComposerCard extends StatelessWidget {
                 icon: const Icon(Icons.attach_file_rounded),
                 label: const Text('Add Files'),
               ),
-              OutlinedButton.icon(
-                onPressed: sendInProgress ? null : onAddFolder,
-                icon: const Icon(Icons.create_new_folder_rounded),
-                label: const Text('Add Folder'),
-              ),
+              if (onAddFolder != null)
+                OutlinedButton.icon(
+                  onPressed: sendInProgress ? null : onAddFolder,
+                  icon: const Icon(Icons.create_new_folder_rounded),
+                  label: const Text('Add Folder'),
+                ),
+              if (onAddPhotos != null)
+                OutlinedButton.icon(
+                  onPressed: sendInProgress ? null : onAddPhotos,
+                  icon: const Icon(Icons.photo_library_rounded),
+                  label: const Text('Add Photos'),
+                ),
               OutlinedButton(
                 onPressed: sendInProgress || pendingItems.isEmpty
                     ? null

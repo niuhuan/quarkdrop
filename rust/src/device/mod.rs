@@ -1,17 +1,25 @@
-use crate::workspace::app_paths;
+use argon2::Argon2;
 use bytes::Bytes;
+use chacha20poly1305::aead::{Aead, KeyInit};
+use chacha20poly1305::{ChaCha20Poly1305, Key, Nonce};
+use crate::workspace::app_paths;
 use flutter_rust_bridge::for_generated::anyhow;
 use futures_util::{stream, StreamExt};
 use libquarkpan::{QuarkEntry, QuarkPan};
+use rand::rngs::OsRng;
+use rand::RngCore;
 use serde::{Deserialize, Serialize};
 use sha1::{Digest as Sha1Digest, Sha1};
 use std::env;
 use std::fs;
+use std::sync::{OnceLock, RwLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 use x25519_dalek::{PublicKey, StaticSecret};
 
 const QUARKDROP_ROOT_FOLDER_NAME: &str = "QuarkDrop";
 const DEVICE_METADATA_FILE_NAME: &str = "device.json";
+const KEY_VERIFY_FILE_NAME: &str = "key_verify.json";
+const VERIFY_PLAINTEXT: &[u8] = b"quarkdrop-verify-ok-v1";
 
 #[derive(Clone, Debug)]
 pub struct LocalDevice {
@@ -61,7 +69,33 @@ struct DeviceMetadata {
     device_name: String,
     #[serde(default)]
     public_key: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    encrypted_key: Option<EncryptedPrivateKey>,
     updated_at: u64,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub(crate) struct EncryptedPrivateKey {
+    version: u32,
+    algorithm: String,
+    argon2_salt: String,
+    nonce: String,
+    ciphertext: String,
+}
+
+static UNLOCKED_KEY: OnceLock<RwLock<Option<[u8; 32]>>> = OnceLock::new();
+static CLOUD_VERIFY_CACHED: OnceLock<RwLock<Option<bool>>> = OnceLock::new();
+
+fn unlocked_key_cell() -> &'static RwLock<Option<[u8; 32]>> {
+    UNLOCKED_KEY.get_or_init(|| RwLock::new(None))
+}
+
+fn cloud_verify_cache() -> &'static RwLock<Option<bool>> {
+    CLOUD_VERIFY_CACHED.get_or_init(|| RwLock::new(None))
+}
+
+pub fn reset_cloud_verify_cache() {
+    *cloud_verify_cache().write().expect("cloud verify cache poisoned") = None;
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -69,7 +103,7 @@ struct StoredLocalDeviceProfile {
     version: u32,
     device_id: String,
     device_name: String,
-    private_key_hex: String,
+    encrypted_key: EncryptedPrivateKey,
     updated_at: u64,
 }
 
@@ -111,13 +145,10 @@ pub fn load_or_create_local_device() -> anyhow::Result<LocalDevice> {
         derived
     };
 
-    let local_device = LocalDevice {
+    Ok(LocalDevice {
         device_id,
         device_name,
-    };
-    let private_key = load_device_private_key()?;
-    remember_device_profile(&local_device, &private_key)?;
-    Ok(local_device)
+    })
 }
 
 pub fn save_device_name(name: String) -> anyhow::Result<String> {
@@ -127,17 +158,16 @@ pub fn save_device_name(name: String) -> anyhow::Result<String> {
     let paths = app_paths()?;
     fs::create_dir_all(&paths.config_dir)?;
     fs::write(&paths.device_name_file, format!("{normalized}\n"))?;
-    let device_id = fs::read_to_string(&paths.device_id_file)?
-        .trim()
-        .to_string();
-    let private_key = load_device_private_key()?;
-    remember_device_profile(
-        &LocalDevice {
+    // Optionally update profile if key file is available
+    if paths.device_private_key_file.exists() {
+        let device_id = fs::read_to_string(&paths.device_id_file)?
+            .trim()
+            .to_string();
+        let _ = remember_device_profile(&LocalDevice {
             device_id,
             device_name: normalized.clone(),
-        },
-        &private_key,
-    )?;
+        });
+    }
     Ok(normalized)
 }
 
@@ -189,16 +219,14 @@ pub fn restore_remembered_device(device_id: String) -> anyhow::Result<LocalDevic
     )?;
     fs::write(
         &paths.device_private_key_file,
-        format!("{}\n", profile.private_key_hex),
+        serde_json::to_vec_pretty(&profile.encrypted_key)?,
     )?;
+    lock_key();
 
-    let local_device = LocalDevice {
+    Ok(LocalDevice {
         device_id: profile.device_id,
         device_name: profile.device_name,
-    };
-    let private_key = decode_private_key_hex(profile.private_key_hex.trim())?;
-    remember_device_profile(&local_device, &private_key)?;
-    Ok(local_device)
+    })
 }
 
 pub fn bind_cloud_device(device_id: String) -> anyhow::Result<()> {
@@ -220,25 +248,220 @@ pub fn bind_cloud_device(device_id: String) -> anyhow::Result<()> {
 
     fs::write(&paths.device_id_file, format!("{normalized}\n"))?;
 
-    let local_device = load_or_create_local_device()?;
-    let private_key = load_device_private_key()?;
-    remember_device_profile(&local_device, &private_key)?;
+    load_or_create_local_device()?;
     Ok(())
 }
 
 pub(crate) fn load_device_private_key() -> anyhow::Result<[u8; 32]> {
+    let guard = unlocked_key_cell()
+        .read()
+        .expect("unlocked key lock poisoned");
+    match *guard {
+        Some(key) => Ok(key),
+        None => anyhow::bail!("Device key is locked. Unlock with password first."),
+    }
+}
+
+pub fn is_key_unlocked() -> bool {
+    unlocked_key_cell()
+        .read()
+        .expect("unlocked key lock poisoned")
+        .is_some()
+}
+
+pub async fn has_cloud_password_verify(quark: &QuarkPan, root_id: &str) -> anyhow::Result<bool> {
+    let entries = list_all_entries(quark, root_id).await?;
+    Ok(entries
+        .iter()
+        .any(|e| e.file && e.file_name == KEY_VERIFY_FILE_NAME))
+}
+
+pub async fn has_cloud_password_verify_cached(quark: &QuarkPan) -> anyhow::Result<bool> {
+    {
+        let guard = cloud_verify_cache().read().expect("cloud verify cache poisoned");
+        if let Some(cached) = *guard {
+            return Ok(cached);
+        }
+    }
+    let root_id = ensure_protocol_folder(quark, "0", QUARKDROP_ROOT_FOLDER_NAME).await?;
+    let result = has_cloud_password_verify(quark, &root_id).await?;
+    *cloud_verify_cache().write().expect("cloud verify cache poisoned") = Some(result);
+    Ok(result)
+}
+
+pub async fn create_cloud_password(quark: &QuarkPan, password: &str) -> anyhow::Result<()> {
+    let password = password.trim();
+    anyhow::ensure!(!password.is_empty(), "Password cannot be empty.");
+
+    let root_id = ensure_protocol_folder(quark, "0", QUARKDROP_ROOT_FOLDER_NAME).await?;
+
+    // Create verify blob
+    let verify_encrypted = encrypt_private_key_blob(VERIFY_PLAINTEXT, password)?;
+    let verify_bytes = serde_json::to_vec_pretty(&verify_encrypted)?;
+    upload_small_bytes(quark, &root_id, KEY_VERIFY_FILE_NAME, verify_bytes).await?;
+    *cloud_verify_cache().write().expect("cloud verify cache poisoned") = Some(true);
+
+    // Generate and encrypt local private key
+    let secret = crate::protocol::crypto::random_key_material();
+    let encrypted = encrypt_private_key(&secret, password)?;
+    let paths = app_paths()?;
+    fs::create_dir_all(&paths.config_dir)?;
+    fs::write(
+        &paths.device_private_key_file,
+        serde_json::to_vec_pretty(&encrypted)?,
+    )?;
+    *unlocked_key_cell()
+        .write()
+        .expect("unlocked key lock poisoned") = Some(secret);
+
+    // Update profile
+    let local_device = load_or_create_local_device()?;
+    let _ = remember_device_profile(&local_device);
+    Ok(())
+}
+
+pub async fn verify_cloud_password(quark: &QuarkPan, password: &str) -> anyhow::Result<()> {
+    let root_id = ensure_protocol_folder(quark, "0", QUARKDROP_ROOT_FOLDER_NAME).await?;
+
+    // Download and verify the cloud verification blob
+    let entries = list_all_entries(quark, &root_id).await?;
+    let verify_entry = entries
+        .iter()
+        .find(|e| e.file && e.file_name == KEY_VERIFY_FILE_NAME)
+        .ok_or_else(|| anyhow::anyhow!("Cloud password verification file not found."))?;
+    let verify_bytes = download_bytes(quark, &verify_entry.fid).await?;
+    let verify_encrypted: EncryptedPrivateKey = serde_json::from_slice(&verify_bytes)?;
+    let decrypted = decrypt_private_key_blob(&verify_encrypted, password)
+        .map_err(|_| anyhow::anyhow!("Incorrect password."))?;
+    anyhow::ensure!(
+        decrypted == VERIFY_PLAINTEXT,
+        "Password verification failed — data mismatch."
+    );
+
+    // Password is correct. Ensure local private key exists.
     let paths = app_paths()?;
     fs::create_dir_all(&paths.config_dir)?;
     if paths.device_private_key_file.exists() {
-        let value = fs::read_to_string(&paths.device_private_key_file)?;
-        return decode_private_key_hex(value.trim());
+        // Decrypt existing local key
+        let data = fs::read(&paths.device_private_key_file)?;
+        let encrypted: EncryptedPrivateKey = serde_json::from_slice(&data)?;
+        let key = decrypt_private_key(&encrypted, password)?;
+        *unlocked_key_cell()
+            .write()
+            .expect("unlocked key lock poisoned") = Some(key);
+    } else {
+        // New device: generate new key pair
+        let secret = crate::protocol::crypto::random_key_material();
+        let encrypted = encrypt_private_key(&secret, password)?;
+        fs::write(
+            &paths.device_private_key_file,
+            serde_json::to_vec_pretty(&encrypted)?,
+        )?;
+        *unlocked_key_cell()
+            .write()
+            .expect("unlocked key lock poisoned") = Some(secret);
     }
-    let secret = crate::protocol::crypto::random_key_material();
+
+    // Update profile
+    let local_device = load_or_create_local_device()?;
+    let _ = remember_device_profile(&local_device);
+    Ok(())
+}
+
+pub async fn change_cloud_password(
+    quark: &QuarkPan,
+    old_password: &str,
+    new_password: &str,
+) -> anyhow::Result<()> {
+    let new_password = new_password.trim();
+    anyhow::ensure!(!new_password.is_empty(), "New password cannot be empty.");
+
+    let root_id = ensure_protocol_folder(quark, "0", QUARKDROP_ROOT_FOLDER_NAME).await?;
+
+    // Verify old password
+    let entries = list_all_entries(quark, &root_id).await?;
+    let verify_entry = entries
+        .iter()
+        .find(|e| e.file && e.file_name == KEY_VERIFY_FILE_NAME)
+        .ok_or_else(|| anyhow::anyhow!("Cloud password verification file not found."))?;
+    let verify_bytes = download_bytes(quark, &verify_entry.fid).await?;
+    let old_verify: EncryptedPrivateKey = serde_json::from_slice(&verify_bytes)?;
+    let decrypted = decrypt_private_key_blob(&old_verify, old_password)
+        .map_err(|_| anyhow::anyhow!("Incorrect old password."))?;
+    anyhow::ensure!(decrypted == VERIFY_PLAINTEXT, "Old password verification failed.");
+
+    // Re-encrypt verify blob with new password and upload
+    let new_verify = encrypt_private_key_blob(VERIFY_PLAINTEXT, new_password)?;
+    quark.delete_file(&verify_entry.fid).await?;
+    upload_small_bytes(
+        quark,
+        &root_id,
+        KEY_VERIFY_FILE_NAME,
+        serde_json::to_vec_pretty(&new_verify)?,
+    )
+    .await?;
+
+    // Re-encrypt local key
+    let key = load_device_private_key()?;
+    let new_encrypted = encrypt_private_key(&key, new_password)?;
+    let paths = app_paths()?;
     fs::write(
         &paths.device_private_key_file,
-        format!("{}\n", hex::encode(secret)),
+        serde_json::to_vec_pretty(&new_encrypted)?,
     )?;
-    Ok(secret)
+
+    // Re-encrypt all local profiles
+    if paths.device_profiles_dir.exists() {
+        for entry in fs::read_dir(&paths.device_profiles_dir)?.filter_map(|e| e.ok()) {
+            let Ok(bytes) = fs::read(entry.path()) else { continue };
+            let Ok(mut profile) = serde_json::from_slice::<StoredLocalDeviceProfile>(&bytes)
+            else { continue };
+            let Ok(pk) = decrypt_private_key(&profile.encrypted_key, old_password) else {
+                continue;
+            };
+            let Ok(new_enc) = encrypt_private_key(&pk, new_password) else { continue };
+            profile.encrypted_key = new_enc;
+            if let Ok(data) = serde_json::to_vec_pretty(&profile) {
+                let _ = fs::write(entry.path(), data);
+            }
+        }
+    }
+
+    // Re-encrypt cloud device profiles
+    for entry in &entries {
+        if !(entry.dir && entry.file_name.starts_with("device_")) {
+            continue;
+        }
+        let children = list_all_entries(quark, &entry.fid).await?;
+        let Some(meta_file) = children
+            .iter()
+            .find(|c| c.file && c.file_name == DEVICE_METADATA_FILE_NAME)
+        else {
+            continue;
+        };
+        let Ok(meta_bytes) = download_bytes(quark, &meta_file.fid).await else { continue };
+        let Ok(mut meta) = serde_json::from_slice::<DeviceMetadata>(&meta_bytes) else {
+            continue;
+        };
+        if meta.encrypted_key.is_none() {
+            continue;
+        }
+        let old_enc = meta.encrypted_key.as_ref().unwrap();
+        let Ok(pk) = decrypt_private_key(old_enc, old_password) else { continue };
+        let Ok(new_enc) = encrypt_private_key(&pk, new_password) else { continue };
+        meta.encrypted_key = Some(new_enc);
+        let new_payload = serde_json::to_vec(&meta)?;
+        quark.delete_file(&meta_file.fid).await?;
+        upload_small_bytes(quark, &entry.fid, DEVICE_METADATA_FILE_NAME, new_payload).await?;
+    }
+
+    Ok(())
+}
+
+pub fn lock_key() {
+    *unlocked_key_cell()
+        .write()
+        .expect("unlocked key lock poisoned") = None;
 }
 
 pub(crate) fn local_public_key_hex() -> anyhow::Result<String> {
@@ -518,17 +741,16 @@ fn generate_device_id() -> String {
     format!("qd{:x}", nanos)
 }
 
-fn remember_device_profile(
-    local_device: &LocalDevice,
-    private_key: &[u8; 32],
-) -> anyhow::Result<()> {
+fn remember_device_profile(local_device: &LocalDevice) -> anyhow::Result<()> {
     let paths = app_paths()?;
+    let encrypted_key: EncryptedPrivateKey =
+        serde_json::from_slice(&fs::read(&paths.device_private_key_file)?)?;
     fs::create_dir_all(&paths.device_profiles_dir)?;
     let profile = StoredLocalDeviceProfile {
-        version: 1,
+        version: 2,
         device_id: local_device.device_id.clone(),
         device_name: local_device.device_name.clone(),
-        private_key_hex: hex::encode(private_key),
+        encrypted_key,
         updated_at: SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map(|duration| duration.as_millis() as u64)
@@ -558,6 +780,8 @@ pub fn clear_local_device_files() -> anyhow::Result<()> {
     let _ = fs::remove_file(&paths.device_id_file);
     let _ = fs::remove_file(&paths.device_name_file);
     let _ = fs::remove_file(&paths.device_private_key_file);
+    lock_key();
+    reset_cloud_verify_cache();
     Ok(())
 }
 
@@ -607,11 +831,18 @@ async fn publish_device_metadata(
         quark.delete_file(&old.fid).await?;
     }
 
+    let paths = app_paths()?;
+    let encrypted_key = if paths.device_private_key_file.exists() {
+        serde_json::from_slice(&fs::read(&paths.device_private_key_file)?).ok()
+    } else {
+        None
+    };
     let payload = serde_json::to_vec(&DeviceMetadata {
         version: 1,
         device_id: local_device.device_id.clone(),
         device_name: local_device.device_name.clone(),
         public_key: local_public_key_hex()?,
+        encrypted_key,
         updated_at: SystemTime::now()
             .duration_since(UNIX_EPOCH)
             .map(|duration| duration.as_millis() as u64)
@@ -710,14 +941,67 @@ fn sha256_hex(bytes: &[u8]) -> String {
     hex::encode(hasher.finalize())
 }
 
-fn decode_private_key_hex(value: &str) -> anyhow::Result<[u8; 32]> {
-    let bytes = hex::decode(value)?;
+fn derive_key_from_password(password: &str, salt: &[u8]) -> anyhow::Result<[u8; 32]> {
+    let mut derived = [0u8; 32];
+    Argon2::default()
+        .hash_password_into(password.as_bytes(), salt, &mut derived)
+        .map_err(|e| anyhow::anyhow!("argon2 key derivation failed: {e}"))?;
+    Ok(derived)
+}
+
+fn encrypt_private_key(key: &[u8; 32], password: &str) -> anyhow::Result<EncryptedPrivateKey> {
+    encrypt_private_key_blob(key.as_ref(), password)
+}
+
+fn encrypt_private_key_blob(plaintext: &[u8], password: &str) -> anyhow::Result<EncryptedPrivateKey> {
+    let mut salt = [0u8; 16];
+    OsRng.fill_bytes(&mut salt);
+    let derived = derive_key_from_password(password, &salt)?;
+    let cipher = ChaCha20Poly1305::new(Key::from_slice(&derived));
+    let mut nonce_bytes = [0u8; 12];
+    OsRng.fill_bytes(&mut nonce_bytes);
+    let ciphertext = cipher
+        .encrypt(Nonce::from_slice(&nonce_bytes), plaintext)
+        .map_err(|e| anyhow::anyhow!("encryption failed: {e}"))?;
+    Ok(EncryptedPrivateKey {
+        version: 1,
+        algorithm: "argon2id-chacha20poly1305".to_string(),
+        argon2_salt: hex::encode(salt),
+        nonce: hex::encode(nonce_bytes),
+        ciphertext: hex::encode(ciphertext),
+    })
+}
+
+fn decrypt_private_key(
+    encrypted: &EncryptedPrivateKey,
+    password: &str,
+) -> anyhow::Result<[u8; 32]> {
+    let plaintext = decrypt_private_key_blob(encrypted, password)?;
     anyhow::ensure!(
-        bytes.len() == 32,
-        "device private key must be 32 bytes, got {}",
-        bytes.len()
+        plaintext.len() == 32,
+        "decrypted key must be 32 bytes, got {}",
+        plaintext.len()
     );
-    let mut secret = [0u8; 32];
-    secret.copy_from_slice(&bytes);
-    Ok(secret)
+    let mut key = [0u8; 32];
+    key.copy_from_slice(&plaintext);
+    Ok(key)
+}
+
+fn decrypt_private_key_blob(
+    encrypted: &EncryptedPrivateKey,
+    password: &str,
+) -> anyhow::Result<Vec<u8>> {
+    anyhow::ensure!(
+        encrypted.algorithm == "argon2id-chacha20poly1305",
+        "unsupported key encryption algorithm `{}`",
+        encrypted.algorithm
+    );
+    let salt = hex::decode(&encrypted.argon2_salt)?;
+    let derived = derive_key_from_password(password, &salt)?;
+    let cipher = ChaCha20Poly1305::new(Key::from_slice(&derived));
+    let nonce_bytes = hex::decode(&encrypted.nonce)?;
+    let ciphertext = hex::decode(&encrypted.ciphertext)?;
+    cipher
+        .decrypt(Nonce::from_slice(&nonce_bytes), ciphertext.as_ref())
+        .map_err(|_| anyhow::anyhow!("Incorrect password or corrupted key file."))
 }

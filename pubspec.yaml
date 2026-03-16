@@ -13,12 +13,15 @@ dependencies:
   file_selector: ^1.0.3
   flutter_inappwebview: ^6.1.5
   flutter_rust_bridge: 2.11.1
+  image_picker: ^1.1.2
   path_provider: ^2.1.5
   rust_lib_quarkdrop:
     path: rust_builder
   shadcn_flutter: ^0.0.52
   signals: ^6.3.0
   signals_flutter: ^6.3.0
+  window_manager: ^0.3.9
+  tray_manager: ^0.2.3
 
 dev_dependencies:
   flutter_test:
@@ -29,3 +32,6 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - lib/assets/
+

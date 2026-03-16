@@ -15,6 +15,8 @@ class RootScreen extends StatelessWidget {
       switch (store.bootstrapPhase.value) {
         case BootstrapPhase.booting:
           return const _BootstrapScreen();
+        case BootstrapPhase.passwordRequired:
+          return _PasswordScreen(store: store);
         case BootstrapPhase.loginRequired:
           return LoginScreen(store: store);
         case BootstrapPhase.cloudDeviceSelection:
@@ -275,6 +277,160 @@ class _DeviceListSection extends StatelessWidget {
             ),
           ],
         ],
+      ),
+    );
+  }
+}
+
+class _PasswordScreen extends StatefulWidget {
+  const _PasswordScreen({required this.store});
+
+  final AppStore store;
+
+  @override
+  State<_PasswordScreen> createState() => _PasswordScreenState();
+}
+
+class _PasswordScreenState extends State<_PasswordScreen> {
+  final _passwordController = TextEditingController();
+  final _confirmController = TextEditingController();
+  bool _submitting = false;
+  String? _error;
+
+  bool get _isCreating {
+    final snapshot = widget.store.deviceSnapshot.value;
+    // If there's no snapshot or auth state indicates create, show create mode
+    // The passwordRequired phase is reached from NeedCreatePassword or NeedVerifyPassword
+    // We check the Rust-side auth state via the last shell snapshot result
+    return snapshot?.mailboxStatusLabel == 'Password setup required';
+  }
+
+  @override
+  void dispose() {
+    _passwordController.dispose();
+    _confirmController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _submit() async {
+    final password = _passwordController.text;
+    if (password.isEmpty) {
+      setState(() => _error = 'Password cannot be empty.');
+      return;
+    }
+    if (_isCreating && password != _confirmController.text) {
+      setState(() => _error = 'Passwords do not match.');
+      return;
+    }
+
+    setState(() {
+      _submitting = true;
+      _error = null;
+    });
+    try {
+      if (_isCreating) {
+        await widget.store.createCloudPassword(password);
+      } else {
+        await widget.store.verifyCloudPassword(password);
+      }
+    } catch (e) {
+      setState(() => _error = e.toString());
+    } finally {
+      if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: Center(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(28),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 400),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const _OrbMark(),
+                const SizedBox(height: 14),
+                Text(
+                  _isCreating ? 'Set Cloud Password' : 'Verify Cloud Password',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  _isCreating
+                      ? 'Set a cloud password to encrypt your device keys.'
+                      : 'Enter your cloud password to unlock this device.',
+                  style: const TextStyle(color: Color(0xFF54635D)),
+                ),
+                const SizedBox(height: 24),
+                TextField(
+                  controller: _passwordController,
+                  obscureText: true,
+                  enabled: !_submitting,
+                  autofocus: true,
+                  onSubmitted: (_) => _isCreating ? null : _submit(),
+                  decoration: InputDecoration(
+                    labelText: _isCreating ? 'New Password' : 'Cloud Password',
+                    border: const OutlineInputBorder(),
+                  ),
+                ),
+                if (_isCreating) ...[
+                  const SizedBox(height: 14),
+                  TextField(
+                    controller: _confirmController,
+                    obscureText: true,
+                    enabled: !_submitting,
+                    onSubmitted: (_) => _submit(),
+                    decoration: const InputDecoration(
+                      labelText: 'Confirm Password',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                ],
+                if (_error != null) ...[
+                  const SizedBox(height: 14),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(10),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFEEE8),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Text(
+                      _error!,
+                      style: const TextStyle(
+                        color: Color(0xFF9B3D16),
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ),
+                ],
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton(
+                    onPressed: _submitting ? null : _submit,
+                    child: _submitting
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Colors.white,
+                            ),
+                          )
+                        : Text(_isCreating ? 'Set Password' : 'Verify'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
       ),
     );
   }

@@ -1,5 +1,7 @@
 import 'dart:async';
+import 'dart:io';
 import 'package:file_selector/file_selector.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:quarkdrop/src/models/inbox_job.dart';
 import 'package:quarkdrop/src/models/pending_send_item.dart';
 import 'package:quarkdrop/src/models/transfer_job.dart';
@@ -7,7 +9,7 @@ import 'package:quarkdrop/src/platform/platform_paths.dart';
 import 'package:quarkdrop/src/rust/api/app.dart' as rust_api;
 import 'package:signals_flutter/signals_flutter.dart';
 
-enum BootstrapPhase { booting, loginRequired, cloudDeviceSelection, ready }
+enum BootstrapPhase { booting, passwordRequired, loginRequired, cloudDeviceSelection, ready }
 
 enum AppDestination { send, inbox, transfers, settings }
 
@@ -312,8 +314,8 @@ class AppStore {
       pendingSendItems.value = const [];
       selectedMailboxJobIds.value = <String>{};
       transferActionStatusMessage.value = null;
-      bootstrapPhase.value = BootstrapPhase.loginRequired;
       lastErrorMessage.value = null;
+      await _loadShell(showBooting: false);
     } catch (error) {
       lastErrorMessage.value = error.toString();
     } finally {
@@ -347,9 +349,13 @@ class AppStore {
     downloadDirectoryStatusMessage.value = null;
     lastErrorMessage.value = null;
     try {
-      final path = await getDirectoryPath(confirmButtonText: 'Use This Folder');
+      var path = await getDirectoryPath(confirmButtonText: 'Use This Folder');
       if (path == null || path.trim().isEmpty) {
         return;
+      }
+      // macOS file_selector may return paths without the leading slash
+      if (Platform.isMacOS && !path.startsWith('/')) {
+        path = '/$path';
       }
       final saved = rust_api.savePreferredDownloadDir(path: path);
       preferredDownloadDir.value = saved;
@@ -411,6 +417,41 @@ class AppStore {
     }
   }
 
+  Future<void> createCloudPassword(String password) async {
+    await rust_api.createCloudPassword(password: password);
+    await refresh();
+  }
+
+  Future<void> verifyCloudPassword(String password) async {
+    await rust_api.verifyCloudPassword(password: password);
+    await refresh();
+  }
+
+  Future<void> changeCloudPassword(String oldPassword, String newPassword) async {
+    await rust_api.changeCloudPassword(
+      oldPassword: oldPassword,
+      newPassword: newPassword,
+    );
+    await refresh();
+  }
+
+  Future<void> addPhotosToSendQueue() async {
+    final picker = ImagePicker();
+    final images = await picker.pickMultiImage();
+    if (images.isEmpty) return;
+    _mergePendingSendItems(
+      images
+          .map(
+            (image) => PendingSendItem(
+              path: image.path,
+              name: image.name,
+              kind: PendingSendKind.file,
+            ),
+          )
+          .toList(growable: false),
+    );
+  }
+
   void _applySnapshot(rust_api.ShellSnapshot snapshot) {
     protocolNames.value = snapshot.protocolNames;
     deviceSnapshot.value = snapshot.deviceSnapshot;
@@ -452,6 +493,8 @@ class AppStore {
 
     final phase = switch (snapshot.authState) {
       rust_api.AuthState.loginRequired => BootstrapPhase.loginRequired,
+      rust_api.AuthState.needCreatePassword => BootstrapPhase.passwordRequired,
+      rust_api.AuthState.needVerifyPassword => BootstrapPhase.passwordRequired,
       rust_api.AuthState.ready => BootstrapPhase.ready,
     };
 
@@ -499,9 +542,12 @@ class AppStore {
   }
 
   Future<void> addDirectoryToSendQueue() async {
-    final path = await getDirectoryPath(confirmButtonText: 'Add Folder');
+    var path = await getDirectoryPath(confirmButtonText: 'Add Folder');
     if (path == null || path.trim().isEmpty) {
       return;
+    }
+    if (Platform.isMacOS && !path.startsWith('/')) {
+      path = '/$path';
     }
     final name = path.split('/').where((part) => part.isNotEmpty).last;
     _mergePendingSendItems([
@@ -667,7 +713,11 @@ class AppStore {
         (platformPaths.downloadDir?.isNotEmpty ?? false)) {
       return platformPaths.downloadDir;
     }
-    return getDirectoryPath(confirmButtonText: 'Download Here');
+    var path = await getDirectoryPath(confirmButtonText: 'Download Here');
+    if (path != null && Platform.isMacOS && !path.startsWith('/')) {
+      path = '/$path';
+    }
+    return path;
   }
 
   Future<void> resumeTransfer(TransferJob job) async {

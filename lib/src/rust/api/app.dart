@@ -70,6 +70,22 @@ int pollIntervalSeconds() =>
 int setPollIntervalSeconds({required int seconds}) =>
     RustLib.instance.api.crateApiAppSetPollIntervalSeconds(seconds: seconds);
 
+Future<void> createCloudPassword({required String password}) =>
+    RustLib.instance.api.crateApiAppCreateCloudPassword(password: password);
+
+Future<void> verifyCloudPassword({required String password}) =>
+    RustLib.instance.api.crateApiAppVerifyCloudPassword(password: password);
+
+Future<void> changeCloudPassword({
+  required String oldPassword,
+  required String newPassword,
+}) => RustLib.instance.api.crateApiAppChangeCloudPassword(
+  oldPassword: oldPassword,
+  newPassword: newPassword,
+);
+
+void openDataFolder() => RustLib.instance.api.crateApiAppOpenDataFolder();
+
 Future<String> sendLocalPath({
   required String peerMailboxFolderId,
   required String peerDeviceId,
@@ -99,7 +115,7 @@ int clearCompletedTransfers() =>
 Future<void> deleteTransfer({required String jobId}) =>
     RustLib.instance.api.crateApiAppDeleteTransfer(jobId: jobId);
 
-enum AuthState { loginRequired, ready }
+enum AuthState { loginRequired, needCreatePassword, needVerifyPassword, ready }
 
 class DeviceSnapshot {
   final String deviceId;

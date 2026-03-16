@@ -37,7 +37,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1152532709;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -148309229;
 
 // Section: executor
 
@@ -105,6 +105,47 @@ fn wire__crate__api__app__bind_cloud_device_impl(
                     Ok(output_ok)
                 })(),
             )
+        },
+    )
+}
+fn wire__crate__api__app__change_cloud_password_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "change_cloud_password",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_old_password = <String>::sse_decode(&mut deserializer);
+            let api_new_password = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::app::change_cloud_password(
+                            api_old_password,
+                            api_new_password,
+                        )
+                        .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
         },
     )
 }
@@ -233,6 +274,43 @@ fn wire__crate__api__simple__configure_app_impl(
         },
     )
 }
+fn wire__crate__api__app__create_cloud_password_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "create_cloud_password",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_password = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok =
+                            crate::api::app::create_cloud_password(api_password).await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__app__delete_transfer_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -328,6 +406,37 @@ fn wire__crate__api__app__navigate_after_transfer_impl(
             transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
                 (move || {
                     let output_ok = crate::api::app::navigate_after_transfer()?;
+                    Ok(output_ok)
+                })(),
+            )
+        },
+    )
+}
+fn wire__crate__api__app__open_data_folder_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "open_data_folder",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                (move || {
+                    let output_ok = crate::api::app::open_data_folder()?;
                     Ok(output_ok)
                 })(),
             )
@@ -934,6 +1043,43 @@ fn wire__crate__api__app__validate_cookie_string_impl(
         },
     )
 }
+fn wire__crate__api__app__verify_cloud_password_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "verify_cloud_password",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_password = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok =
+                            crate::api::app::verify_cloud_password(api_password).await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 
 // Section: dart2rust
 
@@ -959,7 +1105,9 @@ impl SseDecode for crate::api::app::AuthState {
         let mut inner = <i32>::sse_decode(deserializer);
         return match inner {
             0 => crate::api::app::AuthState::LoginRequired,
-            1 => crate::api::app::AuthState::Ready,
+            1 => crate::api::app::AuthState::NeedCreatePassword,
+            2 => crate::api::app::AuthState::NeedVerifyPassword,
+            3 => crate::api::app::AuthState::Ready,
             _ => unreachable!("Invalid variant for AuthState: {}", inner),
         };
     }
@@ -1232,13 +1380,16 @@ fn pde_ffi_dispatcher_primary_impl(
 ) {
     // Codec=Pde (Serialization + dispatch), see doc to use other codecs
     match func_id {
-        7 => wire__crate__api__app__delete_transfer_impl(port, ptr, rust_vec_len, data_len),
-        8 => wire__crate__api__simple__init_app_impl(port, ptr, rust_vec_len, data_len),
-        13 => wire__crate__api__app__receive_job_impl(port, ptr, rust_vec_len, data_len),
-        16 => wire__crate__api__app__resume_task_impl(port, ptr, rust_vec_len, data_len),
-        21 => wire__crate__api__app__send_local_path_impl(port, ptr, rust_vec_len, data_len),
-        25 => wire__crate__api__app__shell_snapshot_impl(port, ptr, rust_vec_len, data_len),
-        26 => wire__crate__api__app__sign_out_impl(port, ptr, rust_vec_len, data_len),
+        3 => wire__crate__api__app__change_cloud_password_impl(port, ptr, rust_vec_len, data_len),
+        8 => wire__crate__api__app__create_cloud_password_impl(port, ptr, rust_vec_len, data_len),
+        9 => wire__crate__api__app__delete_transfer_impl(port, ptr, rust_vec_len, data_len),
+        10 => wire__crate__api__simple__init_app_impl(port, ptr, rust_vec_len, data_len),
+        16 => wire__crate__api__app__receive_job_impl(port, ptr, rust_vec_len, data_len),
+        19 => wire__crate__api__app__resume_task_impl(port, ptr, rust_vec_len, data_len),
+        24 => wire__crate__api__app__send_local_path_impl(port, ptr, rust_vec_len, data_len),
+        28 => wire__crate__api__app__shell_snapshot_impl(port, ptr, rust_vec_len, data_len),
+        29 => wire__crate__api__app__sign_out_impl(port, ptr, rust_vec_len, data_len),
+        31 => wire__crate__api__app__verify_cloud_password_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -1253,24 +1404,25 @@ fn pde_ffi_dispatcher_sync_impl(
     match func_id {
         1 => wire__crate__api__app__auto_receive_enabled_impl(ptr, rust_vec_len, data_len),
         2 => wire__crate__api__app__bind_cloud_device_impl(ptr, rust_vec_len, data_len),
-        3 => wire__crate__api__app__clear_completed_transfers_impl(ptr, rust_vec_len, data_len),
-        4 => wire__crate__api__app__clear_cookie_session_impl(ptr, rust_vec_len, data_len),
-        5 => wire__crate__api__app__clear_preferred_download_dir_impl(ptr, rust_vec_len, data_len),
-        6 => wire__crate__api__simple__configure_app_impl(ptr, rust_vec_len, data_len),
-        9 => wire__crate__api__app__navigate_after_transfer_impl(ptr, rust_vec_len, data_len),
-        10 => wire__crate__api__app__poll_interval_seconds_impl(ptr, rust_vec_len, data_len),
-        11 => wire__crate__api__app__preferred_download_dir_impl(ptr, rust_vec_len, data_len),
-        12 => wire__crate__api__app__quark_login_url_impl(ptr, rust_vec_len, data_len),
-        14 => wire__crate__api__app__remembered_devices_impl(ptr, rust_vec_len, data_len),
-        15 => wire__crate__api__app__restore_remembered_device_impl(ptr, rust_vec_len, data_len),
-        17 => wire__crate__api__app__save_cookie_string_impl(ptr, rust_vec_len, data_len),
-        18 => wire__crate__api__app__save_device_name_impl(ptr, rust_vec_len, data_len),
-        19 => wire__crate__api__app__save_preferred_download_dir_impl(ptr, rust_vec_len, data_len),
-        20 => wire__crate__api__app__save_webview_cookie_string_impl(ptr, rust_vec_len, data_len),
-        22 => wire__crate__api__app__set_auto_receive_enabled_impl(ptr, rust_vec_len, data_len),
-        23 => wire__crate__api__app__set_navigate_after_transfer_impl(ptr, rust_vec_len, data_len),
-        24 => wire__crate__api__app__set_poll_interval_seconds_impl(ptr, rust_vec_len, data_len),
-        27 => wire__crate__api__app__validate_cookie_string_impl(ptr, rust_vec_len, data_len),
+        4 => wire__crate__api__app__clear_completed_transfers_impl(ptr, rust_vec_len, data_len),
+        5 => wire__crate__api__app__clear_cookie_session_impl(ptr, rust_vec_len, data_len),
+        6 => wire__crate__api__app__clear_preferred_download_dir_impl(ptr, rust_vec_len, data_len),
+        7 => wire__crate__api__simple__configure_app_impl(ptr, rust_vec_len, data_len),
+        11 => wire__crate__api__app__navigate_after_transfer_impl(ptr, rust_vec_len, data_len),
+        12 => wire__crate__api__app__open_data_folder_impl(ptr, rust_vec_len, data_len),
+        13 => wire__crate__api__app__poll_interval_seconds_impl(ptr, rust_vec_len, data_len),
+        14 => wire__crate__api__app__preferred_download_dir_impl(ptr, rust_vec_len, data_len),
+        15 => wire__crate__api__app__quark_login_url_impl(ptr, rust_vec_len, data_len),
+        17 => wire__crate__api__app__remembered_devices_impl(ptr, rust_vec_len, data_len),
+        18 => wire__crate__api__app__restore_remembered_device_impl(ptr, rust_vec_len, data_len),
+        20 => wire__crate__api__app__save_cookie_string_impl(ptr, rust_vec_len, data_len),
+        21 => wire__crate__api__app__save_device_name_impl(ptr, rust_vec_len, data_len),
+        22 => wire__crate__api__app__save_preferred_download_dir_impl(ptr, rust_vec_len, data_len),
+        23 => wire__crate__api__app__save_webview_cookie_string_impl(ptr, rust_vec_len, data_len),
+        25 => wire__crate__api__app__set_auto_receive_enabled_impl(ptr, rust_vec_len, data_len),
+        26 => wire__crate__api__app__set_navigate_after_transfer_impl(ptr, rust_vec_len, data_len),
+        27 => wire__crate__api__app__set_poll_interval_seconds_impl(ptr, rust_vec_len, data_len),
+        30 => wire__crate__api__app__validate_cookie_string_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -1282,7 +1434,9 @@ impl flutter_rust_bridge::IntoDart for crate::api::app::AuthState {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         match self {
             Self::LoginRequired => 0.into_dart(),
-            Self::Ready => 1.into_dart(),
+            Self::NeedCreatePassword => 1.into_dart(),
+            Self::NeedVerifyPassword => 2.into_dart(),
+            Self::Ready => 3.into_dart(),
             _ => unreachable!(),
         }
     }
@@ -1524,7 +1678,9 @@ impl SseEncode for crate::api::app::AuthState {
         <i32>::sse_encode(
             match self {
                 crate::api::app::AuthState::LoginRequired => 0,
-                crate::api::app::AuthState::Ready => 1,
+                crate::api::app::AuthState::NeedCreatePassword => 1,
+                crate::api::app::AuthState::NeedVerifyPassword => 2,
+                crate::api::app::AuthState::Ready => 3,
                 _ => {
                     unimplemented!("");
                 }

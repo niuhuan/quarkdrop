@@ -46,7 +46,7 @@ pub fn app_paths() -> io::Result<AppPaths> {
         app_settings_file: config_dir.join("app_settings.json"),
         device_id_file: config_dir.join("device_id.txt"),
         device_name_file: config_dir.join("device_name.txt"),
-        device_private_key_file: config_dir.join("device_private_key.hex"),
+        device_private_key_file: config_dir.join("device_private_key.json"),
         device_profiles_dir: config_dir.join("device_profiles"),
         transfer_history_file: config_dir.join("transfer_history.json"),
         transfer_db_file: config_dir.join("transfer_tasks.sqlite3"),
