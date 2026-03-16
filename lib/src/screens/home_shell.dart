@@ -153,9 +153,6 @@ class _DesktopRail extends StatelessWidget {
       final selected = store.destination.value;
       final autoReceiveEnabled = store.autoReceiveEnabled.value;
       final values = _visibleDestinations(autoReceiveEnabled);
-      final destinations = values
-          .map(_navigationRailDestinationFor)
-          .toList(growable: false);
 
       // Fix if selected relies on a hidden destination
       int selectedIndex = values.indexOf(selected);
@@ -193,17 +190,92 @@ class _DesktopRail extends StatelessWidget {
               ),
             ),
             const Divider(height: 1),
+
             Expanded(
-              child: NavigationRail(
-                minWidth: 56,
-                minExtendedWidth: 200,
-                backgroundColor: Colors.transparent,
-                extended: true,
-                selectedIndex: selectedIndex,
-                onDestinationSelected: (index) {
-                  store.selectDestination(values[index]);
+              child: ListView.builder(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                itemCount: values.length,
+                itemBuilder: (context, index) {
+                  final dest = values[index];
+                  final isSelected = selectedIndex == index;
+
+                  IconData iconData;
+                  IconData selectedIconData;
+                  String label;
+                  switch (dest) {
+                    case AppDestination.send:
+                      iconData = Icons.send_outlined;
+                      selectedIconData = Icons.send_rounded;
+                      label = 'Send';
+                      break;
+                    case AppDestination.inbox:
+                      iconData = Icons.inbox_outlined;
+                      selectedIconData = Icons.inbox_rounded;
+                      label = 'Mailbox';
+                      break;
+                    case AppDestination.transfers:
+                      iconData = Icons.sync_alt_outlined;
+                      selectedIconData = Icons.sync_alt_rounded;
+                      label = 'Transfers';
+                      break;
+                    case AppDestination.settings:
+                      iconData = Icons.tune_outlined;
+                      selectedIconData = Icons.tune_rounded;
+                      label = 'Settings';
+                      break;
+                  }
+
+                  final theme = Theme.of(context);
+
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 6),
+                    child: InkWell(
+                      onTap: () => store.selectDestination(dest),
+                      borderRadius: BorderRadius.circular(10),
+                      child: AnimatedContainer(
+                        duration: const Duration(milliseconds: 150),
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? theme.colorScheme.primary.withValues(alpha: 0.1)
+                              : Colors.transparent,
+                          borderRadius: BorderRadius.circular(10),
+                          boxShadow: isSelected
+                              ? [
+                                  BoxShadow(
+                                    color: theme.colorScheme.primary.withValues(alpha: 0.05),
+                                    blurRadius: 8,
+                                    offset: const Offset(0, 2),
+                                  )
+                                ]
+                              : null,
+                        ),
+                        child: Row(
+                          children: [
+                            Icon(
+                              isSelected ? selectedIconData : iconData,
+                              color: isSelected
+                                  ? theme.colorScheme.primary
+                                  : theme.colorScheme.onSurfaceVariant,
+                              size: 20,
+                            ),
+                            const SizedBox(width: 14),
+                            Text(
+                              label,
+                              style: TextStyle(
+                                color: isSelected
+                                    ? theme.colorScheme.primary
+                                    : theme.colorScheme.onSurfaceVariant,
+                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                fontSize: 14,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                  );
                 },
-                destinations: destinations,
               ),
             ),
           ],

@@ -542,6 +542,7 @@ class AppStore {
     if (path == null || path.trim().isEmpty) {
       return;
     }
+    final name = path.split(Platform.pathSeparator).where((e) => e.isNotEmpty).last;
     _mergePendingSendItems([
       PendingSendItem(path: path, name: name, kind: PendingSendKind.directory),
     ]);
