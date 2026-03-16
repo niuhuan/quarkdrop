@@ -20,7 +20,7 @@ flutter_rust_bridge = "=2.11.1"
 futures-util = "0.3.31"
 hkdf = "0.12.4"
 hex = "0.4.3"
-libquarkpan = { path = "../../libquarkpan" }
+libquarkpan = "0.1.1"
 md5 = "0.7.0"
 rand = "0.8.5"
 rusqlite = { version = "0.37.0", features = ["bundled"] }
