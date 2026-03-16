@@ -46,9 +46,13 @@ Future<void> initDesktopWindow() async {
 }
 
 Future<void> initDesktopTray() async {
-  await trayManager.setIcon(
-    Platform.isWindows ? 'lib/assets/app_icon.ico' : 'lib/assets/app_icon.png',
-  );
+  if (Platform.isMacOS) {
+    await trayManager.setIcon('lib/assets/tray_icon_template.png', isTemplate: true);
+  } else {
+    await trayManager.setIcon(
+      Platform.isWindows ? 'lib/assets/app_icon.ico' : 'lib/assets/app_icon.png',
+    );
+  }
   final menu = Menu(
     items: [
       MenuItem(key: 'show_window', label: 'Show Window'),

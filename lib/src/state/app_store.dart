@@ -353,10 +353,6 @@ class AppStore {
       if (path == null || path.trim().isEmpty) {
         return;
       }
-      // macOS file_selector may return paths without the leading slash
-      if (Platform.isMacOS && !path.startsWith('/')) {
-        path = '/$path';
-      }
       final saved = rust_api.savePreferredDownloadDir(path: path);
       preferredDownloadDir.value = saved;
       downloadDirectoryStatusMessage.value =
@@ -546,10 +542,6 @@ class AppStore {
     if (path == null || path.trim().isEmpty) {
       return;
     }
-    if (Platform.isMacOS && !path.startsWith('/')) {
-      path = '/$path';
-    }
-    final name = path.split('/').where((part) => part.isNotEmpty).last;
     _mergePendingSendItems([
       PendingSendItem(path: path, name: name, kind: PendingSendKind.directory),
     ]);
