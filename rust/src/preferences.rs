@@ -4,12 +4,35 @@ use serde::{Deserialize, Serialize};
 use std::fs;
 use std::path::Path;
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 struct AppSettings {
     #[serde(default)]
     preferred_download_dir: Option<String>,
     #[serde(default)]
     auto_receive_enabled: bool,
+    #[serde(default = "default_true")]
+    navigate_after_transfer: bool,
+    #[serde(default = "default_poll_interval")]
+    poll_interval_seconds: u32,
+}
+
+fn default_true() -> bool {
+    true
+}
+
+fn default_poll_interval() -> u32 {
+    30
+}
+
+impl Default for AppSettings {
+    fn default() -> Self {
+        Self {
+            preferred_download_dir: None,
+            auto_receive_enabled: false,
+            navigate_after_transfer: true,
+            poll_interval_seconds: 30,
+        }
+    }
 }
 
 pub fn preferred_download_dir() -> anyhow::Result<Option<String>> {
@@ -51,6 +74,29 @@ pub fn set_auto_receive_enabled(enabled: bool) -> anyhow::Result<bool> {
     settings.auto_receive_enabled = enabled;
     save_settings(&settings)?;
     Ok(enabled)
+}
+
+pub fn navigate_after_transfer() -> anyhow::Result<bool> {
+    Ok(load_settings()?.navigate_after_transfer)
+}
+
+pub fn set_navigate_after_transfer(enabled: bool) -> anyhow::Result<bool> {
+    let mut settings = load_settings()?;
+    settings.navigate_after_transfer = enabled;
+    save_settings(&settings)?;
+    Ok(enabled)
+}
+
+pub fn poll_interval_seconds() -> anyhow::Result<u32> {
+    Ok(load_settings()?.poll_interval_seconds)
+}
+
+pub fn set_poll_interval_seconds(seconds: u32) -> anyhow::Result<u32> {
+    let clamped = seconds.max(5).min(300);
+    let mut settings = load_settings()?;
+    settings.poll_interval_seconds = clamped;
+    save_settings(&settings)?;
+    Ok(clamped)
 }
 
 fn load_settings() -> anyhow::Result<AppSettings> {

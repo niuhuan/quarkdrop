@@ -208,6 +208,16 @@ pub fn bind_cloud_device(device_id: String) -> anyhow::Result<()> {
     let paths = app_paths()?;
     fs::create_dir_all(&paths.config_dir)?;
 
+    // Record old device ID as excluded before switching
+    if paths.device_id_file.exists() {
+        let old_id = fs::read_to_string(&paths.device_id_file)?
+            .trim()
+            .to_string();
+        if !old_id.is_empty() && old_id != normalized {
+            add_excluded_device_id(&old_id)?;
+        }
+    }
+
     fs::write(&paths.device_id_file, format!("{normalized}\n"))?;
 
     let local_device = load_or_create_local_device()?;
@@ -304,6 +314,7 @@ async fn discover_peer_devices(
     root_id: &str,
     current_device_id: &str,
 ) -> anyhow::Result<Vec<DiscoveredPeerDevice>> {
+    let excluded_ids = load_excluded_device_ids().unwrap_or_default();
     let mut peers = Vec::new();
     for entry in list_all_entries(quark, root_id).await? {
         if !(entry.dir && entry.file_name.starts_with("device_")) {
@@ -313,6 +324,9 @@ async fn discover_peer_devices(
             continue;
         };
         if device_id == current_device_id {
+            continue;
+        }
+        if excluded_ids.contains(&device_id) {
             continue;
         }
         let metadata = read_device_metadata(quark, &entry.fid).await.ok().flatten();
@@ -529,6 +543,46 @@ fn remember_device_profile(
 
 fn device_profile_path(paths: &crate::workspace::AppPaths, device_id: &str) -> std::path::PathBuf {
     paths.device_profiles_dir.join(format!("{device_id}.json"))
+}
+
+pub fn clear_remembered_devices() -> anyhow::Result<()> {
+    let paths = app_paths()?;
+    if paths.device_profiles_dir.exists() {
+        fs::remove_dir_all(&paths.device_profiles_dir)?;
+    }
+    Ok(())
+}
+
+pub fn clear_local_device_files() -> anyhow::Result<()> {
+    let paths = app_paths()?;
+    let _ = fs::remove_file(&paths.device_id_file);
+    let _ = fs::remove_file(&paths.device_name_file);
+    let _ = fs::remove_file(&paths.device_private_key_file);
+    Ok(())
+}
+
+fn excluded_device_ids_path() -> std::io::Result<std::path::PathBuf> {
+    let paths = app_paths()?;
+    Ok(paths.config_dir.join("excluded_device_ids.json"))
+}
+
+pub fn add_excluded_device_id(device_id: &str) -> anyhow::Result<()> {
+    let path = excluded_device_ids_path()?;
+    let mut ids = load_excluded_device_ids().unwrap_or_default();
+    if !ids.contains(&device_id.to_string()) {
+        ids.push(device_id.to_string());
+        fs::write(&path, serde_json::to_vec(&ids)?)?;
+    }
+    Ok(())
+}
+
+fn load_excluded_device_ids() -> anyhow::Result<Vec<String>> {
+    let path = excluded_device_ids_path()?;
+    if !path.exists() {
+        return Ok(Vec::new());
+    }
+    let data = fs::read(&path)?;
+    Ok(serde_json::from_slice(&data)?)
 }
 
 fn short_device_label(device_id: &str) -> &str {

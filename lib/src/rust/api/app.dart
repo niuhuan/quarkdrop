@@ -26,7 +26,10 @@ bool saveWebviewCookieString({required String cookie}) =>
 void clearCookieSession() =>
     RustLib.instance.api.crateApiAppClearCookieSession();
 
-Future<void> signOut() => RustLib.instance.api.crateApiAppSignOut();
+Future<void> signOut({required bool deleteRemoteMailbox}) => RustLib
+    .instance
+    .api
+    .crateApiAppSignOut(deleteRemoteMailbox: deleteRemoteMailbox);
 
 String saveDeviceName({required String name}) =>
     RustLib.instance.api.crateApiAppSaveDeviceName(name: name);
@@ -54,6 +57,18 @@ bool autoReceiveEnabled() =>
 
 bool setAutoReceiveEnabled({required bool enabled}) =>
     RustLib.instance.api.crateApiAppSetAutoReceiveEnabled(enabled: enabled);
+
+bool navigateAfterTransfer() =>
+    RustLib.instance.api.crateApiAppNavigateAfterTransfer();
+
+bool setNavigateAfterTransfer({required bool enabled}) =>
+    RustLib.instance.api.crateApiAppSetNavigateAfterTransfer(enabled: enabled);
+
+int pollIntervalSeconds() =>
+    RustLib.instance.api.crateApiAppPollIntervalSeconds();
+
+int setPollIntervalSeconds({required int seconds}) =>
+    RustLib.instance.api.crateApiAppSetPollIntervalSeconds(seconds: seconds);
 
 Future<String> sendLocalPath({
   required String peerMailboxFolderId,

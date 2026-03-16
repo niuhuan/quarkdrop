@@ -89,6 +89,14 @@ class AppStore {
     false,
     debugLabel: 'autoReceiveEnabled',
   );
+  final navigateAfterTransfer = signal<bool>(
+    true,
+    debugLabel: 'navigateAfterTransfer',
+  );
+  final pollIntervalSeconds = signal<int>(
+    30,
+    debugLabel: 'pollIntervalSeconds',
+  );
   final downloadDirectorySaving = signal(
     false,
     debugLabel: 'downloadDirectorySaving',
@@ -115,6 +123,7 @@ class AppStore {
   );
 
   Timer? _pollingTimer;
+  Timer? _mailboxTimer;
 
   late final currentTitle = computed<String>(() {
     switch (destination.value) {
@@ -182,6 +191,16 @@ class AppStore {
     } else if (!active && _pollingTimer != null) {
       _pollingTimer?.cancel();
       _pollingTimer = null;
+    }
+    // Mailbox polling - always active when authenticated
+    if (bootstrapPhase.value == BootstrapPhase.ready && _mailboxTimer == null) {
+      final interval = pollIntervalSeconds.value.clamp(5, 300);
+      _mailboxTimer = Timer.periodic(Duration(seconds: interval), (_) {
+        refresh();
+      });
+    } else if (bootstrapPhase.value != BootstrapPhase.ready && _mailboxTimer != null) {
+      _mailboxTimer?.cancel();
+      _mailboxTimer = null;
     }
   }
 
@@ -279,10 +298,10 @@ class AppStore {
     destination.value = AppDestination.transfers;
   }
 
-  Future<void> signOut() async {
+  Future<void> signOut({required bool deleteRemoteMailbox}) async {
     signOutInProgress.value = true;
     try {
-      await rust_api.signOut();
+      await rust_api.signOut(deleteRemoteMailbox: deleteRemoteMailbox);
       destination.value = AppDestination.send;
       selectedTransferId.value = null;
       deviceSnapshot.value = null;
@@ -365,6 +384,28 @@ class AppStore {
     try {
       rust_api.setAutoReceiveEnabled(enabled: enabled);
       autoReceiveEnabled.value = enabled;
+    } catch (error) {
+      lastErrorMessage.value = error.toString();
+    }
+  }
+
+  void toggleNavigateAfterTransfer(bool enabled) {
+    try {
+      rust_api.setNavigateAfterTransfer(enabled: enabled);
+      navigateAfterTransfer.value = enabled;
+    } catch (error) {
+      lastErrorMessage.value = error.toString();
+    }
+  }
+
+  void setPollInterval(int seconds) {
+    try {
+      final saved = rust_api.setPollIntervalSeconds(seconds: seconds);
+      pollIntervalSeconds.value = saved;
+      // Restart mailbox timer with new interval
+      _mailboxTimer?.cancel();
+      _mailboxTimer = null;
+      _checkPolling();
     } catch (error) {
       lastErrorMessage.value = error.toString();
     }
@@ -496,7 +537,9 @@ class AppStore {
     sendStatusMessage.value =
         'Sending ${pendingSendItems.value.length} item(s) to ${peer.label}...';
 
-    destination.value = AppDestination.transfers;
+    if (navigateAfterTransfer.value) {
+      destination.value = AppDestination.transfers;
+    }
     _checkPolling();
 
     try {
@@ -572,7 +615,9 @@ class AppStore {
     mailboxStatusMessage.value =
         'Receiving ${jobs.length} selected relay job(s).';
     lastReceivePath.value = outputDir;
-    destination.value = AppDestination.transfers;
+    if (navigateAfterTransfer.value) {
+      destination.value = AppDestination.transfers;
+    }
     _checkPolling();
 
     try {
@@ -805,7 +850,9 @@ class AppStore {
     for (final job in transferJobs.value) {
       if (ids.contains(job.id)) {
         selectedTransferId.value = job.id;
-        destination.value = AppDestination.transfers;
+        if (navigateAfterTransfer.value) {
+          destination.value = AppDestination.transfers;
+        }
         return;
       }
     }
@@ -822,6 +869,15 @@ class AppStore {
       rememberedDevices.value = rust_api.rememberedDevices();
       final preferredDir = rust_api.preferredDownloadDir().trim();
       preferredDownloadDir.value = preferredDir.isEmpty ? null : preferredDir;
+      try {
+        autoReceiveEnabled.value = rust_api.autoReceiveEnabled();
+      } catch (_) {}
+      try {
+        navigateAfterTransfer.value = rust_api.navigateAfterTransfer();
+      } catch (_) {}
+      try {
+        pollIntervalSeconds.value = rust_api.pollIntervalSeconds();
+      } catch (_) {}
       final snapshot = await rust_api.shellSnapshot();
       _applySnapshot(snapshot);
     } catch (error) {

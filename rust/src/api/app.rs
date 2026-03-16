@@ -238,15 +238,18 @@ pub fn clear_cookie_session() -> anyhow::Result<()> {
     Ok(())
 }
 
-pub async fn sign_out() -> anyhow::Result<()> {
+pub async fn sign_out(delete_remote_mailbox: bool) -> anyhow::Result<()> {
+    let local_device = device::load_or_create_local_device()?;
+    device::add_excluded_device_id(&local_device.device_id)?;
     let cookie_session = session::current_session();
-    if cookie_session.is_configured() {
+    if cookie_session.is_configured() && delete_remote_mailbox {
         let quark = QuarkPan::builder()
             .cookie(cookie_session.raw_cookie)
             .prepare()?;
-        let local_device = device::load_or_create_local_device()?;
         device::remove_local_mailbox(&quark, &local_device).await?;
     }
+    device::clear_remembered_devices()?;
+    device::clear_local_device_files()?;
     session::clear_cookie()?;
     Ok(())
 }
@@ -301,6 +304,26 @@ pub fn auto_receive_enabled() -> anyhow::Result<bool> {
 #[flutter_rust_bridge::frb(sync)]
 pub fn set_auto_receive_enabled(enabled: bool) -> anyhow::Result<bool> {
     preferences::set_auto_receive_enabled(enabled)
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn navigate_after_transfer() -> anyhow::Result<bool> {
+    preferences::navigate_after_transfer()
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn set_navigate_after_transfer(enabled: bool) -> anyhow::Result<bool> {
+    preferences::set_navigate_after_transfer(enabled)
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn poll_interval_seconds() -> anyhow::Result<u32> {
+    preferences::poll_interval_seconds()
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn set_poll_interval_seconds(seconds: u32) -> anyhow::Result<u32> {
+    preferences::set_poll_interval_seconds(seconds)
 }
 
 pub async fn send_local_path(
