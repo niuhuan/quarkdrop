@@ -156,4 +156,13 @@ extension AppStoreSettings on AppStore {
       lastErrorMessage.value = error.toString();
     }
   }
+
+  void setThemeMode(String mode) {
+    try {
+      final saved = rust_api.setThemeMode(mode: mode);
+      themeMode.value = saved;
+    } catch (error) {
+      lastErrorMessage.value = error.toString();
+    }
+  }
 }

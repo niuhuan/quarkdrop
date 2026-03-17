@@ -333,6 +333,16 @@ pub fn preferred_locale() -> anyhow::Result<String> {
 }
 
 #[flutter_rust_bridge::frb(sync)]
+pub fn theme_mode() -> anyhow::Result<String> {
+    preferences::theme_mode()
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn set_theme_mode(mode: String) -> anyhow::Result<String> {
+    preferences::set_theme_mode(mode)
+}
+
+#[flutter_rust_bridge::frb(sync)]
 pub fn save_preferred_locale(code: String) -> anyhow::Result<String> {
     preferences::save_preferred_locale(code)
 }

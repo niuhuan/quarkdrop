@@ -37,7 +37,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -807568929;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 724715204;
 
 // Section: executor
 
@@ -1555,6 +1555,38 @@ fn wire__crate__api__app__set_poll_interval_seconds_impl(
         },
     )
 }
+fn wire__crate__api__app__set_theme_mode_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "set_theme_mode",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_mode = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                (move || {
+                    let output_ok = crate::api::app::set_theme_mode(api_mode)?;
+                    Ok(output_ok)
+                })(),
+            )
+        },
+    )
+}
 fn wire__crate__api__app__shell_snapshot_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -1624,6 +1656,37 @@ fn wire__crate__api__app__sign_out_impl(
                     .await,
                 )
             }
+        },
+    )
+}
+fn wire__crate__api__app__theme_mode_impl(
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) -> flutter_rust_bridge::for_generated::WireSyncRust2DartSse {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_sync::<flutter_rust_bridge::for_generated::SseCodec, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "theme_mode",
+            port: None,
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Sync,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                (move || {
+                    let output_ok = crate::api::app::theme_mode()?;
+                    Ok(output_ok)
+                })(),
+            )
         },
     )
 }
@@ -2058,15 +2121,15 @@ fn pde_ffi_dispatcher_primary_impl(
         28 => wire__crate__api__app__reject_inbox_job_impl(port, ptr, rust_vec_len, data_len),
         31 => wire__crate__api__app__resume_task_impl(port, ptr, rust_vec_len, data_len),
         38 => wire__crate__api__app__send_local_path_impl(port, ptr, rust_vec_len, data_len),
-        47 => wire__crate__api__app__shell_snapshot_impl(port, ptr, rust_vec_len, data_len),
-        48 => wire__crate__api__app__sign_out_impl(port, ptr, rust_vec_len, data_len),
-        49 => wire__crate__api__single_instance_stream__unregister_si_listener_impl(
+        48 => wire__crate__api__app__shell_snapshot_impl(port, ptr, rust_vec_len, data_len),
+        49 => wire__crate__api__app__sign_out_impl(port, ptr, rust_vec_len, data_len),
+        51 => wire__crate__api__single_instance_stream__unregister_si_listener_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        51 => wire__crate__api__app__verify_cloud_password_impl(port, ptr, rust_vec_len, data_len),
+        53 => wire__crate__api__app__verify_cloud_password_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -2127,7 +2190,9 @@ fn pde_ffi_dispatcher_sync_impl(
             data_len,
         ),
         46 => wire__crate__api__app__set_poll_interval_seconds_impl(ptr, rust_vec_len, data_len),
-        50 => wire__crate__api__app__validate_cookie_string_impl(ptr, rust_vec_len, data_len),
+        47 => wire__crate__api__app__set_theme_mode_impl(ptr, rust_vec_len, data_len),
+        50 => wire__crate__api__app__theme_mode_impl(ptr, rust_vec_len, data_len),
+        52 => wire__crate__api__app__validate_cookie_string_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }

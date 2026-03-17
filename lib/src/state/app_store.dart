@@ -171,6 +171,7 @@ class AppStore with WidgetsBindingObserver, WindowListener {
     null,
     debugLabel: 'localePreferenceCode',
   );
+  final themeMode = signal<String>('system', debugLabel: 'themeMode');
   final autoReceiveEnabled = signal<bool>(
     false,
     debugLabel: 'autoReceiveEnabled',

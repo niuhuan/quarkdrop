@@ -45,6 +45,11 @@ void bindCloudDevice({required String deviceId}) =>
 
 String preferredLocale() => RustLib.instance.api.crateApiAppPreferredLocale();
 
+String themeMode() => RustLib.instance.api.crateApiAppThemeMode();
+
+String setThemeMode({required String mode}) =>
+    RustLib.instance.api.crateApiAppSetThemeMode(mode: mode);
+
 String savePreferredLocale({required String code}) =>
     RustLib.instance.api.crateApiAppSavePreferredLocale(code: code);
 

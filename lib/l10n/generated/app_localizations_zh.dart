@@ -383,6 +383,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String get languageKoreanOption => '韩语';
 
   @override
+  String get themeModeTitle => '主题模式';
+
+  @override
+  String get themeModeSystem => '跟随系统';
+
+  @override
+  String get themeModeLight => '浅色';
+
+  @override
+  String get themeModeDark => '深色';
+
+  @override
   String get stagePreparing => '准备中';
 
   @override
@@ -1074,6 +1086,18 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get languageKoreanOption => '韩语';
 
   @override
+  String get themeModeTitle => '主题模式';
+
+  @override
+  String get themeModeSystem => '跟随系统';
+
+  @override
+  String get themeModeLight => '浅色';
+
+  @override
+  String get themeModeDark => '深色';
+
+  @override
   String get stagePreparing => '准备中';
 
   @override
@@ -1763,6 +1787,18 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get languageKoreanOption => '韓語';
+
+  @override
+  String get themeModeTitle => '主題模式';
+
+  @override
+  String get themeModeSystem => '跟隨系統';
+
+  @override
+  String get themeModeLight => '淺色';
+
+  @override
+  String get themeModeDark => '深色';
 
   @override
   String get stagePreparing => '準備中';

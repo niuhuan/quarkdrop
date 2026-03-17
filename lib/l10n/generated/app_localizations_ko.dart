@@ -392,6 +392,18 @@ class AppLocalizationsKo extends AppLocalizations {
   String get languageKoreanOption => '한국어';
 
   @override
+  String get themeModeTitle => '테마 모드';
+
+  @override
+  String get themeModeSystem => '시스템 설정 유지';
+
+  @override
+  String get themeModeLight => '라이트';
+
+  @override
+  String get themeModeDark => '다크';
+
+  @override
   String get stagePreparing => '준비 중';
 
   @override

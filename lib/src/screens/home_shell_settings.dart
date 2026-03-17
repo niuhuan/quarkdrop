@@ -48,6 +48,8 @@ class _SettingsPane extends StatelessWidget {
                     statusMessage: downloadStatus,
                   ),
                 if (!Platform.isIOS) const SizedBox(height: 14),
+                _ThemeModeCard(store: store),
+                const SizedBox(height: 14),
                 _LanguageCard(store: store, statusMessage: localeStatus),
                 const SizedBox(height: 14),
                 _AutoReceiveCard(store: store),
@@ -1030,6 +1032,111 @@ class _DownloadDirectoryCard extends StatelessWidget {
         ),
       );
     });
+  }
+}
+
+class _ThemeModeCard extends StatelessWidget {
+  const _ThemeModeCard({required this.store});
+
+  final AppStore store;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Watch((context) {
+      final String currentCode = store.themeMode.value;
+      return Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: Theme.of(
+              context,
+            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      l10n.themeModeTitle,
+                      style: const TextStyle(fontWeight: FontWeight.w700),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      _themeModeName(l10n, currentCode),
+                      style: TextStyle(
+                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              PopupMenuButton<String>(
+                initialValue: currentCode,
+                onSelected: (code) {
+                  store.setThemeMode(code);
+                },
+                itemBuilder: (context) {
+                  return [
+                    PopupMenuItem(
+                      value: 'system',
+                      child: Text(l10n.themeModeSystem),
+                    ),
+                    PopupMenuItem(
+                      value: 'light',
+                      child: Text(l10n.themeModeLight),
+                    ),
+                    PopupMenuItem(
+                      value: 'dark',
+                      child: Text(l10n.themeModeDark),
+                    ),
+                  ];
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    color: Theme.of(
+                      context,
+                    ).colorScheme.secondaryContainer.withValues(alpha: 0.5),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
+                  child: Text(
+                    l10n.actionChooseFolder,
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSecondaryContainer,
+                      fontWeight: FontWeight.w600,
+                      fontSize: 13,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  String _themeModeName(dynamic l10n, String code) {
+    switch (code) {
+      case 'light':
+        return l10n.themeModeLight;
+      case 'dark':
+        return l10n.themeModeDark;
+      default:
+        return l10n.themeModeSystem;
+    }
   }
 }
 

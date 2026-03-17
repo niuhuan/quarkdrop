@@ -175,6 +175,9 @@ extension AppStoreBootstrap on AppStore {
       localePreferenceCode.value = preferredLocale.isEmpty
           ? null
           : preferredLocale;
+      try {
+        themeMode.value = rust_api.themeMode();
+      } catch (_) {}
       final preferredDir = rust_api.preferredDownloadDir().trim();
       preferredDownloadDir.value = preferredDir.isEmpty ? null : preferredDir;
       try {

@@ -26,6 +26,12 @@ struct AppSettings {
     minimize_to_tray: bool,
     #[serde(default = "default_peer_discovery_interval")]
     peer_discovery_interval_minutes: u32,
+    #[serde(default = "default_theme_mode")]
+    theme_mode: String,
+}
+
+fn default_theme_mode() -> String {
+    "system".to_string()
 }
 
 fn default_true() -> bool {
@@ -57,6 +63,7 @@ impl Default for AppSettings {
             keep_screen_on_during_transfer: true,
             minimize_to_tray: false,
             peer_discovery_interval_minutes: 10,
+            theme_mode: "system".to_string(),
         }
     }
 }
@@ -66,6 +73,17 @@ pub fn preferred_locale() -> anyhow::Result<Option<String>> {
         .preferred_locale
         .map(|value| value.trim().to_string())
         .filter(|value| !value.is_empty()))
+}
+
+pub fn theme_mode() -> anyhow::Result<String> {
+    Ok(load_settings()?.theme_mode)
+}
+
+pub fn set_theme_mode(mode: String) -> anyhow::Result<String> {
+    let mut settings = load_settings()?;
+    settings.theme_mode = mode.clone();
+    save_settings(&settings)?;
+    Ok(mode)
 }
 
 pub fn save_preferred_locale(code: String) -> anyhow::Result<String> {

@@ -17,7 +17,14 @@ class QuarkDropApp extends StatelessWidget {
     return Watch((context) {
       final localeCode = store.localePreferenceCode.value;
       final locale = appLocaleOptionFromCode(localeCode)?.locale;
-      final scheme = ColorScheme.fromSeed(
+
+      final themeMode = switch (store.themeMode.value) {
+        'light' => ThemeMode.light,
+        'dark' => ThemeMode.dark,
+        _ => ThemeMode.system,
+      };
+
+      final lightScheme = ColorScheme.fromSeed(
         seedColor: const Color(0xFFD96A28),
         brightness: Brightness.light,
         primary: const Color(0xFFB44818),
@@ -25,10 +32,16 @@ class QuarkDropApp extends StatelessWidget {
         surface: const Color(0xFFF8F2E8),
       );
 
+      final darkScheme = ColorScheme.fromSeed(
+        seedColor: const Color(0xFFD96A28),
+        brightness: Brightness.dark,
+      );
+
       return MaterialApp(
         debugShowCheckedModeBanner: false,
         onGenerateTitle: (context) => AppLocalizations.of(context).appTitle,
         locale: locale,
+        themeMode: themeMode,
         supportedLocales: AppLocalizations.supportedLocales,
         localeListResolutionCallback: (locales, _) {
           return resolveSupportedAppLocale(locales);
@@ -41,7 +54,7 @@ class QuarkDropApp extends StatelessWidget {
         ],
         theme: ThemeData(
           useMaterial3: true,
-          colorScheme: scheme,
+          colorScheme: lightScheme,
           scaffoldBackgroundColor: const Color(0xFFF2EADF),
           cardTheme: const CardThemeData(
             elevation: 0,
@@ -50,23 +63,53 @@ class QuarkDropApp extends StatelessWidget {
           ),
           navigationRailTheme: NavigationRailThemeData(
             backgroundColor: const Color(0xFFF7F0E5),
-            indicatorColor: scheme.primary.withValues(alpha: 0.12),
-            selectedIconTheme: IconThemeData(color: scheme.primary),
+            indicatorColor: lightScheme.primary.withValues(alpha: 0.12),
+            selectedIconTheme: IconThemeData(color: lightScheme.primary),
             selectedLabelTextStyle: TextStyle(
-              color: scheme.primary,
+              color: lightScheme.primary,
               fontWeight: FontWeight.w700,
             ),
           ),
           navigationBarTheme: NavigationBarThemeData(
-            indicatorColor: scheme.primary.withValues(alpha: 0.12),
+            indicatorColor: lightScheme.primary.withValues(alpha: 0.12),
             labelTextStyle: WidgetStateProperty.resolveWith((states) {
               if (states.contains(WidgetState.selected)) {
                 return TextStyle(
-                  color: scheme.primary,
+                  color: lightScheme.primary,
                   fontWeight: FontWeight.w700,
                 );
               }
-              return TextStyle(color: scheme.onSurfaceVariant);
+              return TextStyle(color: lightScheme.onSurfaceVariant);
+            }),
+          ),
+          appBarTheme: const AppBarTheme(
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+            scrolledUnderElevation: 0,
+          ),
+        ),
+        darkTheme: ThemeData(
+          useMaterial3: true,
+          colorScheme: darkScheme,
+          cardTheme: const CardThemeData(elevation: 0, margin: EdgeInsets.zero),
+          navigationRailTheme: NavigationRailThemeData(
+            indicatorColor: darkScheme.primary.withValues(alpha: 0.12),
+            selectedIconTheme: IconThemeData(color: darkScheme.primary),
+            selectedLabelTextStyle: TextStyle(
+              color: darkScheme.primary,
+              fontWeight: FontWeight.w700,
+            ),
+          ),
+          navigationBarTheme: NavigationBarThemeData(
+            indicatorColor: darkScheme.primary.withValues(alpha: 0.12),
+            labelTextStyle: WidgetStateProperty.resolveWith((states) {
+              if (states.contains(WidgetState.selected)) {
+                return TextStyle(
+                  color: darkScheme.primary,
+                  fontWeight: FontWeight.w700,
+                );
+              }
+              return TextStyle(color: darkScheme.onSurfaceVariant);
             }),
           ),
           appBarTheme: const AppBarTheme(

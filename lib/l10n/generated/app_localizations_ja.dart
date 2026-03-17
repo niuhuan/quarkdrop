@@ -390,6 +390,18 @@ class AppLocalizationsJa extends AppLocalizations {
   String get languageKoreanOption => '韓国語';
 
   @override
+  String get themeModeTitle => 'テーマモード';
+
+  @override
+  String get themeModeSystem => 'システム';
+
+  @override
+  String get themeModeLight => 'ライト';
+
+  @override
+  String get themeModeDark => 'ダーク';
+
+  @override
   String get stagePreparing => '準備中';
 
   @override
