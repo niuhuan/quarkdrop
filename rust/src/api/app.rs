@@ -152,7 +152,11 @@ pub async fn shell_snapshot() -> anyhow::Result<ShellSnapshot> {
     // Check cloud password status before accessing mailbox
     let has_verify = device::has_cloud_password_verify_cached(&quark)
         .await
-        .unwrap_or(false);
+        .map_err(|error| {
+            anyhow::anyhow!(
+                "Failed to load QuarkDrop cloud password state before initialization: {error}"
+            )
+        })?;
     let key_unlocked = device::is_key_unlocked();
     if !has_verify {
         device_snapshot.mailbox_status_label = "Password setup required".to_string();
@@ -259,6 +263,7 @@ fn store_validated_cookie(cookie: String, source: CookieSource) -> anyhow::Resul
         "The provided cookie is not accepted by QuarkPan.",
     );
 
+    device::reset_cloud_verify_cache();
     session::save_cookie(cookie, source)?;
     Ok(true)
 }
@@ -410,6 +415,26 @@ pub fn keep_screen_on_during_transfer() -> anyhow::Result<bool> {
 #[flutter_rust_bridge::frb(sync)]
 pub fn set_keep_screen_on_during_transfer(enabled: bool) -> anyhow::Result<bool> {
     preferences::set_keep_screen_on_during_transfer(enabled)
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn minimize_to_tray() -> anyhow::Result<bool> {
+    preferences::minimize_to_tray()
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn set_minimize_to_tray(enabled: bool) -> anyhow::Result<bool> {
+    preferences::set_minimize_to_tray(enabled)
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn peer_discovery_interval_minutes() -> anyhow::Result<u32> {
+    preferences::peer_discovery_interval_minutes()
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn set_peer_discovery_interval_minutes(minutes: u32) -> anyhow::Result<u32> {
+    preferences::set_peer_discovery_interval_minutes(minutes)
 }
 
 pub async fn create_cloud_password(password: String) -> anyhow::Result<()> {

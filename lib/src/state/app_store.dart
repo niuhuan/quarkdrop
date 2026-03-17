@@ -93,6 +93,7 @@ class AppStore with WidgetsBindingObserver, WindowListener {
   int _authDowngradeStreak = 0;
   int _backgroundTransferOperations = 0;
   bool _refreshQueued = false;
+  Future<void>? _refreshFuture;
   final _activeAutoReceives = <String>{};
   Timer? _pollingTimer;
   Timer? _mailboxTimer;
@@ -193,6 +194,11 @@ class AppStore with WidgetsBindingObserver, WindowListener {
   final keepScreenOnDuringTransfer = signal<bool>(
     true,
     debugLabel: 'keepScreenOnDuringTransfer',
+  );
+  final minimizeToTray = signal<bool>(false, debugLabel: 'minimizeToTray');
+  final peerDiscoveryIntervalMinutes = signal<int>(
+    10,
+    debugLabel: 'peerDiscoveryIntervalMinutes',
   );
   final downloadDirectorySaving = signal(
     false,

@@ -689,4 +689,16 @@ class AppLocalizationsJa extends AppLocalizations {
   String maxConcurrentDownloadsSubtitle(Object count) {
     return '同時に $count 件ダウンロード';
   }
+
+  @override
+  String get settingMinimizeToTrayTitle => '閉じる時にトレイへ最小化';
+
+  @override
+  String get settingMinimizeToTrayDescription => 'トレイに最小化';
+
+  @override
+  String get settingPeerDiscoveryTitle => 'ピア探索間隔';
+
+  @override
+  String get settingPeerDiscoveryDescription => 'クラウド上のデバイス名を更新する間隔（分）';
 }

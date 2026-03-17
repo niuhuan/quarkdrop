@@ -5,7 +5,15 @@ extension AppStoreBootstrap on AppStore {
     await _loadShell();
   }
 
-  Future<void>? _refreshFuture;
+  Future<void> _refreshStrict() async {
+    try {
+      final snapshot = await rust_api.shellSnapshot();
+      _applySnapshot(snapshot);
+    } catch (error) {
+      lastErrorMessage.value = error.toString();
+      rethrow;
+    }
+  }
 
   Future<void> refresh() {
     if (_refreshFuture != null) {
@@ -53,7 +61,8 @@ extension AppStoreBootstrap on AppStore {
 
     ScreenWakelock.setKeepScreenOn(active && keepScreenOnDuringTransfer.value);
 
-    final shouldPollMailbox = bootstrapPhase.value == BootstrapPhase.ready && _isAppVisible;
+    final shouldPollMailbox =
+        bootstrapPhase.value == BootstrapPhase.ready && _isAppVisible;
 
     if (shouldPollMailbox && _mailboxTimer == null) {
       final interval = pollIntervalSeconds.value.clamp(5, 300);
@@ -186,6 +195,13 @@ extension AppStoreBootstrap on AppStore {
       try {
         keepScreenOnDuringTransfer.value = rust_api
             .keepScreenOnDuringTransfer();
+      } catch (_) {}
+      try {
+        minimizeToTray.value = rust_api.minimizeToTray();
+      } catch (_) {}
+      try {
+        peerDiscoveryIntervalMinutes.value = rust_api
+            .peerDiscoveryIntervalMinutes();
       } catch (_) {}
       final snapshot = await rust_api.shellSnapshot();
       _applySnapshot(snapshot);

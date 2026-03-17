@@ -98,6 +98,19 @@ bool setKeepScreenOnDuringTransfer({required bool enabled}) => RustLib
     .api
     .crateApiAppSetKeepScreenOnDuringTransfer(enabled: enabled);
 
+bool minimizeToTray() => RustLib.instance.api.crateApiAppMinimizeToTray();
+
+bool setMinimizeToTray({required bool enabled}) =>
+    RustLib.instance.api.crateApiAppSetMinimizeToTray(enabled: enabled);
+
+int peerDiscoveryIntervalMinutes() =>
+    RustLib.instance.api.crateApiAppPeerDiscoveryIntervalMinutes();
+
+int setPeerDiscoveryIntervalMinutes({required int minutes}) => RustLib
+    .instance
+    .api
+    .crateApiAppSetPeerDiscoveryIntervalMinutes(minutes: minutes);
+
 Future<void> createCloudPassword({required String password}) =>
     RustLib.instance.api.crateApiAppCreateCloudPassword(password: password);
 

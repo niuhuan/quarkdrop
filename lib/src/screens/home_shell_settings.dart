@@ -54,10 +54,16 @@ class _SettingsPane extends StatelessWidget {
                 const SizedBox(height: 14),
                 _NavigateAfterTransferCard(store: store),
                 const SizedBox(height: 14),
+                if (!Platform.isAndroid && !Platform.isIOS) ...[
+                  _MinimizeToTrayCard(store: store),
+                  const SizedBox(height: 14),
+                ],
                 if (Platform.isAndroid || Platform.isIOS) ...[
                   _KeepScreenOnCard(store: store),
                   const SizedBox(height: 14),
                 ],
+                _PeerDiscoveryCard(store: store),
+                const SizedBox(height: 14),
                 _PollIntervalCard(store: store),
                 const SizedBox(height: 14),
                 _ConcurrentUploadsCard(store: store),
@@ -1466,5 +1472,132 @@ class _KeepScreenOnCard extends StatelessWidget {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       ),
     );
+  }
+}
+
+class _MinimizeToTrayCard extends StatelessWidget {
+  const _MinimizeToTrayCard({required this.store});
+
+  final AppStore store;
+
+  @override
+  Widget build(BuildContext context) {
+    // using local translations as fallback if arb missed it
+    // final title = context.l10n.settingMinimizeToTrayTitle;
+    return Watch((context) {
+      final l10n = context.l10n;
+      final enabled = store.minimizeToTray.value;
+      return Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: Theme.of(
+              context,
+            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
+          ),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: SwitchListTile(
+          value: enabled,
+          onChanged: store.toggleMinimizeToTray,
+          title: Text(
+            l10n.settingMinimizeToTrayTitle,
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+          ),
+          subtitle: Text(
+            l10n.settingMinimizeToTrayDescription,
+            style: const TextStyle(fontSize: 13),
+          ),
+        ),
+      );
+    });
+  }
+}
+
+class _PeerDiscoveryCard extends StatelessWidget {
+  const _PeerDiscoveryCard({required this.store});
+
+  final AppStore store;
+
+  @override
+  Widget build(BuildContext context) {
+    return Watch((context) {
+      final l10n = context.l10n;
+      final value = store.peerDiscoveryIntervalMinutes.value;
+      return Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: Theme.of(
+              context,
+            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.settingPeerDiscoveryTitle,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 15,
+                ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                l10n.settingPeerDiscoveryDescription,
+                style: const TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
+              ),
+              const SizedBox(height: 12),
+              Row(
+                children: [
+                  Expanded(
+                    child: SliderTheme(
+                      data: SliderTheme.of(context).copyWith(
+                        trackHeight: 4,
+                        thumbShape: const RoundSliderThumbShape(
+                          enabledThumbRadius: 8,
+                        ),
+                        overlayShape: const RoundSliderOverlayShape(
+                          overlayRadius: 16,
+                        ),
+                      ),
+                      child: Slider(
+                        value: value.toDouble(),
+                        min: 1,
+                        max: 60,
+                        divisions: 59,
+                        onChanged: (v) {
+                          store.setPeerDiscoveryIntervalMinutes(v.round());
+                        },
+                      ),
+                    ),
+                  ),
+                  const SizedBox(width: 16),
+                  SizedBox(
+                    width: 48,
+                    child: Text(
+                      '$value',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 16,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                      ),
+                      textAlign: TextAlign.end,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
+      );
+    });
   }
 }

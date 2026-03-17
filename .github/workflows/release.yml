@@ -137,8 +137,19 @@ jobs:
 
       - name: Build Android
         if: matrix.platform == 'android-arm64'
+        run: flutter build apk --release --target-platform android-arm64
+
+      - name: Sign APK (Android)
+        if: matrix.platform == 'android-arm64'
+        env:
+          ANDROID_JKS_BASE64: ${{ secrets.ANDROID_JKS_BASE64 }}
+          ANDROID_JKS_PASSWORD: ${{ secrets.ANDROID_JKS_PASSWORD }}
         run: |
-          flutter build apk --release --target-platform android-arm64
+          if [ -n "$ANDROID_JKS_BASE64" ]; then
+            echo $ANDROID_JKS_BASE64 > key.jks.base64
+            base64 -d key.jks.base64 > key.jks
+            echo $ANDROID_JKS_PASSWORD | $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks key.jks build/app/outputs/flutter-apk/app-release.apk
+          fi
           mv build/app/outputs/flutter-apk/app-release.apk ../quarkdrop-${{ needs.check-version.outputs.version }}-android-arm64.apk
 
       - name: Build Windows

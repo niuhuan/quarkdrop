@@ -31,7 +31,7 @@ extension AppStoreAuth on AppStore {
       }
       loginCookieDraft.value = '';
       _justLoggedIn = true;
-      await refresh();
+      await _refreshStrict();
       destination.value = AppDestination.send;
       return true;
     } catch (error) {
@@ -59,7 +59,7 @@ extension AppStoreAuth on AppStore {
     lastErrorMessage.value = null;
     try {
       rust_api.restoreRememberedDevice(deviceId: deviceId);
-      await refresh();
+      await _refreshStrict();
     } catch (error) {
       lastErrorMessage.value = error.toString();
       bootstrapPhase.value = BootstrapPhase.loginRequired;
@@ -74,7 +74,7 @@ extension AppStoreAuth on AppStore {
     try {
       rust_api.bindCloudDevice(deviceId: deviceId);
       bootstrapPhase.value = BootstrapPhase.ready;
-      await refresh();
+      await _refreshStrict();
     } catch (error) {
       lastErrorMessage.value = error.toString();
     } finally {
@@ -110,13 +110,18 @@ extension AppStoreAuth on AppStore {
   }
 
   Future<void> createCloudPassword(String password) async {
-    await rust_api.createCloudPassword(password: password);
-    await refresh();
+    try {
+      await rust_api.createCloudPassword(password: password);
+    } catch (error) {
+      await refresh();
+      rethrow;
+    }
+    await _refreshStrict();
   }
 
   Future<void> verifyCloudPassword(String password) async {
     await rust_api.verifyCloudPassword(password: password);
-    await refresh();
+    await _refreshStrict();
   }
 
   Future<void> changeCloudPassword(
@@ -127,6 +132,6 @@ extension AppStoreAuth on AppStore {
       oldPassword: oldPassword,
       newPassword: newPassword,
     );
-    await refresh();
+    await _refreshStrict();
   }
 }

@@ -1,3 +1,4 @@
+import 'package:quarkdrop/src/rust/api/app.dart' as rust_api;
 import 'dart:io';
 
 import 'package:tray_manager/tray_manager.dart';
@@ -8,9 +9,18 @@ class DesktopWindowListener with WindowListener {
 
   @override
   Future<void> onWindowClose() async {
-    await windowManager.hide();
-    if (Platform.isMacOS) {
-      await windowManager.setSkipTaskbar(true);
+    bool minimizeToTray = false;
+    try {
+      minimizeToTray = rust_api.minimizeToTray();
+    } catch (_) {}
+
+    if (minimizeToTray) {
+      await windowManager.hide();
+      if (Platform.isMacOS) {
+        await windowManager.setSkipTaskbar(true);
+      }
+    } else {
+      exit(0);
     }
   }
 }

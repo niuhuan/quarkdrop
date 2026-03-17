@@ -197,5 +197,9 @@
   "maxConcurrentUploadsTitle": "最大同时上传数",
   "maxConcurrentUploadsSubtitle": "同时上传 {count} 个文件",
   "maxConcurrentDownloadsTitle": "最大同时下载数",
-  "maxConcurrentDownloadsSubtitle": "同时下载 {count} 个文件"
+  "maxConcurrentDownloadsSubtitle": "同时下载 {count} 个文件",
+  "settingMinimizeToTrayTitle": "最小化到托盘",
+  "settingMinimizeToTrayDescription": "关闭时最小化到系统托盘",
+  "settingPeerDiscoveryTitle": "设备发现间隔",
+  "settingPeerDiscoveryDescription": "刷新云端设备名称的间隔(分钟)"
 }

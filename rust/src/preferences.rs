@@ -22,6 +22,10 @@ struct AppSettings {
     max_concurrent_downloads: u32,
     #[serde(default = "default_true")]
     keep_screen_on_during_transfer: bool,
+    #[serde(default)]
+    minimize_to_tray: bool,
+    #[serde(default = "default_peer_discovery_interval")]
+    peer_discovery_interval_minutes: u32,
 }
 
 fn default_true() -> bool {
@@ -36,6 +40,10 @@ fn default_transfer_parallelism() -> u32 {
     2
 }
 
+fn default_peer_discovery_interval() -> u32 {
+    10
+}
+
 impl Default for AppSettings {
     fn default() -> Self {
         Self {
@@ -47,6 +55,8 @@ impl Default for AppSettings {
             max_concurrent_uploads: 2,
             max_concurrent_downloads: 2,
             keep_screen_on_during_transfer: true,
+            minimize_to_tray: false,
+            peer_discovery_interval_minutes: 10,
         }
     }
 }
@@ -171,6 +181,29 @@ pub fn set_keep_screen_on_during_transfer(enabled: bool) -> anyhow::Result<bool>
     settings.keep_screen_on_during_transfer = enabled;
     save_settings(&settings)?;
     Ok(enabled)
+}
+
+pub fn minimize_to_tray() -> anyhow::Result<bool> {
+    Ok(load_settings()?.minimize_to_tray)
+}
+
+pub fn set_minimize_to_tray(enabled: bool) -> anyhow::Result<bool> {
+    let mut settings = load_settings()?;
+    settings.minimize_to_tray = enabled;
+    save_settings(&settings)?;
+    Ok(enabled)
+}
+
+pub fn peer_discovery_interval_minutes() -> anyhow::Result<u32> {
+    Ok(load_settings()?.peer_discovery_interval_minutes)
+}
+
+pub fn set_peer_discovery_interval_minutes(minutes: u32) -> anyhow::Result<u32> {
+    let clamped = minutes.max(1).min(1440);
+    let mut settings = load_settings()?;
+    settings.peer_discovery_interval_minutes = clamped;
+    save_settings(&settings)?;
+    Ok(clamped)
 }
 
 fn load_settings() -> anyhow::Result<AppSettings> {

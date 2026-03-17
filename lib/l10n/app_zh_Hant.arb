@@ -197,5 +197,9 @@
   "maxConcurrentUploadsTitle": "最大同時上傳數",
   "maxConcurrentUploadsSubtitle": "同時上傳 {count} 個檔案",
   "maxConcurrentDownloadsTitle": "最大同時下載數",
-  "maxConcurrentDownloadsSubtitle": "同時下載 {count} 個檔案"
+  "maxConcurrentDownloadsSubtitle": "同時下載 {count} 個檔案",
+  "settingMinimizeToTrayTitle": "最小化到托盤",
+  "settingMinimizeToTrayDescription": "關閉時最小化到系統托盤",
+  "settingPeerDiscoveryTitle": "設備發現間隔",
+  "settingPeerDiscoveryDescription": "刷新雲端設備名稱的間隔(分鐘)"
 }

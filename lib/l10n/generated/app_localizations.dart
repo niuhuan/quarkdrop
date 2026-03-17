@@ -1291,6 +1291,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{count} download(s) at a time'**
   String maxConcurrentDownloadsSubtitle(Object count);
+
+  /// No description provided for @settingMinimizeToTrayTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimize to tray on close'**
+  String get settingMinimizeToTrayTitle;
+
+  /// No description provided for @settingMinimizeToTrayDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimize to Tray'**
+  String get settingMinimizeToTrayDescription;
+
+  /// No description provided for @settingPeerDiscoveryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Peer Discovery Interval'**
+  String get settingPeerDiscoveryTitle;
+
+  /// No description provided for @settingPeerDiscoveryDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Interval for refreshing cloud device names (Minutes)'**
+  String get settingPeerDiscoveryDescription;
 }
 
 class _AppLocalizationsDelegate

@@ -691,4 +691,16 @@ class AppLocalizationsKo extends AppLocalizations {
   String maxConcurrentDownloadsSubtitle(Object count) {
     return '$count개 동시 다운로드';
   }
+
+  @override
+  String get settingMinimizeToTrayTitle => '닫을 때 트레이로 최소화';
+
+  @override
+  String get settingMinimizeToTrayDescription => '트레이로 최소화';
+
+  @override
+  String get settingPeerDiscoveryTitle => '피어 검색 주기';
+
+  @override
+  String get settingPeerDiscoveryDescription => '클라우드 기기 이름을 새로 고치는 간격(분)';
 }

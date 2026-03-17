@@ -725,4 +725,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String maxConcurrentDownloadsSubtitle(Object count) {
     return '$count download(s) at a time';
   }
+
+  @override
+  String get settingMinimizeToTrayTitle => 'Minimize to tray on close';
+
+  @override
+  String get settingMinimizeToTrayDescription => 'Minimize to Tray';
+
+  @override
+  String get settingPeerDiscoveryTitle => 'Peer Discovery Interval';
+
+  @override
+  String get settingPeerDiscoveryDescription =>
+      'Interval for refreshing cloud device names (Minutes)';
 }

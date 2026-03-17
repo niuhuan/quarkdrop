@@ -197,5 +197,9 @@
   "maxConcurrentUploadsTitle": "最大同時アップロード数",
   "maxConcurrentUploadsSubtitle": "同時に {count} 件アップロード",
   "maxConcurrentDownloadsTitle": "最大同時ダウンロード数",
-  "maxConcurrentDownloadsSubtitle": "同時に {count} 件ダウンロード"
+  "maxConcurrentDownloadsSubtitle": "同時に {count} 件ダウンロード",
+  "settingMinimizeToTrayTitle": "閉じる時にトレイへ最小化",
+  "settingMinimizeToTrayDescription": "トレイに最小化",
+  "settingPeerDiscoveryTitle": "ピア探索間隔",
+  "settingPeerDiscoveryDescription": "クラウド上のデバイス名を更新する間隔（分）"
 }

@@ -197,5 +197,9 @@
   "maxConcurrentUploadsTitle": "Max Concurrent Uploads",
   "maxConcurrentUploadsSubtitle": "{count} upload(s) at a time",
   "maxConcurrentDownloadsTitle": "Max Concurrent Downloads",
-  "maxConcurrentDownloadsSubtitle": "{count} download(s) at a time"
+  "maxConcurrentDownloadsSubtitle": "{count} download(s) at a time",
+  "settingMinimizeToTrayTitle": "Minimize to tray on close",
+  "settingMinimizeToTrayDescription": "Minimize to Tray",
+  "settingPeerDiscoveryTitle": "Peer Discovery Interval",
+  "settingPeerDiscoveryDescription": "Interval for refreshing cloud device names (Minutes)"
 }

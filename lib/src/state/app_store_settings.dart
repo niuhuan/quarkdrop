@@ -138,4 +138,22 @@ extension AppStoreSettings on AppStore {
       lastErrorMessage.value = error.toString();
     }
   }
+
+  void toggleMinimizeToTray(bool enabled) {
+    try {
+      rust_api.setMinimizeToTray(enabled: enabled);
+      minimizeToTray.value = enabled;
+    } catch (error) {
+      lastErrorMessage.value = error.toString();
+    }
+  }
+
+  void setPeerDiscoveryIntervalMinutes(int minutes) {
+    try {
+      final saved = rust_api.setPeerDiscoveryIntervalMinutes(minutes: minutes);
+      peerDiscoveryIntervalMinutes.value = saved;
+    } catch (error) {
+      lastErrorMessage.value = error.toString();
+    }
+  }
 }

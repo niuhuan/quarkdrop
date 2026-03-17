@@ -197,5 +197,9 @@
   "maxConcurrentUploadsTitle": "최대 동시 업로드 수",
   "maxConcurrentUploadsSubtitle": "{count}개 동시 업로드",
   "maxConcurrentDownloadsTitle": "최대 동시 다운로드 수",
-  "maxConcurrentDownloadsSubtitle": "{count}개 동시 다운로드"
+  "maxConcurrentDownloadsSubtitle": "{count}개 동시 다운로드",
+  "settingMinimizeToTrayTitle": "닫을 때 트레이로 최소화",
+  "settingMinimizeToTrayDescription": "트레이로 최소화",
+  "settingPeerDiscoveryTitle": "피어 검색 주기",
+  "settingPeerDiscoveryDescription": "클라우드 기기 이름을 새로 고치는 간격(분)"
 }

@@ -307,11 +307,14 @@ pub async fn create_cloud_password(quark: &QuarkPan, password: &str) -> anyhow::
     anyhow::ensure!(!password.is_empty(), "Password cannot be empty.");
 
     let root_id = ensure_protocol_folder(quark, "0", QUARKDROP_ROOT_FOLDER_NAME).await?;
+    ensure_key_verify_absent_for_create(quark, &root_id).await?;
 
     // Create verify blob
     let verify_encrypted = encrypt_private_key_blob(VERIFY_PLAINTEXT, password)?;
     let verify_bytes = serde_json::to_vec_pretty(&verify_encrypted)?;
-    upload_small_bytes(quark, &root_id, KEY_VERIFY_FILE_NAME, verify_bytes).await?;
+    let uploaded_fid =
+        upload_small_bytes(quark, &root_id, KEY_VERIFY_FILE_NAME, verify_bytes).await?;
+    validate_created_key_verify(quark, &root_id, &uploaded_fid).await?;
     *cloud_verify_cache()
         .write()
         .expect("cloud verify cache poisoned") = Some(true);
@@ -380,6 +383,55 @@ pub async fn verify_cloud_password(quark: &QuarkPan, password: &str) -> anyhow::
     // Update profile
     let local_device = load_or_create_local_device()?;
     let _ = remember_device_profile(&local_device);
+    Ok(())
+}
+
+async fn ensure_key_verify_absent_for_create(
+    quark: &QuarkPan,
+    root_id: &str,
+) -> anyhow::Result<()> {
+    let entries = list_all_entries(quark, root_id).await?;
+    anyhow::ensure!(
+        !entries
+            .iter()
+            .any(|entry| entry.file && entry.file_name == KEY_VERIFY_FILE_NAME),
+        "Cloud password is already initialized for this account. Verify the existing cloud password instead.",
+    );
+    Ok(())
+}
+
+async fn validate_created_key_verify(
+    quark: &QuarkPan,
+    root_id: &str,
+    uploaded_fid: &str,
+) -> anyhow::Result<()> {
+    let entries = list_all_entries(quark, root_id).await?;
+    let exact_exists = entries
+        .iter()
+        .any(|entry| entry.file && entry.file_name == KEY_VERIFY_FILE_NAME);
+
+    if let Some(uploaded_entry) = entries
+        .iter()
+        .find(|entry| entry.file && entry.fid == uploaded_fid)
+    {
+        if uploaded_entry.file_name != KEY_VERIFY_FILE_NAME {
+            let _ = quark.delete(uploaded_fid).await;
+            if exact_exists {
+                *cloud_verify_cache()
+                    .write()
+                    .expect("cloud verify cache poisoned") = Some(true);
+            }
+            anyhow::bail!(
+                "Cloud password was initialized by another device just now. Verify the existing cloud password instead."
+            );
+        }
+    }
+
+    anyhow::ensure!(
+        exact_exists,
+        "Cloud password verification file was not visible after upload. Please retry after refreshing the remote folder.",
+    );
+
     Ok(())
 }
 

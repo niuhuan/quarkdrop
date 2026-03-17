@@ -681,6 +681,18 @@ class AppLocalizationsZh extends AppLocalizations {
   String maxConcurrentDownloadsSubtitle(Object count) {
     return '同时下载 $count 个文件';
   }
+
+  @override
+  String get settingMinimizeToTrayTitle => '最小化到托盘';
+
+  @override
+  String get settingMinimizeToTrayDescription => '关闭时最小化到系统托盘';
+
+  @override
+  String get settingPeerDiscoveryTitle => '设备发现间隔';
+
+  @override
+  String get settingPeerDiscoveryDescription => '刷新云端设备名称的间隔(分钟)';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1360,6 +1372,18 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String maxConcurrentDownloadsSubtitle(Object count) {
     return '同时下载 $count 个文件';
   }
+
+  @override
+  String get settingMinimizeToTrayTitle => '最小化到托盘';
+
+  @override
+  String get settingMinimizeToTrayDescription => '关闭时最小化到系统托盘';
+
+  @override
+  String get settingPeerDiscoveryTitle => '设备发现间隔';
+
+  @override
+  String get settingPeerDiscoveryDescription => '刷新云端设备名称的间隔(分钟)';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2039,4 +2063,16 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String maxConcurrentDownloadsSubtitle(Object count) {
     return '同時下載 $count 個檔案';
   }
+
+  @override
+  String get settingMinimizeToTrayTitle => '最小化到托盤';
+
+  @override
+  String get settingMinimizeToTrayDescription => '關閉時最小化到系統托盤';
+
+  @override
+  String get settingPeerDiscoveryTitle => '設備發現間隔';
+
+  @override
+  String get settingPeerDiscoveryDescription => '刷新雲端設備名稱的間隔(分鐘)';
 }
