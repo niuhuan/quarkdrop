@@ -2,6 +2,7 @@ part of 'app_store.dart';
 
 extension AppStoreBootstrap on AppStore {
   Future<void> bootstrap() async {
+    initIntentListeners();
     await _loadShell();
   }
 

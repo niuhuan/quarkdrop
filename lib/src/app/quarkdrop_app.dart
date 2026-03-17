@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:desktop_drop/desktop_drop.dart';
 import 'package:quarkdrop/l10n/generated/app_localizations.dart';
 import 'package:quarkdrop/src/configs/desktop_layout.dart';
 import 'package:quarkdrop/src/l10n/app_locale.dart';
@@ -118,7 +119,13 @@ class QuarkDropApp extends StatelessWidget {
             scrolledUnderElevation: 0,
           ),
         ),
-        home: _TrayMenuLocalizationSync(child: RootScreen(store: store)),
+        home: DropTarget(
+          onDragDone: (details) {
+            final paths = details.files.map((e) => e.path).toList();
+            store.addIncomingSharedFilePaths(paths);
+          },
+          child: _TrayMenuLocalizationSync(child: RootScreen(store: store)),
+        ),
       );
     });
   }

@@ -21,6 +21,7 @@ part 'app_store_bootstrap.dart';
 part 'app_store_send_receive.dart';
 part 'app_store_transfers.dart';
 part 'app_store_settings.dart';
+part 'app_store_intents.dart';
 
 enum BootstrapPhase {
   booting,
