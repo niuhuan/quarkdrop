@@ -22,7 +22,6 @@ class _SettingsPane extends StatelessWidget {
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: _PaneTitle(
               title: l10n.settingsTitle,
-              subtitle: l10n.settingsSubtitle,
             ),
           ),
           const SizedBox(height: 20),
