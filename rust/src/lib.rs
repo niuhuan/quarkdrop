@@ -8,6 +8,8 @@ mod preferences;
 mod protocol;
 mod receive;
 mod send;
+mod single;
+mod single_instance;
 mod task;
 #[cfg(any(test, feature = "full-test"))]
 mod test_support;

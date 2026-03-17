@@ -5,6 +5,7 @@
 
 import 'api/app.dart';
 import 'api/simple.dart';
+import 'api/single_instance_stream.dart';
 import 'dart:async';
 import 'dart:convert';
 import 'dart:ffi' as ffi;
@@ -21,6 +22,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   AnyhowException dco_decode_AnyhowException(dynamic raw);
+
+  @protected
+  RustStreamSink<void> dco_decode_StreamSink_unit_Sse(dynamic raw);
 
   @protected
   String dco_decode_String(dynamic raw);
@@ -90,6 +94,11 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   AnyhowException sse_decode_AnyhowException(SseDeserializer deserializer);
+
+  @protected
+  RustStreamSink<void> sse_decode_StreamSink_unit_Sse(
+    SseDeserializer deserializer,
+  );
 
   @protected
   String sse_decode_String(SseDeserializer deserializer);
@@ -166,6 +175,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   @protected
   void sse_encode_AnyhowException(
     AnyhowException self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_StreamSink_unit_Sse(
+    RustStreamSink<void> self,
     SseSerializer serializer,
   );
 

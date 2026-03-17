@@ -8,3 +8,6 @@ import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
 void configureApp({required String configDir}) =>
     RustLib.instance.api.crateApiSimpleConfigureApp(configDir: configDir);
+
+Future<void> initSingleInstance() =>
+    RustLib.instance.api.crateApiSimpleInitSingleInstance();
