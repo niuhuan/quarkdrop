@@ -1,3 +1,8 @@
+#![cfg_attr(
+    not(any(target_os = "linux", target_os = "macos", target_os = "windows")),
+    allow(dead_code, unused_imports)
+)]
+
 pub mod error;
 
 pub use self::inner::*;
@@ -136,6 +141,28 @@ mod inner {
 
         pub fn is_single(&self) -> bool {
             self.is_single
+        }
+    }
+}
+
+#[cfg(not(any(
+    target_os = "windows",
+    target_os = "linux",
+    target_os = "android",
+    target_os = "macos"
+)))]
+mod inner {
+    use super::error::Result;
+
+    pub struct SingleInstance;
+
+    impl SingleInstance {
+        pub fn new(_name: &str) -> Result<Self> {
+            Ok(Self)
+        }
+
+        pub fn is_single(&self) -> bool {
+            true
         }
     }
 }

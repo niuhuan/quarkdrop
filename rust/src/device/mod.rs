@@ -102,6 +102,11 @@ pub fn reset_cloud_verify_cache() {
         .expect("cloud verify cache poisoned") = None;
 }
 
+pub fn reset_runtime_state() {
+    lock_key();
+    reset_cloud_verify_cache();
+}
+
 #[derive(Clone, Debug, Serialize, Deserialize)]
 struct StoredLocalDeviceProfile {
     version: u32,

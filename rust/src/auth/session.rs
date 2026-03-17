@@ -43,6 +43,13 @@ pub fn current_session() -> CookieSession {
 }
 
 pub fn initialize_session_from_disk() -> io::Result<()> {
+    {
+        let mut session = session_store()
+            .write()
+            .expect("cookie session lock poisoned");
+        *session = CookieSession::default();
+    }
+
     let paths = app_paths()?;
     if !paths.cookie_file.exists() {
         return Ok(());
