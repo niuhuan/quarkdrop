@@ -371,4 +371,13 @@ extension AppStoreSendReceive on AppStore {
       }
     }
   }
+
+  Future<void> removePeerDevice(String deviceId) async {
+    try {
+      await rust_api.removePeerDevice(peerDeviceId: deviceId);
+      await refresh();
+    } catch (e) {
+      lastErrorMessage.value = "Failed to remove peer device: $e";
+    }
+  }
 }

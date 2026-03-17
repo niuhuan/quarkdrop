@@ -37,7 +37,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 724715204;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1040591788;
 
 // Section: executor
 
@@ -990,6 +990,43 @@ fn wire__crate__api__app__remembered_devices_impl(
                     Ok(output_ok)
                 })(),
             )
+        },
+    )
+}
+fn wire__crate__api__app__remove_peer_device_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "remove_peer_device",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_peer_device_id = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok =
+                            crate::api::app::remove_peer_device(api_peer_device_id).await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
         },
     )
 }
@@ -2119,17 +2156,18 @@ fn pde_ffi_dispatcher_primary_impl(
             data_len,
         ),
         28 => wire__crate__api__app__reject_inbox_job_impl(port, ptr, rust_vec_len, data_len),
-        31 => wire__crate__api__app__resume_task_impl(port, ptr, rust_vec_len, data_len),
-        38 => wire__crate__api__app__send_local_path_impl(port, ptr, rust_vec_len, data_len),
-        48 => wire__crate__api__app__shell_snapshot_impl(port, ptr, rust_vec_len, data_len),
-        49 => wire__crate__api__app__sign_out_impl(port, ptr, rust_vec_len, data_len),
-        51 => wire__crate__api__single_instance_stream__unregister_si_listener_impl(
+        30 => wire__crate__api__app__remove_peer_device_impl(port, ptr, rust_vec_len, data_len),
+        32 => wire__crate__api__app__resume_task_impl(port, ptr, rust_vec_len, data_len),
+        39 => wire__crate__api__app__send_local_path_impl(port, ptr, rust_vec_len, data_len),
+        49 => wire__crate__api__app__shell_snapshot_impl(port, ptr, rust_vec_len, data_len),
+        50 => wire__crate__api__app__sign_out_impl(port, ptr, rust_vec_len, data_len),
+        52 => wire__crate__api__single_instance_stream__unregister_si_listener_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        53 => wire__crate__api__app__verify_cloud_password_impl(port, ptr, rust_vec_len, data_len),
+        54 => wire__crate__api__app__verify_cloud_password_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -2167,32 +2205,32 @@ fn pde_ffi_dispatcher_sync_impl(
         24 => wire__crate__api__app__preferred_locale_impl(ptr, rust_vec_len, data_len),
         25 => wire__crate__api__app__quark_login_url_impl(ptr, rust_vec_len, data_len),
         29 => wire__crate__api__app__remembered_devices_impl(ptr, rust_vec_len, data_len),
-        30 => wire__crate__api__app__restore_remembered_device_impl(ptr, rust_vec_len, data_len),
-        32 => wire__crate__api__app__save_auto_unlock_key_impl(ptr, rust_vec_len, data_len),
-        33 => wire__crate__api__app__save_cookie_string_impl(ptr, rust_vec_len, data_len),
-        34 => wire__crate__api__app__save_device_name_impl(ptr, rust_vec_len, data_len),
-        35 => wire__crate__api__app__save_preferred_download_dir_impl(ptr, rust_vec_len, data_len),
-        36 => wire__crate__api__app__save_preferred_locale_impl(ptr, rust_vec_len, data_len),
-        37 => wire__crate__api__app__save_webview_cookie_string_impl(ptr, rust_vec_len, data_len),
-        39 => wire__crate__api__app__set_auto_receive_enabled_impl(ptr, rust_vec_len, data_len),
-        40 => wire__crate__api__app__set_keep_screen_on_during_transfer_impl(
+        31 => wire__crate__api__app__restore_remembered_device_impl(ptr, rust_vec_len, data_len),
+        33 => wire__crate__api__app__save_auto_unlock_key_impl(ptr, rust_vec_len, data_len),
+        34 => wire__crate__api__app__save_cookie_string_impl(ptr, rust_vec_len, data_len),
+        35 => wire__crate__api__app__save_device_name_impl(ptr, rust_vec_len, data_len),
+        36 => wire__crate__api__app__save_preferred_download_dir_impl(ptr, rust_vec_len, data_len),
+        37 => wire__crate__api__app__save_preferred_locale_impl(ptr, rust_vec_len, data_len),
+        38 => wire__crate__api__app__save_webview_cookie_string_impl(ptr, rust_vec_len, data_len),
+        40 => wire__crate__api__app__set_auto_receive_enabled_impl(ptr, rust_vec_len, data_len),
+        41 => wire__crate__api__app__set_keep_screen_on_during_transfer_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        41 => wire__crate__api__app__set_max_concurrent_downloads_impl(ptr, rust_vec_len, data_len),
-        42 => wire__crate__api__app__set_max_concurrent_uploads_impl(ptr, rust_vec_len, data_len),
-        43 => wire__crate__api__app__set_minimize_to_tray_impl(ptr, rust_vec_len, data_len),
-        44 => wire__crate__api__app__set_navigate_after_transfer_impl(ptr, rust_vec_len, data_len),
-        45 => wire__crate__api__app__set_peer_discovery_interval_minutes_impl(
+        42 => wire__crate__api__app__set_max_concurrent_downloads_impl(ptr, rust_vec_len, data_len),
+        43 => wire__crate__api__app__set_max_concurrent_uploads_impl(ptr, rust_vec_len, data_len),
+        44 => wire__crate__api__app__set_minimize_to_tray_impl(ptr, rust_vec_len, data_len),
+        45 => wire__crate__api__app__set_navigate_after_transfer_impl(ptr, rust_vec_len, data_len),
+        46 => wire__crate__api__app__set_peer_discovery_interval_minutes_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        46 => wire__crate__api__app__set_poll_interval_seconds_impl(ptr, rust_vec_len, data_len),
-        47 => wire__crate__api__app__set_theme_mode_impl(ptr, rust_vec_len, data_len),
-        50 => wire__crate__api__app__theme_mode_impl(ptr, rust_vec_len, data_len),
-        52 => wire__crate__api__app__validate_cookie_string_impl(ptr, rust_vec_len, data_len),
+        47 => wire__crate__api__app__set_poll_interval_seconds_impl(ptr, rust_vec_len, data_len),
+        48 => wire__crate__api__app__set_theme_mode_impl(ptr, rust_vec_len, data_len),
+        51 => wire__crate__api__app__theme_mode_impl(ptr, rust_vec_len, data_len),
+        53 => wire__crate__api__app__validate_cookie_string_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }

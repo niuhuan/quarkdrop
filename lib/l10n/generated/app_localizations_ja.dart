@@ -230,6 +230,13 @@ class AppLocalizationsJa extends AppLocalizations {
   String get actionResumeTransfer => '転送を再開';
 
   @override
+  String get actionDeleteDevice => 'Delete Device';
+
+  @override
+  String get actionDeleteDeviceHint =>
+      'Are you sure you want to delete this device and its mailbox?';
+
+  @override
   String get actionDeleteRemoteJob => 'リモートジョブを削除';
 
   @override

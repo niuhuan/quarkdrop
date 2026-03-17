@@ -67,6 +67,8 @@
   "sendJobLabel": "送信ジョブ",
   "receiveJobLabel": "受信ジョブ",
   "actionResumeTransfer": "転送を再開",
+  "actionDeleteDevice": "Delete Device",
+  "actionDeleteDeviceHint": "Are you sure you want to delete this device and its mailbox?",
   "actionDeleteRemoteJob": "リモートジョブを削除",
   "settingsTitle": "設定",
   "settingsSubtitle": "デバイス、保存先、サインアウト。",

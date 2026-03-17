@@ -67,6 +67,8 @@
   "sendJobLabel": "보내기 작업",
   "receiveJobLabel": "받기 작업",
   "actionResumeTransfer": "전송 재개",
+  "actionDeleteDevice": "Delete Device",
+  "actionDeleteDeviceHint": "Are you sure you want to delete this device and its mailbox?",
   "actionDeleteRemoteJob": "원격 작업 삭제",
   "settingsTitle": "설정",
   "settingsSubtitle": "기기, 저장소 및 로그아웃.",

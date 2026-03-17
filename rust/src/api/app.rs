@@ -723,3 +723,11 @@ fn size_label(size_bytes: u64) -> String {
         format!("{value:.1} {}", UNITS[unit_index])
     }
 }
+pub async fn remove_peer_device(peer_device_id: String) -> anyhow::Result<()> {
+    let cookie_session = session::current_session();
+    let quark = QuarkPan::builder()
+        .cookie(cookie_session.raw_cookie)
+        .prepare()?;
+    
+    device::remove_peer_mailbox(&quark, &peer_device_id).await
+}

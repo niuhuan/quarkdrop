@@ -67,6 +67,8 @@
   "sendJobLabel": "Send job",
   "receiveJobLabel": "Receive job",
   "actionResumeTransfer": "Resume Transfer",
+  "actionDeleteDevice": "Delete Device",
+  "actionDeleteDeviceHint": "Are you sure you want to delete this device and its mailbox?",
   "actionDeleteRemoteJob": "Delete Remote Job",
   "settingsTitle": "Settings",
   "settingsSubtitle": "Device, storage, and sign-out.",

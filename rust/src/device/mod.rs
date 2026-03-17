@@ -1208,3 +1208,25 @@ fn decrypt_private_key_blob(
         .decrypt(Nonce::from_slice(&nonce_bytes), ciphertext.as_ref())
         .map_err(|_| anyhow::anyhow!("Incorrect password or corrupted key file."))
 }
+
+pub async fn remove_peer_mailbox(
+    quark: &QuarkPan,
+    peer_device_id: &str,
+) -> anyhow::Result<()> {
+    let root_entries = list_all_entries(quark, "0").await?;
+    let Some(root) = root_entries
+        .iter()
+        .find(|entry| entry.dir && entry.file_name == QUARKDROP_ROOT_FOLDER_NAME)
+    else {
+        return Ok(());
+    };
+    let mailbox_name = format!("device_{}", peer_device_id);
+    let mailbox_entries = list_all_entries(quark, &root.fid).await?;
+    if let Some(mailbox) = mailbox_entries
+        .iter()
+        .find(|entry| entry.dir && entry.file_name == mailbox_name)
+    {
+        quark.delete(&mailbox.fid).await?;
+    }
+    Ok(())
+}

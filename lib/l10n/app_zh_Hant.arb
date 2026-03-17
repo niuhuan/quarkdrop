@@ -67,6 +67,8 @@
   "sendJobLabel": "傳送任務",
   "receiveJobLabel": "接收任務",
   "actionResumeTransfer": "恢復傳輸",
+  "actionDeleteDevice": "删除设备",
+  "actionDeleteDeviceHint": "确定要删除此设备吗？",
   "actionDeleteRemoteJob": "刪除遠端任務",
   "settingsTitle": "設定",
   "settingsSubtitle": "裝置、儲存與登出。",

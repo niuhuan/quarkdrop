@@ -170,6 +170,11 @@ int clearCompletedTransfers() =>
 Future<void> deleteTransfer({required String jobId}) =>
     RustLib.instance.api.crateApiAppDeleteTransfer(jobId: jobId);
 
+Future<void> removePeerDevice({required String peerDeviceId}) => RustLib
+    .instance
+    .api
+    .crateApiAppRemovePeerDevice(peerDeviceId: peerDeviceId);
+
 enum AuthState { loginRequired, needCreatePassword, needVerifyPassword, ready }
 
 class DeviceSnapshot {

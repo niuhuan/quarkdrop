@@ -506,6 +506,18 @@ abstract class AppLocalizations {
   /// **'Resume Transfer'**
   String get actionResumeTransfer;
 
+  /// No description provided for @actionDeleteDevice.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete Device'**
+  String get actionDeleteDevice;
+
+  /// No description provided for @actionDeleteDeviceHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Are you sure you want to delete this device and its mailbox?'**
+  String get actionDeleteDeviceHint;
+
   /// No description provided for @actionDeleteRemoteJob.
   ///
   /// In en, this message translates to:

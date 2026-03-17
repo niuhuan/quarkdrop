@@ -224,6 +224,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get actionResumeTransfer => '恢复传输';
 
   @override
+  String get actionDeleteDevice => '删除设备';
+
+  @override
+  String get actionDeleteDeviceHint => '确定要删除此设备吗？';
+
+  @override
   String get actionDeleteRemoteJob => '删除远端任务';
 
   @override
@@ -927,6 +933,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get actionResumeTransfer => '恢复传输';
 
   @override
+  String get actionDeleteDevice => '删除设备';
+
+  @override
+  String get actionDeleteDeviceHint => '确定要删除此设备吗？';
+
+  @override
   String get actionDeleteRemoteJob => '删除远端任务';
 
   @override
@@ -1628,6 +1640,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get actionResumeTransfer => '恢復傳輸';
+
+  @override
+  String get actionDeleteDevice => '删除设备';
+
+  @override
+  String get actionDeleteDeviceHint => '确定要删除此设备吗？';
 
   @override
   String get actionDeleteRemoteJob => '刪除遠端任務';

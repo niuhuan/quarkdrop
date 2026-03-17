@@ -1,5 +1,32 @@
 part of 'home_shell.dart';
 
+Future<void> _confirmDeletePeer(
+    BuildContext context, AppStore store, rust_api.PeerDevice peer) async {
+  final l10n = context.l10n;
+  final confirmed = await showDialog<bool>(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        title: Text(l10n.actionDeleteDevice),
+        content: Text(l10n.actionDeleteDeviceHint),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.actionCancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(l10n.actionDeleteDevice),
+          ),
+        ],
+      );
+    },
+  );
+  if (confirmed == true) {
+    store.removePeerDevice(peer.deviceId);
+  }
+}
+
 class _SendPane extends StatelessWidget {
   const _SendPane({required this.store});
 
@@ -84,6 +111,11 @@ class _SendPane extends StatelessWidget {
                               ),
                             ],
                           ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete_outline),
+                          onPressed: () => _confirmDeletePeer(context, store, peer),
+                          color: Theme.of(context).colorScheme.error,
                         ),
                         if (selected)
                           _StatusBadge(
