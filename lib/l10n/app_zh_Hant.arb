@@ -56,9 +56,10 @@
   "transfersTitle": "傳輸",
   "transfersSubtitle": "上傳與下載歷史。",
   "actionClearCompleted": "清除已完成",
-  "tabAll": "全部（{count}）",
-  "tabUpload": "上傳（{count}）",
-  "tabDownload": "下載（{count}）",
+  "tabPending": "未完成（{count}）",
+  "tabSendQueuePending": "傳送（{count}）",
+  "tabReceiveQueueCompleted": "已接收（{count}）",
+  "tabCompleted": "已完成（{count}）",
   "selectTransferTitle": "選擇一個傳輸",
   "selectTransferBody": "從佇列中選擇一列，以查看其狀態與可用操作。",
   "selectedTransferTitle": "已選傳輸",
@@ -191,5 +192,10 @@
   "statusAutoReceiving": "正在從 {sender} 自動接收 `{name}`。",
   "statusAutoReceived": "已自動接收 `{name}`，並清理遠端中繼檔案。",
   "errorAutoReceiveFailed": "自動接收 `{name}` 失敗：{error}",
-  "errorAutoReceiveFailedShort": "自動接收 `{name}` 失敗。"
+  "errorAutoReceiveFailedShort": "自動接收 `{name}` 失敗。",
+  "actionReject": "拒絕",
+  "maxConcurrentUploadsTitle": "最大同時上傳數",
+  "maxConcurrentUploadsSubtitle": "同時上傳 {count} 個檔案",
+  "maxConcurrentDownloadsTitle": "最大同時下載數",
+  "maxConcurrentDownloadsSubtitle": "同時下載 {count} 個檔案"
 }

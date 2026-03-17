@@ -56,9 +56,10 @@
   "transfersTitle": "転送",
   "transfersSubtitle": "アップロードとダウンロードの履歴。",
   "actionClearCompleted": "完了済みを削除",
-  "tabAll": "すべて ({count})",
-  "tabUpload": "アップロード ({count})",
-  "tabDownload": "ダウンロード ({count})",
+  "tabPending": "未完了 ({count})",
+  "tabSendQueuePending": "送信 ({count})",
+  "tabReceiveQueueCompleted": "受信済み ({count})",
+  "tabCompleted": "完了 ({count})",
   "selectTransferTitle": "転送を選択",
   "selectTransferBody": "キューから行を選択すると、状態と利用可能な操作を確認できます。",
   "selectedTransferTitle": "選択中の転送",
@@ -191,5 +192,10 @@
   "statusAutoReceiving": "{sender} から `{name}` を自動受信中です。",
   "statusAutoReceived": "`{name}` を自動受信し、リモート中継を削除しました。",
   "errorAutoReceiveFailed": "`{name}` の自動受信に失敗しました: {error}",
-  "errorAutoReceiveFailedShort": "`{name}` の自動受信に失敗しました。"
+  "errorAutoReceiveFailedShort": "`{name}` の自動受信に失敗しました。",
+  "actionReject": "拒否",
+  "maxConcurrentUploadsTitle": "最大同時アップロード数",
+  "maxConcurrentUploadsSubtitle": "同時に {count} 件アップロード",
+  "maxConcurrentDownloadsTitle": "最大同時ダウンロード数",
+  "maxConcurrentDownloadsSubtitle": "同時に {count} 件ダウンロード"
 }

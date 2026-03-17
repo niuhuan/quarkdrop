@@ -16,6 +16,10 @@ struct AppSettings {
     navigate_after_transfer: bool,
     #[serde(default = "default_poll_interval")]
     poll_interval_seconds: u32,
+    #[serde(default = "default_transfer_parallelism")]
+    max_concurrent_uploads: u32,
+    #[serde(default = "default_transfer_parallelism")]
+    max_concurrent_downloads: u32,
     #[serde(default = "default_true")]
     keep_screen_on_during_transfer: bool,
 }
@@ -28,6 +32,10 @@ fn default_poll_interval() -> u32 {
     30
 }
 
+fn default_transfer_parallelism() -> u32 {
+    2
+}
+
 impl Default for AppSettings {
     fn default() -> Self {
         Self {
@@ -36,6 +44,8 @@ impl Default for AppSettings {
             auto_receive_enabled: false,
             navigate_after_transfer: true,
             poll_interval_seconds: 30,
+            max_concurrent_uploads: 2,
+            max_concurrent_downloads: 2,
             keep_screen_on_during_transfer: true,
         }
     }
@@ -124,6 +134,30 @@ pub fn set_poll_interval_seconds(seconds: u32) -> anyhow::Result<u32> {
     let clamped = seconds.max(5).min(300);
     let mut settings = load_settings()?;
     settings.poll_interval_seconds = clamped;
+    save_settings(&settings)?;
+    Ok(clamped)
+}
+
+pub fn max_concurrent_uploads() -> anyhow::Result<u32> {
+    Ok(load_settings()?.max_concurrent_uploads.max(1).min(8))
+}
+
+pub fn set_max_concurrent_uploads(count: u32) -> anyhow::Result<u32> {
+    let clamped = count.max(1).min(8);
+    let mut settings = load_settings()?;
+    settings.max_concurrent_uploads = clamped;
+    save_settings(&settings)?;
+    Ok(clamped)
+}
+
+pub fn max_concurrent_downloads() -> anyhow::Result<u32> {
+    Ok(load_settings()?.max_concurrent_downloads.max(1).min(8))
+}
+
+pub fn set_max_concurrent_downloads(count: u32) -> anyhow::Result<u32> {
+    let clamped = count.max(1).min(8);
+    let mut settings = load_settings()?;
+    settings.max_concurrent_downloads = clamped;
     save_settings(&settings)?;
     Ok(clamped)
 }

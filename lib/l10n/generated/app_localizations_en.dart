@@ -195,18 +195,23 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionClearCompleted => 'Clear Completed';
 
   @override
-  String tabAll(Object count) {
-    return 'All ($count)';
+  String tabPending(Object count) {
+    return 'Pending ($count)';
   }
 
   @override
-  String tabUpload(Object count) {
-    return 'Upload ($count)';
+  String tabSendQueuePending(Object count) {
+    return 'Send ($count)';
   }
 
   @override
-  String tabDownload(Object count) {
-    return 'Download ($count)';
+  String tabReceiveQueueCompleted(Object count) {
+    return 'Received ($count)';
+  }
+
+  @override
+  String tabCompleted(Object count) {
+    return 'Done ($count)';
   }
 
   @override
@@ -700,5 +705,24 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String errorAutoReceiveFailedShort(Object name) {
     return 'Auto-receive failed for `$name`.';
+  }
+
+  @override
+  String get actionReject => 'Reject';
+
+  @override
+  String get maxConcurrentUploadsTitle => 'Max Concurrent Uploads';
+
+  @override
+  String maxConcurrentUploadsSubtitle(Object count) {
+    return '$count upload(s) at a time';
+  }
+
+  @override
+  String get maxConcurrentDownloadsTitle => 'Max Concurrent Downloads';
+
+  @override
+  String maxConcurrentDownloadsSubtitle(Object count) {
+    return '$count download(s) at a time';
   }
 }

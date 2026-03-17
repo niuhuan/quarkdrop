@@ -56,9 +56,10 @@
   "transfersTitle": "Transfers",
   "transfersSubtitle": "Upload and download history.",
   "actionClearCompleted": "Clear Completed",
-  "tabAll": "All ({count})",
-  "tabUpload": "Upload ({count})",
-  "tabDownload": "Download ({count})",
+  "tabPending": "Pending ({count})",
+  "tabSendQueuePending": "Send ({count})",
+  "tabReceiveQueueCompleted": "Received ({count})",
+  "tabCompleted": "Done ({count})",
   "selectTransferTitle": "Select a transfer",
   "selectTransferBody": "Choose a row from the queue to inspect its state and available actions.",
   "selectedTransferTitle": "Selected Transfer",
@@ -191,5 +192,10 @@
   "statusAutoReceiving": "Auto-receiving `{name}` from {sender}.",
   "statusAutoReceived": "Auto-received `{name}` and cleaned the remote relay.",
   "errorAutoReceiveFailed": "Auto-receive failed for {name}: {error}",
-  "errorAutoReceiveFailedShort": "Auto-receive failed for `{name}`."
+  "errorAutoReceiveFailedShort": "Auto-receive failed for `{name}`.",
+  "actionReject": "Reject",
+  "maxConcurrentUploadsTitle": "Max Concurrent Uploads",
+  "maxConcurrentUploadsSubtitle": "{count} upload(s) at a time",
+  "maxConcurrentDownloadsTitle": "Max Concurrent Downloads",
+  "maxConcurrentDownloadsSubtitle": "{count} download(s) at a time"
 }

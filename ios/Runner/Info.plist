@@ -55,5 +55,7 @@
 	<true/>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>QuarkDrop needs access to your photos to send images.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>QuarkDrop needs camera access to capture photos for sending.</string>
 </dict>
 </plist>

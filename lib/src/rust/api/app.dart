@@ -78,6 +78,18 @@ int pollIntervalSeconds() =>
 int setPollIntervalSeconds({required int seconds}) =>
     RustLib.instance.api.crateApiAppSetPollIntervalSeconds(seconds: seconds);
 
+int maxConcurrentUploads() =>
+    RustLib.instance.api.crateApiAppMaxConcurrentUploads();
+
+int setMaxConcurrentUploads({required int count}) =>
+    RustLib.instance.api.crateApiAppSetMaxConcurrentUploads(count: count);
+
+int maxConcurrentDownloads() =>
+    RustLib.instance.api.crateApiAppMaxConcurrentDownloads();
+
+int setMaxConcurrentDownloads({required int count}) =>
+    RustLib.instance.api.crateApiAppSetMaxConcurrentDownloads(count: count);
+
 bool keepScreenOnDuringTransfer() =>
     RustLib.instance.api.crateApiAppKeepScreenOnDuringTransfer();
 
@@ -127,6 +139,9 @@ Future<String> receiveJob({
   jobFolderId: jobFolderId,
   outputDir: outputDir,
 );
+
+Future<void> rejectInboxJob({required String jobFolderId}) =>
+    RustLib.instance.api.crateApiAppRejectInboxJob(jobFolderId: jobFolderId);
 
 Future<String> resumeTask({required String jobId}) =>
     RustLib.instance.api.crateApiAppResumeTask(jobId: jobId);
@@ -340,6 +355,7 @@ class TransferPreview {
   final String id;
   final String title;
   final String subtitle;
+  final String sizeLabel;
   final double progress;
   final TransferStage stage;
   final TransferDirection direction;
@@ -348,6 +364,7 @@ class TransferPreview {
     required this.id,
     required this.title,
     required this.subtitle,
+    required this.sizeLabel,
     required this.progress,
     required this.stage,
     required this.direction,
@@ -358,6 +375,7 @@ class TransferPreview {
       id.hashCode ^
       title.hashCode ^
       subtitle.hashCode ^
+      sizeLabel.hashCode ^
       progress.hashCode ^
       stage.hashCode ^
       direction.hashCode;
@@ -370,6 +388,7 @@ class TransferPreview {
           id == other.id &&
           title == other.title &&
           subtitle == other.subtitle &&
+          sizeLabel == other.sizeLabel &&
           progress == other.progress &&
           stage == other.stage &&
           direction == other.direction;

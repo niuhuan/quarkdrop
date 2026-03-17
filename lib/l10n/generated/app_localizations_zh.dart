@@ -183,18 +183,23 @@ class AppLocalizationsZh extends AppLocalizations {
   String get actionClearCompleted => '清除已完成';
 
   @override
-  String tabAll(Object count) {
-    return '全部（$count）';
+  String tabPending(Object count) {
+    return '未完成（$count）';
   }
 
   @override
-  String tabUpload(Object count) {
-    return '上传（$count）';
+  String tabSendQueuePending(Object count) {
+    return '发送（$count）';
   }
 
   @override
-  String tabDownload(Object count) {
-    return '下载（$count）';
+  String tabReceiveQueueCompleted(Object count) {
+    return '已接收（$count）';
+  }
+
+  @override
+  String tabCompleted(Object count) {
+    return '已完成（$count）';
   }
 
   @override
@@ -656,6 +661,25 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String errorAutoReceiveFailedShort(Object name) {
     return '自动接收 `$name` 失败。';
+  }
+
+  @override
+  String get actionReject => '拒绝';
+
+  @override
+  String get maxConcurrentUploadsTitle => '最大同时上传数';
+
+  @override
+  String maxConcurrentUploadsSubtitle(Object count) {
+    return '同时上传 $count 个文件';
+  }
+
+  @override
+  String get maxConcurrentDownloadsTitle => '最大同时下载数';
+
+  @override
+  String maxConcurrentDownloadsSubtitle(Object count) {
+    return '同时下载 $count 个文件';
   }
 }
 
@@ -838,18 +862,23 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get actionClearCompleted => '清除已完成';
 
   @override
-  String tabAll(Object count) {
-    return '全部（$count）';
+  String tabPending(Object count) {
+    return '未完成（$count）';
   }
 
   @override
-  String tabUpload(Object count) {
-    return '上传（$count）';
+  String tabSendQueuePending(Object count) {
+    return '发送（$count）';
   }
 
   @override
-  String tabDownload(Object count) {
-    return '下载（$count）';
+  String tabReceiveQueueCompleted(Object count) {
+    return '已接收（$count）';
+  }
+
+  @override
+  String tabCompleted(Object count) {
+    return '已完成（$count）';
   }
 
   @override
@@ -1312,6 +1341,25 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String errorAutoReceiveFailedShort(Object name) {
     return '自动接收 `$name` 失败。';
   }
+
+  @override
+  String get actionReject => '拒绝';
+
+  @override
+  String get maxConcurrentUploadsTitle => '最大同时上传数';
+
+  @override
+  String maxConcurrentUploadsSubtitle(Object count) {
+    return '同时上传 $count 个文件';
+  }
+
+  @override
+  String get maxConcurrentDownloadsTitle => '最大同时下载数';
+
+  @override
+  String maxConcurrentDownloadsSubtitle(Object count) {
+    return '同时下载 $count 个文件';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -1493,18 +1541,23 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get actionClearCompleted => '清除已完成';
 
   @override
-  String tabAll(Object count) {
-    return '全部（$count）';
+  String tabPending(Object count) {
+    return '未完成（$count）';
   }
 
   @override
-  String tabUpload(Object count) {
-    return '上傳（$count）';
+  String tabSendQueuePending(Object count) {
+    return '傳送（$count）';
   }
 
   @override
-  String tabDownload(Object count) {
-    return '下載（$count）';
+  String tabReceiveQueueCompleted(Object count) {
+    return '已接收（$count）';
+  }
+
+  @override
+  String tabCompleted(Object count) {
+    return '已完成（$count）';
   }
 
   @override
@@ -1966,5 +2019,24 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   @override
   String errorAutoReceiveFailedShort(Object name) {
     return '自動接收 `$name` 失敗。';
+  }
+
+  @override
+  String get actionReject => '拒絕';
+
+  @override
+  String get maxConcurrentUploadsTitle => '最大同時上傳數';
+
+  @override
+  String maxConcurrentUploadsSubtitle(Object count) {
+    return '同時上傳 $count 個檔案';
+  }
+
+  @override
+  String get maxConcurrentDownloadsTitle => '最大同時下載數';
+
+  @override
+  String maxConcurrentDownloadsSubtitle(Object count) {
+    return '同時下載 $count 個檔案';
   }
 }

@@ -86,6 +86,7 @@ pub struct TransferPreview {
     pub id: String,
     pub title: String,
     pub subtitle: String,
+    pub size_label: String,
     pub progress: f64,
     pub stage: TransferStage,
     pub direction: TransferDirection,
@@ -382,6 +383,26 @@ pub fn set_poll_interval_seconds(seconds: u32) -> anyhow::Result<u32> {
 }
 
 #[flutter_rust_bridge::frb(sync)]
+pub fn max_concurrent_uploads() -> anyhow::Result<u32> {
+    preferences::max_concurrent_uploads()
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn set_max_concurrent_uploads(count: u32) -> anyhow::Result<u32> {
+    preferences::set_max_concurrent_uploads(count)
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn max_concurrent_downloads() -> anyhow::Result<u32> {
+    preferences::max_concurrent_downloads()
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn set_max_concurrent_downloads(count: u32) -> anyhow::Result<u32> {
+    preferences::set_max_concurrent_downloads(count)
+}
+
+#[flutter_rust_bridge::frb(sync)]
 pub fn keep_screen_on_during_transfer() -> anyhow::Result<bool> {
     preferences::keep_screen_on_during_transfer()
 }
@@ -485,6 +506,23 @@ pub async fn receive_job(job_folder_id: String, output_dir: String) -> anyhow::R
         .cookie(cookie_session.raw_cookie)
         .prepare()?;
     receive::receive_job(&quark, &job_folder_id, &output_dir).await
+}
+
+pub async fn reject_inbox_job(job_folder_id: String) -> anyhow::Result<()> {
+    let cookie_session = session::current_session();
+    anyhow::ensure!(
+        cookie_session.is_configured(),
+        "Authenticate with Quark before rejecting a job.",
+    );
+
+    let quark = QuarkPan::builder()
+        .cookie(cookie_session.raw_cookie)
+        .prepare()?;
+    match quark.delete(&job_folder_id).await {
+        Ok(()) => Ok(()),
+        Err(libquarkpan::QuarkPanError::Api { status, .. }) if status == 404 => Ok(()),
+        Err(error) => Err(error.into()),
+    }
 }
 
 pub async fn resume_task(job_id: String) -> anyhow::Result<String> {
@@ -614,6 +652,11 @@ fn map_task_snapshot(task: TaskSnapshot) -> TransferPreview {
         id: task.job_id,
         title: task.display_name,
         subtitle,
+        size_label: if task.size_bytes > 0 {
+            size_label(task.size_bytes)
+        } else {
+            String::new()
+        },
         progress: match task.stage {
             TaskStage::Scanning => 0.1,
             TaskStage::UploadingBlobs => 0.55,

@@ -189,18 +189,23 @@ class AppLocalizationsJa extends AppLocalizations {
   String get actionClearCompleted => '完了済みを削除';
 
   @override
-  String tabAll(Object count) {
-    return 'すべて ($count)';
+  String tabPending(Object count) {
+    return '未完了 ($count)';
   }
 
   @override
-  String tabUpload(Object count) {
-    return 'アップロード ($count)';
+  String tabSendQueuePending(Object count) {
+    return '送信 ($count)';
   }
 
   @override
-  String tabDownload(Object count) {
-    return 'ダウンロード ($count)';
+  String tabReceiveQueueCompleted(Object count) {
+    return '受信済み ($count)';
+  }
+
+  @override
+  String tabCompleted(Object count) {
+    return '完了 ($count)';
   }
 
   @override
@@ -664,5 +669,24 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String errorAutoReceiveFailedShort(Object name) {
     return '`$name` の自動受信に失敗しました。';
+  }
+
+  @override
+  String get actionReject => '拒否';
+
+  @override
+  String get maxConcurrentUploadsTitle => '最大同時アップロード数';
+
+  @override
+  String maxConcurrentUploadsSubtitle(Object count) {
+    return '同時に $count 件アップロード';
+  }
+
+  @override
+  String get maxConcurrentDownloadsTitle => '最大同時ダウンロード数';
+
+  @override
+  String maxConcurrentDownloadsSubtitle(Object count) {
+    return '同時に $count 件ダウンロード';
   }
 }

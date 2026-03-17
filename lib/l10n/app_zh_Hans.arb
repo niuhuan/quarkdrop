@@ -56,9 +56,10 @@
   "transfersTitle": "传输",
   "transfersSubtitle": "上传和下载历史。",
   "actionClearCompleted": "清除已完成",
-  "tabAll": "全部（{count}）",
-  "tabUpload": "上传（{count}）",
-  "tabDownload": "下载（{count}）",
+  "tabPending": "未完成（{count}）",
+  "tabSendQueuePending": "发送（{count}）",
+  "tabReceiveQueueCompleted": "已接收（{count}）",
+  "tabCompleted": "已完成（{count}）",
   "selectTransferTitle": "选择一个传输",
   "selectTransferBody": "从队列中选择一项，以查看其状态和可用操作。",
   "selectedTransferTitle": "已选传输",
@@ -191,5 +192,10 @@
   "statusAutoReceiving": "正在从 {sender} 自动接收 `{name}`。",
   "statusAutoReceived": "已自动接收 `{name}`，并清理远端中转文件。",
   "errorAutoReceiveFailed": "自动接收 `{name}` 失败：{error}",
-  "errorAutoReceiveFailedShort": "自动接收 `{name}` 失败。"
+  "errorAutoReceiveFailedShort": "自动接收 `{name}` 失败。",
+  "actionReject": "拒绝",
+  "maxConcurrentUploadsTitle": "最大同时上传数",
+  "maxConcurrentUploadsSubtitle": "同时上传 {count} 个文件",
+  "maxConcurrentDownloadsTitle": "最大同时下载数",
+  "maxConcurrentDownloadsSubtitle": "同时下载 {count} 个文件"
 }

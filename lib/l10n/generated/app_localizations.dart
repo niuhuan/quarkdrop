@@ -440,23 +440,29 @@ abstract class AppLocalizations {
   /// **'Clear Completed'**
   String get actionClearCompleted;
 
-  /// No description provided for @tabAll.
+  /// No description provided for @tabPending.
   ///
   /// In en, this message translates to:
-  /// **'All ({count})'**
-  String tabAll(Object count);
+  /// **'Pending ({count})'**
+  String tabPending(Object count);
 
-  /// No description provided for @tabUpload.
+  /// No description provided for @tabSendQueuePending.
   ///
   /// In en, this message translates to:
-  /// **'Upload ({count})'**
-  String tabUpload(Object count);
+  /// **'Send ({count})'**
+  String tabSendQueuePending(Object count);
 
-  /// No description provided for @tabDownload.
+  /// No description provided for @tabReceiveQueueCompleted.
   ///
   /// In en, this message translates to:
-  /// **'Download ({count})'**
-  String tabDownload(Object count);
+  /// **'Received ({count})'**
+  String tabReceiveQueueCompleted(Object count);
+
+  /// No description provided for @tabCompleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Done ({count})'**
+  String tabCompleted(Object count);
 
   /// No description provided for @selectTransferTitle.
   ///
@@ -1255,6 +1261,36 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Auto-receive failed for `{name}`.'**
   String errorAutoReceiveFailedShort(Object name);
+
+  /// No description provided for @actionReject.
+  ///
+  /// In en, this message translates to:
+  /// **'Reject'**
+  String get actionReject;
+
+  /// No description provided for @maxConcurrentUploadsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Concurrent Uploads'**
+  String get maxConcurrentUploadsTitle;
+
+  /// No description provided for @maxConcurrentUploadsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} upload(s) at a time'**
+  String maxConcurrentUploadsSubtitle(Object count);
+
+  /// No description provided for @maxConcurrentDownloadsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Max Concurrent Downloads'**
+  String get maxConcurrentDownloadsTitle;
+
+  /// No description provided for @maxConcurrentDownloadsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} download(s) at a time'**
+  String maxConcurrentDownloadsSubtitle(Object count);
 }
 
 class _AppLocalizationsDelegate

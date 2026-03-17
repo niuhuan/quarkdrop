@@ -190,18 +190,23 @@ class AppLocalizationsKo extends AppLocalizations {
   String get actionClearCompleted => '완료 항목 지우기';
 
   @override
-  String tabAll(Object count) {
-    return '전체 ($count)';
+  String tabPending(Object count) {
+    return '미완료 ($count)';
   }
 
   @override
-  String tabUpload(Object count) {
-    return '업로드 ($count)';
+  String tabSendQueuePending(Object count) {
+    return '전송 ($count)';
   }
 
   @override
-  String tabDownload(Object count) {
-    return '다운로드 ($count)';
+  String tabReceiveQueueCompleted(Object count) {
+    return '수신 완료 ($count)';
+  }
+
+  @override
+  String tabCompleted(Object count) {
+    return '완료 ($count)';
   }
 
   @override
@@ -666,5 +671,24 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String errorAutoReceiveFailedShort(Object name) {
     return '`$name` 자동 수신 실패.';
+  }
+
+  @override
+  String get actionReject => '거부';
+
+  @override
+  String get maxConcurrentUploadsTitle => '최대 동시 업로드 수';
+
+  @override
+  String maxConcurrentUploadsSubtitle(Object count) {
+    return '$count개 동시 업로드';
+  }
+
+  @override
+  String get maxConcurrentDownloadsTitle => '최대 동시 다운로드 수';
+
+  @override
+  String maxConcurrentDownloadsSubtitle(Object count) {
+    return '$count개 동시 다운로드';
   }
 }
