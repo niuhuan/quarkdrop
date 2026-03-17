@@ -54,11 +54,11 @@ class _SendPane extends StatelessWidget {
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      color: selected ? Theme.of(context).colorScheme.secondaryContainer : Theme.of(context).colorScheme.surface,
+                      color: selected ? Theme.of(context).colorScheme.surfaceContainerHighest : Theme.of(context).colorScheme.surface,
                       border: Border.all(
                         color: selected
-                            ? const Color(0xFFE1B48A)
-                            : const Color(0xFFE7DED0),
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context).colorScheme.outlineVariant,
                       ),
                     ),
                     child: Row(
@@ -69,7 +69,7 @@ class _SendPane extends StatelessWidget {
                             children: [
                               Text(
                                 peer.label,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 16,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -77,8 +77,8 @@ class _SendPane extends StatelessWidget {
                               const SizedBox(height: 4),
                               Text(
                                 peer.subtitle,
-                                style: const TextStyle(
-                                  color: Color(0xFF5C6A64),
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
                                   fontSize: 13,
                                 ),
                               ),
@@ -88,7 +88,7 @@ class _SendPane extends StatelessWidget {
                         if (selected)
                           _StatusBadge(
                             label: context.l10n.sendTargetLabel,
-                            color: const Color(0xFF1E7A67),
+                            color: Theme.of(context).colorScheme.primary,
                           )
                         else
                           OutlinedButton(
@@ -148,7 +148,7 @@ class _SendComposerCard extends StatelessWidget {
             selectedPeerLabel == null
                 ? l10n.sendComposerChooseDevice
                 : l10n.sendComposerReadyToSend(selectedPeerLabel!),
-            style: const TextStyle(fontWeight: FontWeight.w800),
+            style: TextStyle(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 12),
           Wrap(
@@ -204,7 +204,7 @@ class _SendComposerCard extends StatelessWidget {
           if (pendingItems.isEmpty)
             Text(
               l10n.sendComposerEmpty,
-              style: const TextStyle(color: Color(0xFF596860)),
+              style: TextStyle(color: Color(0xFF596860)),
             )
           else
             Wrap(

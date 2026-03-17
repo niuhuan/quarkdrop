@@ -142,7 +142,6 @@ class _TransfersPaneState extends State<_TransfersPane>
                 Expanded(
                   child: _PaneTitle(
                     title: context.l10n.transfersTitle,
-                    subtitle: context.l10n.transfersSubtitle,
                   ),
                 ),
                 OutlinedButton.icon(
@@ -201,7 +200,7 @@ class _TransferListTile extends StatelessWidget {
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(22),
-          color: selected ? Theme.of(context).colorScheme.secondaryContainer : Theme.of(context).colorScheme.surface,
+          color: selected ? Theme.of(context).colorScheme.surfaceContainerHighest : Theme.of(context).colorScheme.surface,
           border: Border.all(
             color: selected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outlineVariant,
           ),

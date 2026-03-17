@@ -1,10 +1,10 @@
 part of 'home_shell.dart';
 
 class _PaneTitle extends StatelessWidget {
-  const _PaneTitle({required this.title, required this.subtitle});
+  const _PaneTitle({required this.title, this.subtitle});
 
   final String title;
-  final String subtitle;
+  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -15,8 +15,8 @@ class _PaneTitle extends StatelessWidget {
           title,
           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
         ),
-        const SizedBox(height: 6),
-        Text(subtitle, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+        if (subtitle != null) const SizedBox(height: 6),
+        if (subtitle != null) Text(subtitle!, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
       ],
     );
   }
