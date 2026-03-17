@@ -1,8 +1,12 @@
 import 'dart:async';
 import 'dart:io';
+import 'dart:ui';
+
 import 'package:file_selector/file_selector.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:quarkdrop/l10n/generated/app_localizations.dart';
 import 'package:quarkdrop/src/configs/screen_wakelock.dart';
+import 'package:quarkdrop/src/l10n/app_locale.dart';
 import 'package:quarkdrop/src/models/inbox_job.dart';
 import 'package:quarkdrop/src/models/pending_send_item.dart';
 import 'package:quarkdrop/src/models/transfer_job.dart';
@@ -10,7 +14,13 @@ import 'package:quarkdrop/src/platform/platform_paths.dart';
 import 'package:quarkdrop/src/rust/api/app.dart' as rust_api;
 import 'package:signals_flutter/signals_flutter.dart';
 
-enum BootstrapPhase { booting, passwordRequired, loginRequired, cloudDeviceSelection, ready }
+enum BootstrapPhase {
+  booting,
+  passwordRequired,
+  loginRequired,
+  cloudDeviceSelection,
+  ready,
+}
 
 enum AppDestination { send, inbox, transfers, settings }
 
@@ -88,6 +98,10 @@ class AppStore {
     null,
     debugLabel: 'preferredDownloadDir',
   );
+  final localePreferenceCode = signal<String?>(
+    null,
+    debugLabel: 'localePreferenceCode',
+  );
   final autoReceiveEnabled = signal<bool>(
     false,
     debugLabel: 'autoReceiveEnabled',
@@ -120,6 +134,10 @@ class AppStore {
     null,
     debugLabel: 'deviceSnapshot',
   );
+  final currentAuthState = signal<rust_api.AuthState?>(
+    null,
+    debugLabel: 'currentAuthState',
+  );
   final rememberedDevices = signal<List<rust_api.RememberedDevice>>(
     const [],
     debugLabel: 'rememberedDevices',
@@ -128,9 +146,21 @@ class AppStore {
     const [],
     debugLabel: 'peerDevices',
   );
+  final localeStatusMessage = signal<String?>(
+    null,
+    debugLabel: 'localeStatusMessage',
+  );
 
   Timer? _pollingTimer;
   Timer? _mailboxTimer;
+
+  Locale get effectiveLocale {
+    final option = appLocaleOptionFromCode(localePreferenceCode.value);
+    return option?.locale ??
+        resolveSupportedAppLocale(PlatformDispatcher.instance.locales);
+  }
+
+  AppLocalizations get l10n => lookupAppLocalizations(effectiveLocale);
 
   late final currentTitle = computed<String>(() {
     switch (destination.value) {
@@ -212,7 +242,8 @@ class AppStore {
       _mailboxTimer = Timer.periodic(Duration(seconds: interval), (_) {
         refresh();
       });
-    } else if (bootstrapPhase.value != BootstrapPhase.ready && _mailboxTimer != null) {
+    } else if (bootstrapPhase.value != BootstrapPhase.ready &&
+        _mailboxTimer != null) {
       _mailboxTimer?.cancel();
       _mailboxTimer = null;
     }
@@ -233,7 +264,7 @@ class AppStore {
     }
 
     if (normalized.isEmpty) {
-      lastErrorMessage.value = 'Please paste a Quark cookie before continuing.';
+      lastErrorMessage.value = l10n.errorPasteQuarkCookie;
       bootstrapPhase.value = BootstrapPhase.loginRequired;
       return false;
     }
@@ -338,7 +369,7 @@ class AppStore {
   Future<void> saveDeviceName(String name) async {
     final normalized = name.trim();
     if (normalized.isEmpty) {
-      lastErrorMessage.value = 'Device name cannot be empty.';
+      lastErrorMessage.value = l10n.errorDeviceNameEmpty;
       return;
     }
     deviceNameSaving.value = true;
@@ -346,7 +377,7 @@ class AppStore {
     lastErrorMessage.value = null;
     try {
       final saved = rust_api.saveDeviceName(name: normalized);
-      deviceNameStatusMessage.value = 'Saved device name as `$saved`.';
+      deviceNameStatusMessage.value = l10n.statusSavedDeviceName(saved);
       await refresh();
     } catch (error) {
       deviceNameStatusMessage.value = error.toString();
@@ -361,14 +392,16 @@ class AppStore {
     downloadDirectoryStatusMessage.value = null;
     lastErrorMessage.value = null;
     try {
-      var path = await getDirectoryPath(confirmButtonText: 'Use This Folder');
+      var path = await getDirectoryPath(
+        confirmButtonText: l10n.actionUseThisFolder,
+      );
       if (path == null || path.trim().isEmpty) {
         return;
       }
       final saved = rust_api.savePreferredDownloadDir(path: path);
       preferredDownloadDir.value = saved;
-      downloadDirectoryStatusMessage.value =
-          'Default download folder set to `$saved`.';
+      downloadDirectoryStatusMessage.value = l10n
+          .statusDefaultDownloadFolderSet(saved);
     } catch (error) {
       downloadDirectoryStatusMessage.value = error.toString();
       lastErrorMessage.value = error.toString();
@@ -385,12 +418,31 @@ class AppStore {
       rust_api.clearPreferredDownloadDir();
       preferredDownloadDir.value = null;
       downloadDirectoryStatusMessage.value =
-          'Cleared the saved download folder.';
+          l10n.statusClearedSavedDownloadFolder;
     } catch (error) {
       downloadDirectoryStatusMessage.value = error.toString();
       lastErrorMessage.value = error.toString();
     } finally {
       downloadDirectorySaving.value = false;
+    }
+  }
+
+  Future<void> setLocalePreference(String? code) async {
+    localeStatusMessage.value = null;
+    lastErrorMessage.value = null;
+    try {
+      if (code == null || code.isEmpty) {
+        rust_api.clearPreferredLocale();
+        localePreferenceCode.value = null;
+        localeStatusMessage.value = l10n.statusLanguageFollowsSystem;
+      } else {
+        final saved = rust_api.savePreferredLocale(code: code);
+        localePreferenceCode.value = saved;
+        localeStatusMessage.value = l10n.statusLanguageSaved;
+      }
+    } catch (error) {
+      localeStatusMessage.value = error.toString();
+      lastErrorMessage.value = error.toString();
     }
   }
 
@@ -445,7 +497,10 @@ class AppStore {
     await refresh();
   }
 
-  Future<void> changeCloudPassword(String oldPassword, String newPassword) async {
+  Future<void> changeCloudPassword(
+    String oldPassword,
+    String newPassword,
+  ) async {
     await rust_api.changeCloudPassword(
       oldPassword: oldPassword,
       newPassword: newPassword,
@@ -473,6 +528,7 @@ class AppStore {
   void _applySnapshot(rust_api.ShellSnapshot snapshot) {
     protocolNames.value = snapshot.protocolNames;
     deviceSnapshot.value = snapshot.deviceSnapshot;
+    currentAuthState.value = snapshot.authState;
     peerDevices.value = snapshot.peerDevices;
     transferJobs.value = snapshot.transferPreviews
         .map(_mapTransferPreview)
@@ -541,7 +597,7 @@ class AppStore {
   Future<void> addFilesToSendQueue() async {
     final files = await openFiles(
       acceptedTypeGroups: const [XTypeGroup(label: 'Any file')],
-      confirmButtonText: 'Add',
+      confirmButtonText: l10n.actionAdd,
     );
     if (files.isEmpty) {
       return;
@@ -560,11 +616,14 @@ class AppStore {
   }
 
   Future<void> addDirectoryToSendQueue() async {
-    var path = await getDirectoryPath(confirmButtonText: 'Add Folder');
+    var path = await getDirectoryPath(confirmButtonText: l10n.actionAddFolder);
     if (path == null || path.trim().isEmpty) {
       return;
     }
-    final name = path.split(Platform.pathSeparator).where((e) => e.isNotEmpty).last;
+    final name = path
+        .split(Platform.pathSeparator)
+        .where((e) => e.isNotEmpty)
+        .last;
     _mergePendingSendItems([
       PendingSendItem(path: path, name: name, kind: PendingSendKind.directory),
     ]);
@@ -583,20 +642,21 @@ class AppStore {
   Future<void> sendPendingSelection() async {
     final peer = selectedPeerDevice.value;
     if (peer == null) {
-      sendStatusMessage.value = 'Choose a target device before sending.';
+      sendStatusMessage.value = l10n.errorChooseTargetDevice;
       destination.value = AppDestination.send;
       return;
     }
     if (pendingSendItems.value.isEmpty) {
-      sendStatusMessage.value =
-          'Add one or more files or folders before starting a transfer.';
+      sendStatusMessage.value = l10n.errorAddItemsBeforeTransfer;
       destination.value = AppDestination.send;
       return;
     }
 
     sendInProgress.value = true;
-    sendStatusMessage.value =
-        'Sending ${pendingSendItems.value.length} item(s) to ${peer.label}...';
+    sendStatusMessage.value = l10n.statusSendingItems(
+      pendingSendItems.value.length,
+      peer.label,
+    );
 
     if (navigateAfterTransfer.value) {
       destination.value = AppDestination.transfers;
@@ -608,7 +668,7 @@ class AppStore {
       final jobIds = <String>[];
       for (final item in items) {
         lastSentPath.value = item.path;
-        sendStatusMessage.value = 'Sending `${item.name}` to ${peer.label}...';
+        sendStatusMessage.value = l10n.statusSendingItem(item.name, peer.label);
         final jobId = await rust_api.sendLocalPath(
           peerMailboxFolderId: peer.mailboxFolderId,
           peerDeviceId: peer.deviceId,
@@ -618,8 +678,10 @@ class AppStore {
         jobIds.add(jobId);
       }
       pendingSendItems.value = const [];
-      sendStatusMessage.value =
-          'Queued ${jobIds.length} transfer job(s) to ${peer.label}.';
+      sendStatusMessage.value = l10n.statusQueuedTransferJobs(
+        jobIds.length,
+        peer.label,
+      );
       await refresh();
       _focusTransferJobIds(jobIds);
     } catch (error) {
@@ -653,7 +715,7 @@ class AppStore {
   Future<void> receiveSelectedMailboxJobs() async {
     final selectedIds = selectedMailboxJobIds.value;
     if (selectedIds.isEmpty) {
-      mailboxStatusMessage.value = 'Select one or more relay jobs first.';
+      mailboxStatusMessage.value = l10n.errorSelectRelayJobsFirst;
       destination.value = AppDestination.inbox;
       return;
     }
@@ -661,7 +723,7 @@ class AppStore {
         .where((job) => selectedIds.contains(job.id) && job.isReady)
         .toList(growable: false);
     if (jobs.isEmpty) {
-      mailboxStatusMessage.value = 'No ready relay jobs are selected.';
+      mailboxStatusMessage.value = l10n.errorNoReadyRelayJobsSelected;
       return;
     }
 
@@ -671,10 +733,13 @@ class AppStore {
     }
 
     receiveInProgress.value = true;
-    receiveStatusMessage.value =
-        'Receiving ${jobs.length} selected job(s) into `$outputDir`...';
-    mailboxStatusMessage.value =
-        'Receiving ${jobs.length} selected relay job(s).';
+    receiveStatusMessage.value = l10n.statusReceivingSelectedJobs(
+      jobs.length,
+      outputDir,
+    );
+    mailboxStatusMessage.value = l10n.statusReceivingSelectedRelayJobs(
+      jobs.length,
+    );
     lastReceivePath.value = outputDir;
     if (navigateAfterTransfer.value) {
       destination.value = AppDestination.transfers;
@@ -687,7 +752,7 @@ class AppStore {
         _setMailboxJobStatus(
           job.id,
           MailboxJobStatus.autoReceiving,
-          statusMessage: 'Saving into `$outputDir`.',
+          statusMessage: l10n.statusSavingInto(outputDir),
         );
         final jobId = await rust_api.receiveJob(
           jobFolderId: job.id,
@@ -695,18 +760,20 @@ class AppStore {
         );
         jobIds.add(jobId);
       }
-      receiveStatusMessage.value =
-          'Received ${jobIds.length} relay job(s) into `$outputDir`.';
-      mailboxStatusMessage.value =
-          'Received ${jobIds.length} relay job(s) and cleaned remote relays.';
+      receiveStatusMessage.value = l10n.statusReceivedRelayJobs(
+        jobIds.length,
+        outputDir,
+      );
+      mailboxStatusMessage.value = l10n.statusReceivedAndCleanedRelayJobs(
+        jobIds.length,
+      );
       selectedMailboxJobIds.value = <String>{};
       await refresh();
       _focusTransferJobIds(jobIds);
     } catch (error) {
       receiveStatusMessage.value = error.toString();
       lastErrorMessage.value = error.toString();
-      mailboxStatusMessage.value =
-          'Failed while receiving selected relay jobs.';
+      mailboxStatusMessage.value = l10n.errorFailedReceivingSelectedRelayJobs;
       for (final job in jobs) {
         _setMailboxJobStatus(
           job.id,
@@ -728,7 +795,9 @@ class AppStore {
         (platformPaths.downloadDir?.isNotEmpty ?? false)) {
       return platformPaths.downloadDir;
     }
-    var path = await getDirectoryPath(confirmButtonText: 'Download Here');
+    var path = await getDirectoryPath(
+      confirmButtonText: l10n.actionDownloadHere,
+    );
     if (path != null && Platform.isMacOS && !path.startsWith('/')) {
       path = '/$path';
     }
@@ -740,13 +809,11 @@ class AppStore {
       return;
     }
     resumeInProgress.value = true;
-    resumeStatusMessage.value =
-        'Resuming `${job.title}` from saved JSON task state...';
+    resumeStatusMessage.value = l10n.statusResumingTransfer(job.title);
     destination.value = AppDestination.transfers;
     try {
       final jobId = await rust_api.resumeTask(jobId: job.id);
-      resumeStatusMessage.value =
-          'Resumed `${job.title}` successfully. Task `$jobId` advanced from saved state.';
+      resumeStatusMessage.value = l10n.statusResumedTransfer(job.title, jobId);
       await refresh();
       _focusTransferJobIds([jobId]);
       destination.value = AppDestination.transfers;
@@ -763,8 +830,9 @@ class AppStore {
     transferActionStatusMessage.value = null;
     try {
       final removed = rust_api.clearCompletedTransfers();
-      transferActionStatusMessage.value =
-          'Cleared $removed completed transfer entr${removed == 1 ? 'y' : 'ies'}.';
+      transferActionStatusMessage.value = l10n.statusClearedCompletedTransfers(
+        removed,
+      );
       await refresh();
     } catch (error) {
       transferActionStatusMessage.value = error.toString();
@@ -776,12 +844,14 @@ class AppStore {
 
   Future<void> deleteTransfer(TransferJob job) async {
     transferActionInProgress.value = true;
-    transferActionStatusMessage.value =
-        'Deleting remote transfer job `${job.title}`...';
+    transferActionStatusMessage.value = l10n.statusDeletingRemoteTransferJob(
+      job.title,
+    );
     try {
       await rust_api.deleteTransfer(jobId: job.id);
-      transferActionStatusMessage.value =
-          'Deleted remote transfer job `${job.title}` and removed local history.';
+      transferActionStatusMessage.value = l10n.statusDeletedRemoteTransferJob(
+        job.title,
+      );
       if (selectedTransferId.value == job.id) {
         selectedTransferId.value = null;
       }
@@ -859,23 +929,26 @@ class AppStore {
     _setMailboxJobStatus(
       job.id,
       MailboxJobStatus.autoReceiving,
-      statusMessage: 'Auto-receive is saving this relay job now.',
+      statusMessage: l10n.statusAutoReceiveSavingJob,
     );
-    mailboxStatusMessage.value =
-        'Auto-receiving `${job.rootName}` from ${job.sender}.';
+    mailboxStatusMessage.value = l10n.statusAutoReceiving(
+      job.rootName,
+      job.sender,
+    );
 
     try {
       final jobId = await rust_api.receiveJob(
         jobFolderId: job.id,
         outputDir: outputDir,
       );
-      mailboxStatusMessage.value =
-          'Auto-received `${job.rootName}` and cleaned the remote relay.';
+      mailboxStatusMessage.value = l10n.statusAutoReceived(job.rootName);
       await refresh();
       _focusTransferJobIds([jobId]);
     } catch (e) {
-      lastErrorMessage.value = 'Auto-receive failed for ${job.rootName}: $e';
-      mailboxStatusMessage.value = 'Auto-receive failed for `${job.rootName}`.';
+      lastErrorMessage.value = l10n.errorAutoReceiveFailed(job.rootName, '$e');
+      mailboxStatusMessage.value = l10n.errorAutoReceiveFailedShort(
+        job.rootName,
+      );
       _setMailboxJobStatus(
         job.id,
         MailboxJobStatus.failed,
@@ -930,6 +1003,10 @@ class AppStore {
 
     try {
       rememberedDevices.value = rust_api.rememberedDevices();
+      final preferredLocale = rust_api.preferredLocale().trim();
+      localePreferenceCode.value = preferredLocale.isEmpty
+          ? null
+          : preferredLocale;
       final preferredDir = rust_api.preferredDownloadDir().trim();
       preferredDownloadDir.value = preferredDir.isEmpty ? null : preferredDir;
       try {
@@ -942,7 +1019,8 @@ class AppStore {
         pollIntervalSeconds.value = rust_api.pollIntervalSeconds();
       } catch (_) {}
       try {
-        keepScreenOnDuringTransfer.value = rust_api.keepScreenOnDuringTransfer();
+        keepScreenOnDuringTransfer.value = rust_api
+            .keepScreenOnDuringTransfer();
       } catch (_) {}
       final snapshot = await rust_api.shellSnapshot();
       _applySnapshot(snapshot);

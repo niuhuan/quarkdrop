@@ -1,8 +1,8 @@
+use crate::workspace::app_paths;
 use argon2::Argon2;
 use bytes::Bytes;
 use chacha20poly1305::aead::{Aead, KeyInit};
 use chacha20poly1305::{ChaCha20Poly1305, Key, Nonce};
-use crate::workspace::app_paths;
 use flutter_rust_bridge::for_generated::anyhow;
 use futures_util::{stream, StreamExt};
 use libquarkpan::{QuarkEntry, QuarkPan};
@@ -19,6 +19,7 @@ use x25519_dalek::{PublicKey, StaticSecret};
 
 const QUARKDROP_ROOT_FOLDER_NAME: &str = "QuarkDrop";
 const DEVICE_METADATA_FILE_NAME: &str = "device.json";
+const DEVICE_METADATA_BAK_FILE_NAME: &str = "device.bak.json";
 const KEY_VERIFY_FILE_NAME: &str = "key_verify.json";
 const VERIFY_PLAINTEXT: &[u8] = b"quarkdrop-verify-ok-v1";
 
@@ -96,7 +97,9 @@ fn cloud_verify_cache() -> &'static RwLock<Option<bool>> {
 }
 
 pub fn reset_cloud_verify_cache() {
-    *cloud_verify_cache().write().expect("cloud verify cache poisoned") = None;
+    *cloud_verify_cache()
+        .write()
+        .expect("cloud verify cache poisoned") = None;
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -279,14 +282,18 @@ pub async fn has_cloud_password_verify(quark: &QuarkPan, root_id: &str) -> anyho
 
 pub async fn has_cloud_password_verify_cached(quark: &QuarkPan) -> anyhow::Result<bool> {
     {
-        let guard = cloud_verify_cache().read().expect("cloud verify cache poisoned");
+        let guard = cloud_verify_cache()
+            .read()
+            .expect("cloud verify cache poisoned");
         if let Some(cached) = *guard {
             return Ok(cached);
         }
     }
     let root_id = ensure_protocol_folder(quark, "0", QUARKDROP_ROOT_FOLDER_NAME).await?;
     let result = has_cloud_password_verify(quark, &root_id).await?;
-    *cloud_verify_cache().write().expect("cloud verify cache poisoned") = Some(result);
+    *cloud_verify_cache()
+        .write()
+        .expect("cloud verify cache poisoned") = Some(result);
     Ok(result)
 }
 
@@ -300,7 +307,9 @@ pub async fn create_cloud_password(quark: &QuarkPan, password: &str) -> anyhow::
     let verify_encrypted = encrypt_private_key_blob(VERIFY_PLAINTEXT, password)?;
     let verify_bytes = serde_json::to_vec_pretty(&verify_encrypted)?;
     upload_small_bytes(quark, &root_id, KEY_VERIFY_FILE_NAME, verify_bytes).await?;
-    *cloud_verify_cache().write().expect("cloud verify cache poisoned") = Some(true);
+    *cloud_verify_cache()
+        .write()
+        .expect("cloud verify cache poisoned") = Some(true);
 
     // Generate and encrypt local private key
     let secret = crate::protocol::crypto::random_key_material();
@@ -389,11 +398,14 @@ pub async fn change_cloud_password(
     let old_verify: EncryptedPrivateKey = serde_json::from_slice(&verify_bytes)?;
     let decrypted = decrypt_private_key_blob(&old_verify, old_password)
         .map_err(|_| anyhow::anyhow!("Incorrect old password."))?;
-    anyhow::ensure!(decrypted == VERIFY_PLAINTEXT, "Old password verification failed.");
+    anyhow::ensure!(
+        decrypted == VERIFY_PLAINTEXT,
+        "Old password verification failed."
+    );
 
     // Re-encrypt verify blob with new password and upload
     let new_verify = encrypt_private_key_blob(VERIFY_PLAINTEXT, new_password)?;
-    quark.delete_file(&verify_entry.fid).await?;
+    quark.delete(&verify_entry.fid).await?;
     upload_small_bytes(
         quark,
         &root_id,
@@ -414,13 +426,18 @@ pub async fn change_cloud_password(
     // Re-encrypt all local profiles
     if paths.device_profiles_dir.exists() {
         for entry in fs::read_dir(&paths.device_profiles_dir)?.filter_map(|e| e.ok()) {
-            let Ok(bytes) = fs::read(entry.path()) else { continue };
-            let Ok(mut profile) = serde_json::from_slice::<StoredLocalDeviceProfile>(&bytes)
-            else { continue };
+            let Ok(bytes) = fs::read(entry.path()) else {
+                continue;
+            };
+            let Ok(mut profile) = serde_json::from_slice::<StoredLocalDeviceProfile>(&bytes) else {
+                continue;
+            };
             let Ok(pk) = decrypt_private_key(&profile.encrypted_key, old_password) else {
                 continue;
             };
-            let Ok(new_enc) = encrypt_private_key(&pk, new_password) else { continue };
+            let Ok(new_enc) = encrypt_private_key(&pk, new_password) else {
+                continue;
+            };
             profile.encrypted_key = new_enc;
             if let Ok(data) = serde_json::to_vec_pretty(&profile) {
                 let _ = fs::write(entry.path(), data);
@@ -440,7 +457,9 @@ pub async fn change_cloud_password(
         else {
             continue;
         };
-        let Ok(meta_bytes) = download_bytes(quark, &meta_file.fid).await else { continue };
+        let Ok(meta_bytes) = download_bytes(quark, &meta_file.fid).await else {
+            continue;
+        };
         let Ok(mut meta) = serde_json::from_slice::<DeviceMetadata>(&meta_bytes) else {
             continue;
         };
@@ -448,11 +467,27 @@ pub async fn change_cloud_password(
             continue;
         }
         let old_enc = meta.encrypted_key.as_ref().unwrap();
-        let Ok(pk) = decrypt_private_key(old_enc, old_password) else { continue };
-        let Ok(new_enc) = encrypt_private_key(&pk, new_password) else { continue };
+        let Ok(pk) = decrypt_private_key(old_enc, old_password) else {
+            continue;
+        };
+        let Ok(new_enc) = encrypt_private_key(&pk, new_password) else {
+            continue;
+        };
         meta.encrypted_key = Some(new_enc);
         let new_payload = serde_json::to_vec(&meta)?;
-        quark.delete_file(&meta_file.fid).await?;
+        if let Some(old_bak) = children
+            .iter()
+            .find(|c| c.file && c.file_name == DEVICE_METADATA_BAK_FILE_NAME)
+        {
+            quark.delete(&old_bak.fid).await?;
+        }
+        quark
+            .rename()
+            .fid(meta_file.fid.clone())
+            .file_name(DEVICE_METADATA_BAK_FILE_NAME.to_string())
+            .prepare()?
+            .request()
+            .await?;
         upload_small_bytes(quark, &entry.fid, DEVICE_METADATA_FILE_NAME, new_payload).await?;
     }
 
@@ -609,7 +644,7 @@ pub async fn remove_local_mailbox(
         .iter()
         .find(|entry| entry.dir && entry.file_name == mailbox_name)
     {
-        quark.delete_file(&mailbox.fid).await?;
+        quark.delete(&mailbox.fid).await?;
     }
     Ok(())
 }
@@ -752,8 +787,8 @@ async fn ensure_protocol_folder(
 
     Ok(quark
         .create_folder()
-        .parent_folder(parent_folder.to_string())
-        .name(folder_name.to_string())
+        .pdir_fid(parent_folder.to_string())
+        .file_name(folder_name.to_string())
         .prepare()?
         .request()
         .await?)
@@ -770,7 +805,7 @@ pub(crate) async fn list_all_entries(
     loop {
         let page = quark
             .list()
-            .folder_id(folder_id.to_string())
+            .pdir_fid(folder_id.to_string())
             .page(page_no)
             .size(page_size)
             .prepare()?
@@ -906,14 +941,6 @@ async fn publish_device_metadata(
     mailbox_id: &str,
     local_device: &LocalDevice,
 ) -> anyhow::Result<()> {
-    let existing = list_all_entries(quark, mailbox_id).await?;
-    if let Some(old) = existing
-        .iter()
-        .find(|entry| entry.file_name == DEVICE_METADATA_FILE_NAME && entry.file)
-    {
-        quark.delete_file(&old.fid).await?;
-    }
-
     let paths = app_paths()?;
     let encrypted_key = if paths.device_private_key_file.exists() {
         serde_json::from_slice(&fs::read(&paths.device_private_key_file)?).ok()
@@ -931,6 +958,25 @@ async fn publish_device_metadata(
             .map(|duration| duration.as_millis() as u64)
             .unwrap_or(0),
     })?;
+    let existing = list_all_entries(quark, mailbox_id).await?;
+    if let Some(old_bak) = existing
+        .iter()
+        .find(|entry| entry.file_name == DEVICE_METADATA_BAK_FILE_NAME && entry.file)
+    {
+        quark.delete(&old_bak.fid).await?;
+    }
+    if let Some(old_current) = existing
+        .iter()
+        .find(|entry| entry.file_name == DEVICE_METADATA_FILE_NAME && entry.file)
+    {
+        quark
+            .rename()
+            .fid(old_current.fid.clone())
+            .file_name(DEVICE_METADATA_BAK_FILE_NAME.to_string())
+            .prepare()?
+            .request()
+            .await?;
+    }
     upload_small_bytes(quark, mailbox_id, DEVICE_METADATA_FILE_NAME, payload).await?;
     Ok(())
 }
@@ -940,13 +986,27 @@ async fn read_device_metadata(
     mailbox_id: &str,
 ) -> anyhow::Result<Option<DeviceMetadata>> {
     let children = list_all_entries(quark, mailbox_id).await?;
-    let Some(metadata_file) = children
+    let metadata_file = if let Some(metadata_file) = children
         .iter()
         .find(|entry| entry.file_name == DEVICE_METADATA_FILE_NAME && entry.file)
-    else {
+    {
+        metadata_file.fid.clone()
+    } else if let Some(metadata_bak_file) = children
+        .iter()
+        .find(|entry| entry.file_name == DEVICE_METADATA_BAK_FILE_NAME && entry.file)
+    {
+        quark
+            .rename()
+            .fid(metadata_bak_file.fid.clone())
+            .file_name(DEVICE_METADATA_FILE_NAME.to_string())
+            .prepare()?
+            .request()
+            .await?;
+        metadata_bak_file.fid.clone()
+    } else {
         return Ok(None);
     };
-    Ok(Some(download_json(quark, &metadata_file.fid).await?))
+    Ok(Some(download_json(quark, &metadata_file).await?))
 }
 
 async fn download_json<T>(quark: &QuarkPan, file_id: &str) -> anyhow::Result<T>
@@ -960,7 +1020,7 @@ where
 async fn download_bytes(quark: &QuarkPan, file_id: &str) -> anyhow::Result<Vec<u8>> {
     let mut stream = quark
         .download()
-        .file_id(file_id.to_string())
+        .fid(file_id.to_string())
         .prepare()?
         .stream()
         .await?;
@@ -983,21 +1043,21 @@ async fn upload_small_bytes(
     let sha1 = hex::encode(sha1.finalize());
     match quark
         .upload()
-        .parent_folder(parent_folder_id)
-        .name(name)
+        .pdir_fid(parent_folder_id)
+        .file_name(name)
         .size(bytes.len() as u64)
         .md5(md5)
         .sha1(sha1)
         .prepare()
         .await?
     {
-        libquarkpan::UploadPrepareResult::RapidUploaded { file_id } => Ok(file_id),
+        libquarkpan::UploadPrepareResult::RapidUploaded { fid } => Ok(fid),
         libquarkpan::UploadPrepareResult::NeedUpload(session) => {
             let stream =
                 stream::once(
                     async move { Ok::<Bytes, libquarkpan::QuarkPanError>(Bytes::from(bytes)) },
                 );
-            Ok(session.upload_stream(stream).await?.file_id)
+            Ok(session.upload_stream(stream).await?.fid)
         }
     }
 }
@@ -1036,7 +1096,10 @@ fn encrypt_private_key(key: &[u8; 32], password: &str) -> anyhow::Result<Encrypt
     encrypt_private_key_blob(key.as_ref(), password)
 }
 
-fn encrypt_private_key_blob(plaintext: &[u8], password: &str) -> anyhow::Result<EncryptedPrivateKey> {
+fn encrypt_private_key_blob(
+    plaintext: &[u8],
+    password: &str,
+) -> anyhow::Result<EncryptedPrivateKey> {
     let mut salt = [0u8; 16];
     OsRng.fill_bytes(&mut salt);
     let derived = derive_key_from_password(password, &salt)?;

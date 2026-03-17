@@ -697,8 +697,8 @@ async fn create_folder(
 ) -> anyhow::Result<String> {
     Ok(quark
         .create_folder()
-        .parent_folder(parent_folder_id)
-        .name(name)
+        .pdir_fid(parent_folder_id)
+        .file_name(name)
         .prepare()?
         .request()
         .await?)
@@ -730,26 +730,26 @@ async fn upload_file_chunk(
 ) -> anyhow::Result<String> {
     match quark
         .upload()
-        .parent_folder(parent_folder_id)
-        .name(&blob.name)
+        .pdir_fid(parent_folder_id)
+        .file_name(&blob.name)
         .size(blob.size)
         .md5(&blob.md5)
         .sha1(&blob.sha1)
         .prepare()
         .await?
     {
-        UploadPrepareResult::RapidUploaded { file_id } => Ok(file_id),
+        UploadPrepareResult::RapidUploaded { fid } => Ok(fid),
         UploadPrepareResult::NeedUpload(session) => match payload_cipher {
             PayloadCipher::PlainV0 => {
                 let mut file = tokio::fs::File::open(source_path).await?;
                 file.seek(SeekFrom::Start(blob.offset)).await?;
                 let stream = ReaderStream::new(file.take(blob.size));
-                Ok(session.upload_stream(stream).await?.file_id)
+                Ok(session.upload_stream(stream).await?.fid)
             }
             PayloadCipher::EncryptedSizedV1 => {
                 let stream =
                     encrypted_blob_stream(source_path, entry_id, content_key_seed, blob).await?;
-                Ok(session.upload_stream(stream).await?.file_id)
+                Ok(session.upload_stream(stream).await?.fid)
             }
         },
     }
@@ -801,19 +801,19 @@ async fn upload_bytes(
 
     match quark
         .upload()
-        .parent_folder(parent_folder_id)
-        .name(name)
+        .pdir_fid(parent_folder_id)
+        .file_name(name)
         .size(bytes.len() as u64)
         .md5(md5)
         .sha1(sha1)
         .prepare()
         .await?
     {
-        UploadPrepareResult::RapidUploaded { file_id } => Ok(file_id),
+        UploadPrepareResult::RapidUploaded { fid } => Ok(fid),
         UploadPrepareResult::NeedUpload(session) => {
             let stream =
                 stream::once(async move { Ok::<Bytes, QuarkPanError>(Bytes::from(bytes)) });
-            Ok(session.upload_stream(stream).await?.file_id)
+            Ok(session.upload_stream(stream).await?.fid)
         }
     }
 }
@@ -822,7 +822,7 @@ async fn download_bytes(quark: &QuarkPan, file_id: &str) -> anyhow::Result<Vec<u
     use futures_util::StreamExt;
     let mut stream = quark
         .download()
-        .file_id(file_id.to_string())
+        .fid(file_id.to_string())
         .prepare()?
         .stream()
         .await?;
@@ -845,7 +845,7 @@ async fn list_all_entries(quark: &QuarkPan, folder_id: &str) -> anyhow::Result<V
     loop {
         let page = quark
             .list()
-            .folder_id(folder_id.to_string())
+            .pdir_fid(folder_id.to_string())
             .page(page_no)
             .size(page_size)
             .prepare()?

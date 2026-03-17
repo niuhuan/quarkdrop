@@ -43,6 +43,14 @@ String restoreRememberedDevice({required String deviceId}) =>
 void bindCloudDevice({required String deviceId}) =>
     RustLib.instance.api.crateApiAppBindCloudDevice(deviceId: deviceId);
 
+String preferredLocale() => RustLib.instance.api.crateApiAppPreferredLocale();
+
+String savePreferredLocale({required String code}) =>
+    RustLib.instance.api.crateApiAppSavePreferredLocale(code: code);
+
+void clearPreferredLocale() =>
+    RustLib.instance.api.crateApiAppClearPreferredLocale();
+
 String preferredDownloadDir() =>
     RustLib.instance.api.crateApiAppPreferredDownloadDir();
 

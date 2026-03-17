@@ -5,6 +5,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:quarkdrop/src/configs/launch_at_startup.dart' as startup;
+import 'package:quarkdrop/src/l10n/app_locale.dart';
+import 'package:quarkdrop/src/l10n/l10n.dart';
 import 'package:quarkdrop/src/models/pending_send_item.dart';
 import 'package:quarkdrop/src/models/transfer_job.dart';
 import 'package:quarkdrop/src/rust/api/app.dart' as rust_api;
@@ -32,6 +34,7 @@ class _HomeShellState extends State<HomeShell> {
     _watchStatusSignal(widget.store.receiveStatusMessage);
     _watchStatusSignal(widget.store.mailboxStatusMessage);
     _watchStatusSignal(widget.store.deviceNameStatusMessage);
+    _watchStatusSignal(widget.store.localeStatusMessage);
   }
 
   void _watchStatusSignal(Signal<String?> signal) {
@@ -104,7 +107,10 @@ class _HomeShellState extends State<HomeShell> {
                       store.selectDestination(destinations[index]);
                     },
                     destinations: destinations
-                        .map(_navigationDestinationFor)
+                        .map(
+                          (destination) =>
+                              _navigationDestinationFor(context, destination),
+                        )
                         .toList(growable: false),
                   ),
           );
@@ -151,6 +157,7 @@ class _DesktopRail extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Watch((context) {
+      final l10n = context.l10n;
       final selected = store.destination.value;
       final autoReceiveEnabled = store.autoReceiveEnabled.value;
       final values = _visibleDestinations(autoReceiveEnabled);
@@ -183,8 +190,8 @@ class _DesktopRail extends StatelessWidget {
                     size: 22,
                   ),
                   const SizedBox(width: 8),
-                  const Text(
-                    'QuarkDrop',
+                  Text(
+                    l10n.appTitle,
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                 ],
@@ -210,22 +217,22 @@ class _DesktopRail extends StatelessWidget {
                     case AppDestination.send:
                       iconData = Icons.send_outlined;
                       selectedIconData = Icons.send_rounded;
-                      label = 'Send';
+                      label = l10n.navSend;
                       break;
                     case AppDestination.inbox:
                       iconData = Icons.inbox_outlined;
                       selectedIconData = Icons.inbox_rounded;
-                      label = 'Mailbox';
+                      label = l10n.navMailbox;
                       break;
                     case AppDestination.transfers:
                       iconData = Icons.sync_alt_outlined;
                       selectedIconData = Icons.sync_alt_rounded;
-                      label = 'Transfers';
+                      label = l10n.navTransfers;
                       break;
                     case AppDestination.settings:
                       iconData = Icons.tune_outlined;
                       selectedIconData = Icons.tune_rounded;
-                      label = 'Settings';
+                      label = l10n.navSettings;
                       break;
                   }
 
@@ -313,31 +320,35 @@ int _selectedDestinationIndex(
   return index == -1 ? 0 : index;
 }
 
-NavigationDestination _navigationDestinationFor(AppDestination destination) {
+NavigationDestination _navigationDestinationFor(
+  BuildContext context,
+  AppDestination destination,
+) {
+  final l10n = context.l10n;
   switch (destination) {
     case AppDestination.send:
-      return const NavigationDestination(
-        icon: Icon(Icons.send_outlined),
-        selectedIcon: Icon(Icons.send_rounded),
-        label: 'Send',
+      return NavigationDestination(
+        icon: const Icon(Icons.send_outlined),
+        selectedIcon: const Icon(Icons.send_rounded),
+        label: l10n.navSend,
       );
     case AppDestination.inbox:
-      return const NavigationDestination(
-        icon: Icon(Icons.inbox_outlined),
-        selectedIcon: Icon(Icons.inbox_rounded),
-        label: 'Mailbox',
+      return NavigationDestination(
+        icon: const Icon(Icons.inbox_outlined),
+        selectedIcon: const Icon(Icons.inbox_rounded),
+        label: l10n.navMailbox,
       );
     case AppDestination.transfers:
-      return const NavigationDestination(
-        icon: Icon(Icons.sync_alt_outlined),
-        selectedIcon: Icon(Icons.sync_alt_rounded),
-        label: 'Transfers',
+      return NavigationDestination(
+        icon: const Icon(Icons.sync_alt_outlined),
+        selectedIcon: const Icon(Icons.sync_alt_rounded),
+        label: l10n.navTransfers,
       );
     case AppDestination.settings:
-      return const NavigationDestination(
-        icon: Icon(Icons.tune_outlined),
-        selectedIcon: Icon(Icons.tune_rounded),
-        label: 'Settings',
+      return NavigationDestination(
+        icon: const Icon(Icons.tune_outlined),
+        selectedIcon: const Icon(Icons.tune_rounded),
+        label: l10n.navSettings,
       );
   }
 }
@@ -407,10 +418,9 @@ class _SendPane extends StatelessWidget {
           ),
           const SizedBox(height: 18),
           if (peers.isEmpty)
-            const _EmptyPaneMessage(
-              title: 'No peer devices yet',
-              body:
-                  'No other device is available yet. Open QuarkDrop on another device and sign in first.',
+            _EmptyPaneMessage(
+              title: context.l10n.noPeerDevicesTitle,
+              body: context.l10n.noPeerDevicesBody,
             )
           else
             ...peers.map((peer) {
@@ -456,15 +466,15 @@ class _SendPane extends StatelessWidget {
                           ),
                         ),
                         if (selected)
-                          const _StatusBadge(
-                            label: 'Send Target',
+                          _StatusBadge(
+                            label: context.l10n.sendTargetLabel,
                             color: Color(0xFF1E7A67),
                           )
                         else
                           OutlinedButton(
                             onPressed: () =>
                                 store.selectPeerDevice(peer.deviceId),
-                            child: const Text('Select'),
+                            child: Text(context.l10n.actionSelect),
                           ),
                       ],
                     ),
@@ -522,10 +532,10 @@ class _TransfersPaneState extends State<_TransfersPane>
 
       Widget buildJobList(List<TransferJob> filtered) {
         if (filtered.isEmpty) {
-          return const Center(
+          return Center(
             child: _EmptyPaneMessage(
-              title: 'No transfers',
-              body: 'Jobs matching this filter will appear here.',
+              title: context.l10n.noTransfersTitle,
+              body: context.l10n.noTransfersBody,
             ),
           );
         }
@@ -540,11 +550,10 @@ class _TransfersPaneState extends State<_TransfersPane>
 
       Widget buildBody() {
         if (jobs.isEmpty) {
-          return const Center(
+          return Center(
             child: _EmptyPaneMessage(
-              title: 'No transfer history yet',
-              body:
-                  'Send a file or receive a mailbox job to build the transfer queue.',
+              title: context.l10n.noTransferHistoryTitle,
+              body: context.l10n.noTransferHistoryBody,
             ),
           );
         }
@@ -598,10 +607,10 @@ class _TransfersPaneState extends State<_TransfersPane>
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Row(
               children: [
-                const Expanded(
+                Expanded(
                   child: _PaneTitle(
-                    title: 'Transfers',
-                    subtitle: 'Upload and download history.',
+                    title: context.l10n.transfersTitle,
+                    subtitle: context.l10n.transfersSubtitle,
                   ),
                 ),
                 OutlinedButton.icon(
@@ -609,7 +618,7 @@ class _TransfersPaneState extends State<_TransfersPane>
                       ? null
                       : store.clearCompletedTransfers,
                   icon: const Icon(Icons.cleaning_services_outlined),
-                  label: const Text('Clear Completed'),
+                  label: Text(context.l10n.actionClearCompleted),
                 ),
               ],
             ),
@@ -619,9 +628,9 @@ class _TransfersPaneState extends State<_TransfersPane>
             child: TabBar(
               controller: _tabController,
               tabs: [
-                Tab(text: 'All (${jobs.length})'),
-                Tab(text: 'Upload (${uploadJobs.length})'),
-                Tab(text: 'Download (${downloadJobs.length})'),
+                Tab(text: context.l10n.tabAll(jobs.length)),
+                Tab(text: context.l10n.tabUpload(uploadJobs.length)),
+                Tab(text: context.l10n.tabDownload(downloadJobs.length)),
               ],
             ),
           ),
@@ -673,7 +682,7 @@ class _TransferListTile extends StatelessWidget {
                   ),
                 ),
                 _StatusBadge(
-                  label: _stageLabel(job.stage),
+                  label: _stageLabel(context, job.stage),
                   color: _stageColor(job.stage),
                 ),
               ],
@@ -694,7 +703,7 @@ class _TransferListTile extends StatelessWidget {
             ),
             const SizedBox(height: 8),
             Text(
-              _progressLabel(job),
+              _progressLabel(context, job),
               style: const TextStyle(color: Color(0xFF5C6A64)),
             ),
           ],
@@ -721,6 +730,7 @@ class _TransferDetailCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     if (job == null) {
       return Container(
         padding: const EdgeInsets.all(20),
@@ -729,10 +739,9 @@ class _TransferDetailCard extends StatelessWidget {
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: const Color(0xFFE7DED0)),
         ),
-        child: const _EmptyPaneMessage(
-          title: 'Select a transfer',
-          body:
-              'Choose a row from the queue to inspect its state and available actions.',
+        child: _EmptyPaneMessage(
+          title: l10n.selectTransferTitle,
+          body: l10n.selectTransferBody,
         ),
       );
     }
@@ -747,9 +756,9 @@ class _TransferDetailCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const _PaneTitle(
-            title: 'Selected Transfer',
-            subtitle: 'Current status, direction, and recovery actions.',
+          _PaneTitle(
+            title: l10n.selectedTransferTitle,
+            subtitle: l10n.selectedTransferSubtitle,
           ),
           const SizedBox(height: 18),
           Row(
@@ -768,7 +777,7 @@ class _TransferDetailCard extends StatelessWidget {
                 ),
               ),
               _StatusBadge(
-                label: _stageLabel(job!.stage),
+                label: _stageLabel(context, job!.stage),
                 color: _stageColor(job!.stage),
               ),
             ],
@@ -792,7 +801,7 @@ class _TransferDetailCard extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            _progressLabel(job!),
+            _progressLabel(context, job!),
             style: const TextStyle(fontSize: 15, color: Color(0xFF5C6A64)),
           ),
           const SizedBox(height: 18),
@@ -805,12 +814,12 @@ class _TransferDetailCard extends StatelessWidget {
                     ? Icons.north_east_rounded
                     : Icons.south_west_rounded,
                 label: job!.direction == TransferDirection.send
-                    ? 'Send job'
-                    : 'Receive job',
+                    ? l10n.sendJobLabel
+                    : l10n.receiveJobLabel,
               ),
               _DetailMetaChip(
                 icon: Icons.flag_outlined,
-                label: _detailStateLabel(job!),
+                label: _detailStateLabel(context, job!),
               ),
               _DetailMetaChip(
                 icon: Icons.percent_rounded,
@@ -826,7 +835,7 @@ class _TransferDetailCard extends StatelessWidget {
                   child: FilledButton.icon(
                     onPressed: resumeInProgress ? null : onResume,
                     icon: const Icon(Icons.restart_alt_rounded),
-                    label: const Text('Resume Transfer'),
+                    label: Text(l10n.actionResumeTransfer),
                   ),
                 ),
               ],
@@ -838,7 +847,7 @@ class _TransferDetailCard extends StatelessWidget {
                   child: OutlinedButton.icon(
                     onPressed: transferActionInProgress ? null : onDeleteRemote,
                     icon: const Icon(Icons.delete_outline_rounded),
-                    label: const Text('Delete Remote Job'),
+                    label: Text(l10n.actionDeleteRemoteJob),
                   ),
                 ),
               ],
@@ -884,20 +893,22 @@ class _SettingsPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Watch((context) {
       final device = store.deviceSnapshot.value;
       final lastError = store.lastErrorMessage.value;
       final preferredDownloadDir = store.preferredDownloadDir.value;
       final platformPaths = store.platformPaths;
       final downloadStatus = store.downloadDirectoryStatusMessage.value;
+      final localeStatus = store.localeStatusMessage.value;
       return Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Padding(
+          Padding(
             padding: EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: _PaneTitle(
-              title: 'Settings',
-              subtitle: 'Device, storage, and sign-out.',
+              title: l10n.settingsTitle,
+              subtitle: l10n.settingsSubtitle,
             ),
           ),
           const SizedBox(height: 20),
@@ -919,10 +930,12 @@ class _SettingsPane extends StatelessWidget {
                     currentPath:
                         preferredDownloadDir ??
                         platformPaths.downloadDir ??
-                        'Choose a folder before receiving',
+                        l10n.downloadFolderChooseBeforeReceiving,
                     statusMessage: downloadStatus,
                   ),
                 if (!Platform.isIOS) const SizedBox(height: 14),
+                _LanguageCard(store: store, statusMessage: localeStatus),
+                const SizedBox(height: 14),
                 _AutoReceiveCard(store: store),
                 const SizedBox(height: 14),
                 _NavigateAfterTransferCard(store: store),
@@ -953,7 +966,7 @@ class _SettingsPane extends StatelessWidget {
                 if (lastError != null) ...[
                   const SizedBox(height: 14),
                   _InfoCard(
-                    title: 'Latest Error',
+                    title: l10n.latestErrorTitle,
                     body: lastError,
                     icon: Icons.warning_amber_rounded,
                   ),
@@ -1021,7 +1034,10 @@ class _DirectionChip extends StatelessWidget {
     final icon = direction == TransferDirection.send
         ? Icons.north_east_rounded
         : Icons.south_west_rounded;
-    final label = direction == TransferDirection.send ? 'Send' : 'Receive';
+    final l10n = context.l10n;
+    final label = direction == TransferDirection.send
+        ? l10n.directionSend
+        : l10n.directionReceive;
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
@@ -1111,6 +1127,7 @@ class _DeviceSettingsCardState extends State<_DeviceSettingsCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Watch((context) {
       final saving = widget.store.deviceNameSaving.value;
       return Card(
@@ -1130,12 +1147,12 @@ class _DeviceSettingsCardState extends State<_DeviceSettingsCard> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Device Name',
+                l10n.deviceNameTitle,
                 style: const TextStyle(fontWeight: FontWeight.w700),
               ),
               const SizedBox(height: 2),
               Text(
-                'Account: ${widget.authSource}',
+                l10n.accountLabel(widget.authSource),
                 style: const TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
               ),
               const SizedBox(height: 12),
@@ -1248,14 +1265,15 @@ class _PasswordCardState extends State<_PasswordCard> {
   }
 
   Future<void> _save() async {
+    final l10n = context.l10n;
     final newPw = _newController.text;
     final confirm = _confirmController.text;
     if (newPw.isEmpty) {
-      setState(() => _error = 'New password cannot be empty.');
+      setState(() => _error = l10n.errorNewPasswordEmpty);
       return;
     }
     if (newPw != confirm) {
-      setState(() => _error = 'Passwords do not match.');
+      setState(() => _error = l10n.errorPasswordsDoNotMatch);
       return;
     }
     setState(() {
@@ -1274,10 +1292,10 @@ class _PasswordCardState extends State<_PasswordCard> {
         ScaffoldMessenger.of(context)
           ..clearSnackBars()
           ..showSnackBar(
-            const SnackBar(
-              content: Text('Cloud password updated.'),
+            SnackBar(
+              content: Text(context.l10n.cloudPasswordUpdated),
               behavior: SnackBarBehavior.floating,
-              margin: EdgeInsets.fromLTRB(16, 0, 16, 24),
+              margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
             ),
           );
       }
@@ -1290,6 +1308,7 @@ class _PasswordCardState extends State<_PasswordCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Card(
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
@@ -1308,9 +1327,9 @@ class _PasswordCardState extends State<_PasswordCard> {
                 children: [
                   const Icon(Icons.lock_outline_rounded, size: 22),
                   const SizedBox(width: 12),
-                  const Expanded(
+                  Expanded(
                     child: Text(
-                      'Cloud Password',
+                      l10n.cloudPasswordCardTitle,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
@@ -1326,10 +1345,10 @@ class _PasswordCardState extends State<_PasswordCard> {
                 ],
               ),
               if (!_editing)
-                const Padding(
+                Padding(
                   padding: EdgeInsets.only(top: 4),
                   child: Text(
-                    'Change your cloud password. All device keys will be re-encrypted.',
+                    l10n.cloudPasswordCardSubtitle,
                     style: TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
                   ),
                 ),
@@ -1339,8 +1358,8 @@ class _PasswordCardState extends State<_PasswordCard> {
                   controller: _oldController,
                   obscureText: true,
                   enabled: !_saving,
-                  decoration: const InputDecoration(
-                    labelText: 'Current Password',
+                  decoration: InputDecoration(
+                    labelText: l10n.currentPasswordLabel,
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -1349,8 +1368,8 @@ class _PasswordCardState extends State<_PasswordCard> {
                   controller: _newController,
                   obscureText: true,
                   enabled: !_saving,
-                  decoration: const InputDecoration(
-                    labelText: 'New Password',
+                  decoration: InputDecoration(
+                    labelText: l10n.newPasswordLabel,
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -1360,8 +1379,8 @@ class _PasswordCardState extends State<_PasswordCard> {
                   obscureText: true,
                   enabled: !_saving,
                   onSubmitted: (_) => _save(),
-                  decoration: const InputDecoration(
-                    labelText: 'Confirm New Password',
+                  decoration: InputDecoration(
+                    labelText: l10n.confirmNewPasswordLabel,
                     border: OutlineInputBorder(),
                   ),
                 ),
@@ -1381,7 +1400,7 @@ class _PasswordCardState extends State<_PasswordCard> {
                   children: [
                     TextButton(
                       onPressed: _saving ? null : _toggle,
-                      child: const Text('Cancel'),
+                      child: Text(l10n.actionCancel),
                     ),
                     const SizedBox(width: 8),
                     FilledButton(
@@ -1395,7 +1414,7 @@ class _PasswordCardState extends State<_PasswordCard> {
                                 color: Colors.white,
                               ),
                             )
-                          : const Text('Change Password'),
+                          : Text(l10n.actionChangePassword),
                     ),
                   ],
                 ),
@@ -1419,6 +1438,7 @@ class _SavedPasswordCardState extends State<_SavedPasswordCard> {
   late bool _hasSaved = rust_api.hasSavedKey();
 
   void _toggle() {
+    final l10n = context.l10n;
     try {
       if (_hasSaved) {
         rust_api.clearSavedKey();
@@ -1431,9 +1451,7 @@ class _SavedPasswordCardState extends State<_SavedPasswordCard> {
         ..showSnackBar(
           SnackBar(
             content: Text(
-              _hasSaved
-                  ? 'Password saved. The app will auto-unlock on next launch.'
-                  : 'Saved password cleared.',
+              _hasSaved ? l10n.savedPasswordEnabled : l10n.savedPasswordCleared,
             ),
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
@@ -1444,7 +1462,7 @@ class _SavedPasswordCardState extends State<_SavedPasswordCard> {
         ..clearSnackBars()
         ..showSnackBar(
           SnackBar(
-            content: Text('Failed: $e'),
+            content: Text(context.l10n.genericFailed('$e')),
             behavior: SnackBarBehavior.floating,
             margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
           ),
@@ -1454,6 +1472,7 @@ class _SavedPasswordCardState extends State<_SavedPasswordCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Card(
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
@@ -1464,14 +1483,14 @@ class _SavedPasswordCardState extends State<_SavedPasswordCard> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
         secondary: const Icon(Icons.key_rounded, size: 22),
-        title: const Text(
-          'Remember Password',
+        title: Text(
+          l10n.rememberPasswordTitle,
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
         subtitle: Text(
           _hasSaved
-              ? 'The device key is saved. Auto-unlock is enabled.'
-              : 'Save the device key so password is not required on next launch.',
+              ? l10n.rememberPasswordEnabled
+              : l10n.rememberPasswordDisabled,
           style: const TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
         ),
         value: _hasSaved,
@@ -1502,6 +1521,7 @@ class _AutoStartCardState extends State<_AutoStartCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Card(
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
@@ -1512,16 +1532,16 @@ class _AutoStartCardState extends State<_AutoStartCard> {
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
         secondary: Icon(_enabled ? Icons.power : Icons.power_off, size: 22),
-        title: const Text(
-          'Launch at Startup',
+        title: Text(
+          l10n.launchAtStartupTitle,
           style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
         ),
         subtitle: Text(
           !_available
-              ? 'This platform integration is not wired up yet for the current build.'
+              ? l10n.launchAtStartupUnavailable
               : _enabled
-              ? 'The app will start automatically when you log in.'
-              : 'Enable to start the app automatically at system boot.',
+              ? l10n.launchAtStartupEnabled
+              : l10n.launchAtStartupDisabled,
           style: const TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
         ),
         value: _enabled,
@@ -1536,6 +1556,7 @@ class _OpenDataFolderCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Card(
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
@@ -1552,39 +1573,39 @@ class _OpenDataFolderCard extends StatelessWidget {
               ..clearSnackBars()
               ..showSnackBar(
                 SnackBar(
-                  content: Text('Failed to open data folder: $e'),
+                  content: Text(l10n.failedOpenDataFolder('$e')),
                   behavior: SnackBarBehavior.floating,
                   margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
                 ),
               );
           }
         },
-        child: const Padding(
+        child: Padding(
           padding: EdgeInsets.all(18),
           child: Row(
             children: [
-              Icon(Icons.folder_open_rounded, size: 22),
-              SizedBox(width: 12),
+              const Icon(Icons.folder_open_rounded, size: 22),
+              const SizedBox(width: 12),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Open Data Folder',
+                      l10n.openDataFolderTitle,
                       style: TextStyle(
                         fontSize: 16,
                         fontWeight: FontWeight.w700,
                       ),
                     ),
-                    SizedBox(height: 4),
+                    const SizedBox(height: 4),
                     Text(
-                      'Open the app configuration directory in the file manager. (Debug only)',
+                      l10n.openDataFolderSubtitle,
                       style: TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
                     ),
                   ],
                 ),
               ),
-              Icon(
+              const Icon(
                 Icons.open_in_new_rounded,
                 size: 20,
                 color: Color(0xFF5C6A64),
@@ -1647,6 +1668,7 @@ class _BackgroundServiceCardState extends State<_BackgroundServiceCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Card(
       margin: EdgeInsets.zero,
       shape: RoundedRectangleBorder(
@@ -1658,13 +1680,13 @@ class _BackgroundServiceCardState extends State<_BackgroundServiceCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Row(
+            Row(
               children: [
-                Icon(Icons.battery_saver_rounded, size: 22),
-                SizedBox(width: 12),
+                const Icon(Icons.battery_saver_rounded, size: 22),
+                const SizedBox(width: 12),
                 Expanded(
                   child: Text(
-                    'Background',
+                    l10n.backgroundTitle,
                     style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                 ),
@@ -1685,8 +1707,8 @@ class _BackgroundServiceCardState extends State<_BackgroundServiceCard> {
             else ...[
               Text(
                 _ignoringBattery
-                    ? 'Battery optimization is disabled. The app can run in the background.'
-                    : 'Disable battery optimization to prevent background transfers from being interrupted.',
+                    ? l10n.backgroundBatteryDisabled
+                    : l10n.backgroundBatteryEnabled,
                 style: const TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
               ),
               const SizedBox(height: 12),
@@ -1696,7 +1718,7 @@ class _BackgroundServiceCardState extends State<_BackgroundServiceCard> {
                   child: FilledButton.icon(
                     onPressed: _requestBatteryOptimization,
                     icon: const Icon(Icons.battery_alert_rounded, size: 18),
-                    label: const Text('Disable Battery Optimization'),
+                    label: Text(l10n.actionDisableBatteryOptimization),
                   ),
                 ),
               const SizedBox(height: 8),
@@ -1705,7 +1727,7 @@ class _BackgroundServiceCardState extends State<_BackgroundServiceCard> {
                 child: OutlinedButton.icon(
                   onPressed: _openAppSettings,
                   icon: const Icon(Icons.settings_rounded, size: 18),
-                  label: const Text('Open App Settings'),
+                  label: Text(l10n.actionOpenAppSettings),
                 ),
               ),
             ],
@@ -1730,6 +1752,7 @@ class _SignOutCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Watch((context) {
       final busy = store.signOutInProgress.value;
       return Card(
@@ -1751,13 +1774,13 @@ class _SignOutCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Sign Out',
+                    Text(
+                      l10n.signOutTitle,
                       style: TextStyle(fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 4),
-                    const Text(
-                      'Remove mailbox and clear saved session.',
+                    Text(
+                      l10n.signOutSubtitle,
                       style: TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
                     ),
                   ],
@@ -1773,7 +1796,7 @@ class _SignOutCard extends StatelessWidget {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.logout_rounded),
-                tooltip: 'Sign Out',
+                tooltip: l10n.signOutTitle,
               ),
             ],
           ),
@@ -1797,13 +1820,14 @@ class _SignOutConfirmDialogState extends State<_SignOutConfirmDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return AlertDialog(
-      title: const Text('Sign Out'),
+      title: Text(l10n.signOutTitle),
       content: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text('All local transfer tasks will be removed.'),
+          Text(l10n.signOutConfirmBody),
           const SizedBox(height: 16),
           InkWell(
             borderRadius: BorderRadius.circular(8),
@@ -1816,7 +1840,7 @@ class _SignOutConfirmDialogState extends State<_SignOutConfirmDialog> {
                 ),
                 Expanded(
                   child: Text(
-                    'Delete cloud folder and local task list',
+                    l10n.signOutDeleteCloudFolder,
                     style: Theme.of(context).textTheme.bodyMedium,
                   ),
                 ),
@@ -1826,8 +1850,8 @@ class _SignOutConfirmDialogState extends State<_SignOutConfirmDialog> {
           const SizedBox(height: 8),
           Text(
             _deleteRemote
-                ? 'Other devices will no longer be able to send files to the current device.'
-                : 'Files will not be received for this account until you re-login and bind.',
+                ? l10n.signOutDeleteCloudHint
+                : l10n.signOutKeepCloudHint,
             style: const TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
           ),
         ],
@@ -1835,14 +1859,14 @@ class _SignOutConfirmDialogState extends State<_SignOutConfirmDialog> {
       actions: [
         TextButton(
           onPressed: () => Navigator.of(context).pop(),
-          child: const Text('Cancel'),
+          child: Text(l10n.actionCancel),
         ),
         FilledButton(
           onPressed: () {
             Navigator.of(context).pop();
             widget.store.signOut(deleteRemoteMailbox: _deleteRemote);
           },
-          child: const Text('Sign Out'),
+          child: Text(l10n.signOutTitle),
         ),
       ],
     );
@@ -1862,6 +1886,7 @@ class _DownloadDirectoryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Watch((context) {
       final saving = store.downloadDirectorySaving.value;
       final hasCustomDir =
@@ -1885,8 +1910,8 @@ class _DownloadDirectoryCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      'Download Folder',
+                    Text(
+                      l10n.downloadFolderTitle,
                       style: TextStyle(fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 4),
@@ -1920,7 +1945,7 @@ class _DownloadDirectoryCard extends StatelessWidget {
                             child: CircularProgressIndicator(strokeWidth: 2),
                           )
                         : const Icon(Icons.folder_open_rounded),
-                    tooltip: 'Choose Folder',
+                    tooltip: l10n.actionChooseFolder,
                   ),
                   if (hasCustomDir)
                     Padding(
@@ -1930,7 +1955,7 @@ class _DownloadDirectoryCard extends StatelessWidget {
                             ? null
                             : () => store.clearPreferredDownloadDirectory(),
                         icon: const Icon(Icons.close_rounded, size: 20),
-                        tooltip: 'Use Default',
+                        tooltip: l10n.actionUseDefault,
                       ),
                     ),
                 ],
@@ -1940,6 +1965,104 @@ class _DownloadDirectoryCard extends StatelessWidget {
         ),
       );
     });
+  }
+}
+
+class _LanguageCard extends StatelessWidget {
+  const _LanguageCard({required this.store, required this.statusMessage});
+
+  final AppStore store;
+  final String? statusMessage;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return Watch((context) {
+      final selectedCode = store.localePreferenceCode.value;
+      return Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: Theme.of(
+              context,
+            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
+          ),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                l10n.languageTitle,
+                style: const TextStyle(fontWeight: FontWeight.w700),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                selectedCode == null
+                    ? l10n.languageFollowingSystem
+                    : _labelForLocaleCode(context, selectedCode),
+                style: const TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
+              ),
+              const SizedBox(height: 12),
+              DropdownButtonFormField<String?>(
+                initialValue: selectedCode,
+                decoration: InputDecoration(
+                  isDense: true,
+                  border: const OutlineInputBorder(),
+                  labelText: l10n.languageTitle,
+                ),
+                items: [
+                  DropdownMenuItem<String?>(
+                    value: null,
+                    child: Text(l10n.languageFollowSystemOption),
+                  ),
+                  ...supportedAppLocaleOptions.map(
+                    (option) => DropdownMenuItem<String?>(
+                      value: option.code,
+                      child: Text(_labelForLocaleCode(context, option.code)),
+                    ),
+                  ),
+                ],
+                onChanged: (value) {
+                  store.setLocalePreference(value);
+                },
+              ),
+              if (statusMessage != null) ...[
+                const SizedBox(height: 8),
+                Text(
+                  statusMessage!,
+                  style: const TextStyle(
+                    color: Color(0xFF5C6A64),
+                    fontSize: 13,
+                  ),
+                ),
+              ],
+            ],
+          ),
+        ),
+      );
+    });
+  }
+
+  String _labelForLocaleCode(BuildContext context, String code) {
+    final l10n = context.l10n;
+    switch (code) {
+      case 'en':
+        return l10n.languageEnglishUsOption;
+      case 'zh_Hans':
+        return l10n.languageSimplifiedChineseOption;
+      case 'zh_Hant':
+        return l10n.languageTraditionalChineseOption;
+      case 'ja':
+        return l10n.languageJapaneseOption;
+      case 'ko':
+        return l10n.languageKoreanOption;
+      default:
+        return code;
+    }
   }
 }
 
@@ -2037,26 +2160,27 @@ class _EmptyPaneMessage extends StatelessWidget {
   }
 }
 
-String _stageLabel(TransferStage stage) {
+String _stageLabel(BuildContext context, TransferStage stage) {
+  final l10n = context.l10n;
   switch (stage) {
     case TransferStage.preparing:
-      return 'Preparing';
+      return l10n.stagePreparing;
     case TransferStage.uploading:
-      return 'Uploading';
+      return l10n.stageUploading;
     case TransferStage.uploadingManifest:
-      return 'Manifest';
+      return l10n.stageManifest;
     case TransferStage.uploadingCommit:
-      return 'Commit';
+      return l10n.stageCommit;
     case TransferStage.downloading:
-      return 'Downloading';
+      return l10n.stageDownloading;
     case TransferStage.verifying:
-      return 'Verifying';
+      return l10n.stageVerifying;
     case TransferStage.cleaningRemote:
-      return 'Cleanup';
+      return l10n.stageCleanup;
     case TransferStage.failed:
-      return 'Failed';
+      return l10n.stageFailed;
     case TransferStage.completed:
-      return 'Done';
+      return l10n.stageDone;
   }
 }
 
@@ -2077,24 +2201,26 @@ Color _stageColor(TransferStage stage) {
   }
 }
 
-String _progressLabel(TransferJob job) {
+String _progressLabel(BuildContext context, TransferJob job) {
+  final l10n = context.l10n;
   if (job.stage == TransferStage.failed) {
-    return 'Transfer failed and is waiting for recovery.';
+    return l10n.transferFailedWaitingRecovery;
   }
   if (job.stage == TransferStage.completed) {
-    return 'Transfer completed successfully.';
+    return l10n.transferCompletedSuccessfully;
   }
-  return '${(job.progress * 100).round()}% complete';
+  return l10n.transferPercentComplete((job.progress * 100).round());
 }
 
-String _detailStateLabel(TransferJob job) {
+String _detailStateLabel(BuildContext context, TransferJob job) {
+  final l10n = context.l10n;
   if (job.stage == TransferStage.failed) {
-    return 'Needs attention';
+    return l10n.transferNeedsAttention;
   }
   if (job.stage == TransferStage.completed) {
-    return 'Completed';
+    return l10n.transferCompleted;
   }
-  return 'Active';
+  return l10n.transferActive;
 }
 
 class _PollIntervalCard extends StatefulWidget {
@@ -2110,6 +2236,7 @@ class _PollIntervalCardState extends State<_PollIntervalCard> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final seconds = widget.store.pollIntervalSeconds.watch(context);
     return Card(
       elevation: 0,
@@ -2136,13 +2263,13 @@ class _PollIntervalCardState extends State<_PollIntervalCard> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text(
-                          'Mailbox Poll Interval',
+                        Text(
+                          l10n.mailboxPollIntervalTitle,
                           style: TextStyle(fontWeight: FontWeight.w700),
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '${seconds}s — how often to check for new files.',
+                          l10n.mailboxPollIntervalSubtitle(seconds),
                           style: const TextStyle(
                             color: Color(0xFF5C6A64),
                             fontSize: 13,
@@ -2166,7 +2293,7 @@ class _PollIntervalCardState extends State<_PollIntervalCard> {
                   min: 5,
                   max: 300,
                   divisions: 59,
-                  label: '${seconds}s',
+                  label: l10n.secondsShort(seconds),
                   onChanged: (v) => widget.store.setPollInterval(v.round()),
                 ),
               ],
@@ -2184,6 +2311,7 @@ class _AutoReceiveCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final enabled = store.autoReceiveEnabled.watch(context);
     return Card(
       elevation: 0,
@@ -2197,10 +2325,8 @@ class _AutoReceiveCard extends StatelessWidget {
         ),
       ),
       child: SwitchListTile(
-        title: const Text('Auto-Receive Files'),
-        subtitle: const Text(
-          'Automatically download incoming files to your default download directory.',
-        ),
+        title: Text(l10n.autoReceiveFilesTitle),
+        subtitle: Text(l10n.autoReceiveFilesSubtitle),
         value: enabled,
         onChanged: (val) => store.toggleAutoReceive(val),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -2215,6 +2341,7 @@ class _NavigateAfterTransferCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final enabled = store.navigateAfterTransfer.watch(context);
     return Card(
       elevation: 0,
@@ -2228,10 +2355,8 @@ class _NavigateAfterTransferCard extends StatelessWidget {
         ),
       ),
       child: SwitchListTile(
-        title: const Text('Auto-Navigate to Transfers'),
-        subtitle: const Text(
-          'After sending or receiving, automatically switch to the Transfers page.',
-        ),
+        title: Text(l10n.autoNavigateTransfersTitle),
+        subtitle: Text(l10n.autoNavigateTransfersSubtitle),
         value: enabled,
         onChanged: (val) => store.toggleNavigateAfterTransfer(val),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -2246,6 +2371,7 @@ class _KeepScreenOnCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final enabled = store.keepScreenOnDuringTransfer.watch(context);
     return Card(
       elevation: 0,
@@ -2259,10 +2385,8 @@ class _KeepScreenOnCard extends StatelessWidget {
         ),
       ),
       child: SwitchListTile(
-        title: const Text('Keep Screen On During Transfer'),
-        subtitle: const Text(
-          'Prevent the screen from turning off while files are being sent or received.',
-        ),
+        title: Text(l10n.keepScreenOnTitle),
+        subtitle: Text(l10n.keepScreenOnSubtitle),
         value: enabled,
         onChanged: (val) => store.toggleKeepScreenOnDuringTransfer(val),
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -2278,6 +2402,7 @@ class _InboxPane extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     final jobs = store.inboxJobs.watch(context);
     final selectedJobIds = store.selectedMailboxJobIds.watch(context);
     final receiveInProgress = store.receiveInProgress.watch(context);
@@ -2312,8 +2437,8 @@ class _InboxPane extends StatelessWidget {
               Expanded(
                 child: Text(
                   selectedCount > 0
-                      ? '$selectedCount selected'
-                      : '${sortedJobs.length} items in mailbox',
+                      ? l10n.mailboxSelectedCount(selectedCount)
+                      : l10n.mailboxItemsCount(sortedJobs.length),
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w600,
@@ -2335,7 +2460,9 @@ class _InboxPane extends StatelessWidget {
                       )
                     : const Icon(Icons.download_rounded, size: 18),
                 label: Text(
-                  selectedCount == 0 ? 'Receive' : 'Receive $selectedCount',
+                  selectedCount == 0
+                      ? l10n.actionReceive
+                      : l10n.actionReceiveCount(selectedCount),
                 ),
               ),
             ],
@@ -2344,11 +2471,10 @@ class _InboxPane extends StatelessWidget {
         const SizedBox(height: 8),
         Expanded(
           child: sortedJobs.isEmpty
-              ? const Center(
+              ? Center(
                   child: _EmptyPaneMessage(
-                    title: 'No relay jobs in the mailbox',
-                    body:
-                        'Incoming encrypted jobs will appear here after another device sends them.',
+                    title: l10n.mailboxEmptyTitle,
+                    body: l10n.mailboxEmptyBody,
                   ),
                 )
               : ListView.separated(
@@ -2409,7 +2535,10 @@ class _InboxPane extends StatelessWidget {
                                   ),
                                   const SizedBox(height: 2),
                                   Text(
-                                    'From ${job.sender} · ${job.sizeLabel}',
+                                    l10n.mailboxFromSender(
+                                      job.sender,
+                                      job.sizeLabel,
+                                    ),
                                     style: const TextStyle(
                                       color: Color(0xFF7A847E),
                                       fontSize: 13,
@@ -2455,6 +2584,7 @@ class _SendComposerCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
@@ -2467,8 +2597,8 @@ class _SendComposerCard extends StatelessWidget {
         children: [
           Text(
             selectedPeerLabel == null
-                ? 'Choose a device below, then build your send batch.'
-                : 'Ready to send to $selectedPeerLabel.',
+                ? l10n.sendComposerChooseDevice
+                : l10n.sendComposerReadyToSend(selectedPeerLabel!),
             style: const TextStyle(fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 12),
@@ -2479,25 +2609,25 @@ class _SendComposerCard extends StatelessWidget {
               FilledButton.icon(
                 onPressed: sendInProgress ? null : onAddFiles,
                 icon: const Icon(Icons.attach_file_rounded),
-                label: const Text('Add Files'),
+                label: Text(l10n.actionAddFiles),
               ),
               if (onAddFolder != null)
                 OutlinedButton.icon(
                   onPressed: sendInProgress ? null : onAddFolder,
                   icon: const Icon(Icons.create_new_folder_rounded),
-                  label: const Text('Add Folder'),
+                  label: Text(l10n.actionAddFolder),
                 ),
               if (onAddPhotos != null)
                 OutlinedButton.icon(
                   onPressed: sendInProgress ? null : onAddPhotos,
                   icon: const Icon(Icons.photo_library_rounded),
-                  label: const Text('Add Photos'),
+                  label: Text(l10n.actionAddPhotos),
                 ),
               OutlinedButton(
                 onPressed: sendInProgress || pendingItems.isEmpty
                     ? null
                     : onClear,
-                child: const Text('Clear Batch'),
+                child: Text(l10n.actionClearBatch),
               ),
               FilledButton.icon(
                 onPressed: sendInProgress || pendingItems.isEmpty
@@ -2515,16 +2645,16 @@ class _SendComposerCard extends StatelessWidget {
                     : const Icon(Icons.send_rounded),
                 label: Text(
                   pendingItems.isEmpty
-                      ? 'Send Batch'
-                      : 'Send ${pendingItems.length} Item(s)',
+                      ? l10n.actionSendBatch
+                      : l10n.actionSendItemCount(pendingItems.length),
                 ),
               ),
             ],
           ),
           const SizedBox(height: 16),
           if (pendingItems.isEmpty)
-            const Text(
-              'No files or folders added yet.',
+            Text(
+              l10n.sendComposerEmpty,
               style: TextStyle(color: Color(0xFF596860)),
             )
           else

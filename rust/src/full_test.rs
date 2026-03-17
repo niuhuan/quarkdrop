@@ -166,7 +166,7 @@ async fn full_test_send_receive_resume_cleanup() -> anyhow::Result<()> {
         &cookie,
     )
     .await?;
-    sender.quark.delete_file(&delete_remote_folder_id).await?;
+    sender.quark.delete(&delete_remote_folder_id).await?;
     wait_for_job_absence(&receiver, &delete_remote_job_id, &cookie).await?;
 
     fs::remove_file(normal_download_dir.join("hello-quarkdrop.txt")).await?;
@@ -317,7 +317,7 @@ async fn list_all_entries(quark: &QuarkPan, folder_id: &str) -> anyhow::Result<V
     loop {
         let page = quark
             .list()
-            .folder_id(folder_id.to_string())
+            .pdir_fid(folder_id.to_string())
             .page(page_no)
             .size(100)
             .prepare()?
@@ -363,7 +363,7 @@ async fn seed_partial_download(
 async fn cleanup_mailbox(actor: &Actor, cookie: &str) -> anyhow::Result<()> {
     if let Ok(mailbox_id) = mailbox_folder_id(actor, cookie).await {
         activate_actor(actor, cookie)?;
-        let _ = actor.quark.delete_file(&mailbox_id).await;
+        let _ = actor.quark.delete(&mailbox_id).await;
     }
     Ok(())
 }

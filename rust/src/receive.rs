@@ -207,7 +207,7 @@ async fn receive_job_impl(
                             .await?;
                         } else {
                             let start_offset = resumed_bytes.saturating_sub(completed_before_blob);
-                            let mut request = quark.download().file_id(blob.fid.clone());
+                            let mut request = quark.download().fid(blob.fid.clone());
                             if start_offset > 0 {
                                 request = request.start_offset(start_offset);
                             }
@@ -248,7 +248,7 @@ async fn receive_job_impl(
         snapshot.last_error_message.clear();
         snapshot.updated_at_unix_ms = now_unix_ms();
         persist_snapshot(&snapshot)?;
-        quark.delete_file(job_folder_id).await?;
+        quark.delete(job_folder_id).await?;
 
         snapshot.stage = TaskStage::Done;
         snapshot.last_error_message.clear();
@@ -285,7 +285,7 @@ async fn download_encrypted_blob(
     let frame_floor =
         (start_plain_offset / BLOB_FRAME_PLAIN_BYTES as u64) * BLOB_FRAME_PLAIN_BYTES as u64;
     let start_offset = encrypted_cipher_offset(frame_floor);
-    let mut request = quark.download().file_id(file_id.to_string());
+    let mut request = quark.download().fid(file_id.to_string());
     if start_offset > 0 {
         request = request.start_offset(start_offset);
     }
@@ -345,7 +345,7 @@ async fn download_encrypted_blob(
 async fn download_bytes(quark: &QuarkPan, file_id: &str) -> anyhow::Result<Vec<u8>> {
     let mut stream = quark
         .download()
-        .file_id(file_id.to_string())
+        .fid(file_id.to_string())
         .prepare()?
         .stream()
         .await?;
@@ -383,7 +383,7 @@ async fn list_all_entries(quark: &QuarkPan, folder_id: &str) -> anyhow::Result<V
     loop {
         let page = quark
             .list()
-            .folder_id(folder_id.to_string())
+            .pdir_fid(folder_id.to_string())
             .page(page_no)
             .size(page_size)
             .prepare()?

@@ -149,7 +149,9 @@ pub async fn shell_snapshot() -> anyhow::Result<ShellSnapshot> {
     };
 
     // Check cloud password status before accessing mailbox
-    let has_verify = device::has_cloud_password_verify_cached(&quark).await.unwrap_or(false);
+    let has_verify = device::has_cloud_password_verify_cached(&quark)
+        .await
+        .unwrap_or(false);
     let key_unlocked = device::is_key_unlocked();
     if !has_verify {
         device_snapshot.mailbox_status_label = "Password setup required".to_string();
@@ -317,6 +319,21 @@ pub fn restore_remembered_device(device_id: String) -> anyhow::Result<String> {
 #[flutter_rust_bridge::frb(sync)]
 pub fn bind_cloud_device(device_id: String) -> anyhow::Result<()> {
     device::bind_cloud_device(device_id)
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn preferred_locale() -> anyhow::Result<String> {
+    Ok(preferences::preferred_locale()?.unwrap_or_default())
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn save_preferred_locale(code: String) -> anyhow::Result<String> {
+    preferences::save_preferred_locale(code)
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn clear_preferred_locale() -> anyhow::Result<()> {
+    preferences::clear_preferred_locale()
 }
 
 #[flutter_rust_bridge::frb(sync)]
@@ -514,7 +531,7 @@ pub async fn delete_transfer(job_id: String) -> anyhow::Result<()> {
         let quark = QuarkPan::builder()
             .cookie(cookie_session.raw_cookie)
             .prepare()?;
-        match quark.delete_file(&task.remote_job_folder_id).await {
+        match quark.delete(&task.remote_job_folder_id).await {
             Ok(()) => {}
             Err(libquarkpan::QuarkPanError::Api { status, .. }) if status == 404 => {}
             Err(error) => return Err(error.into()),

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:quarkdrop/src/l10n/l10n.dart';
 import 'package:quarkdrop/src/state/app_store.dart';
 import 'package:signals_flutter/signals_flutter.dart';
 
@@ -71,6 +72,7 @@ class _AuthPanelState extends State<_AuthPanel> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Watch((context) {
       final busy = widget.store.loginInProgress.value;
       final error = widget.store.lastErrorMessage.value;
@@ -79,16 +81,20 @@ class _AuthPanelState extends State<_AuthPanel> {
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
-          const Icon(Icons.cloud_sync_rounded, size: 48, color: Color(0xFFB44818)),
+          const Icon(
+            Icons.cloud_sync_rounded,
+            size: 48,
+            color: Color(0xFFB44818),
+          ),
           const SizedBox(height: 16),
-          const Text(
-            'QuarkDrop',
+          Text(
+            l10n.appTitle,
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 6),
-          const Text(
-            'Sign in with your Quark account to continue.',
+          Text(
+            l10n.loginSubtitle,
             textAlign: TextAlign.center,
             style: TextStyle(color: Color(0xFF54635D)),
           ),
@@ -128,7 +134,7 @@ class _AuthPanelState extends State<_AuthPanel> {
                       );
                     },
               icon: const Icon(Icons.public_rounded),
-              label: const Text('Use Browser Login'),
+              label: Text(l10n.actionUseBrowserLogin),
             ),
           ),
           const SizedBox(height: 12),
@@ -137,9 +143,11 @@ class _AuthPanelState extends State<_AuthPanel> {
               width: double.infinity,
               height: 48,
               child: OutlinedButton.icon(
-                onPressed: busy ? null : () => setState(() => _showCookieInput = true),
+                onPressed: busy
+                    ? null
+                    : () => setState(() => _showCookieInput = true),
                 icon: const Icon(Icons.cookie_outlined),
-                label: const Text('Use Cookie Login'),
+                label: Text(l10n.actionUseCookieLogin),
               ),
             )
           else ...[
@@ -151,14 +159,14 @@ class _AuthPanelState extends State<_AuthPanel> {
               autocorrect: false,
               keyboardType: TextInputType.multiline,
               decoration: InputDecoration(
-                labelText: 'Quark Cookie',
+                labelText: l10n.quarkCookieLabel,
                 alignLabelWithHint: true,
                 hintText: '__puus=...; kps=...;',
                 border: const OutlineInputBorder(),
                 suffixIcon: IconButton(
                   onPressed: busy ? null : _pasteCookie,
                   icon: const Icon(Icons.content_paste_go_rounded),
-                  tooltip: 'Paste',
+                  tooltip: l10n.actionPaste,
                 ),
               ),
             ),
@@ -177,7 +185,7 @@ class _AuthPanelState extends State<_AuthPanel> {
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
                     : const Icon(Icons.login_rounded),
-                label: Text(busy ? 'Validating...' : 'Sign In'),
+                label: Text(busy ? l10n.actionValidating : l10n.actionSignIn),
               ),
             ),
           ],
@@ -200,15 +208,24 @@ class _WebViewLoginPage extends StatefulWidget {
 class _WebViewLoginPageState extends State<_WebViewLoginPage> {
   final _cookieManager = CookieManager.instance();
   final _progress = ValueNotifier<double>(0);
-  String _status =
-      'Sign in to Quark, then tap Complete Login to import the cookies.';
+  String _status = '';
   bool _capturing = false;
   bool _preparing = true;
+  bool _initializedStatus = false;
 
   @override
   void initState() {
     super.initState();
     _prepareWebView();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initializedStatus) {
+      _status = context.l10n.webLoginInitialStatus;
+      _initializedStatus = true;
+    }
   }
 
   @override
@@ -225,8 +242,7 @@ class _WebViewLoginPageState extends State<_WebViewLoginPage> {
       }
       setState(() {
         _preparing = false;
-        _status =
-            'Fresh login session ready. Sign in to Quark, then tap Complete Login.';
+        _status = context.l10n.webLoginFreshSessionReady;
       });
     } catch (error) {
       if (!mounted) {
@@ -234,7 +250,7 @@ class _WebViewLoginPageState extends State<_WebViewLoginPage> {
       }
       setState(() {
         _preparing = false;
-        _status = 'Failed to reset the embedded browser session: $error';
+        _status = context.l10n.webLoginResetFailed('$error');
       });
     }
   }
@@ -246,7 +262,7 @@ class _WebViewLoginPageState extends State<_WebViewLoginPage> {
 
     setState(() {
       _capturing = true;
-      _status = 'Importing Quark cookies from the embedded browser...';
+      _status = context.l10n.webLoginImportingCookies;
     });
 
     try {
@@ -276,14 +292,13 @@ class _WebViewLoginPageState extends State<_WebViewLoginPage> {
 
       if (mounted) {
         setState(() {
-          _status =
-              'No validated Quark session yet. Finish the login flow, then tap Complete Login again.';
+          _status = context.l10n.webLoginNoValidatedSession;
         });
       }
     } catch (error) {
       if (mounted) {
         setState(() {
-          _status = 'Cookie capture failed: $error';
+          _status = context.l10n.webLoginCookieCaptureFailed('$error');
         });
       }
     } finally {
@@ -311,9 +326,10 @@ class _WebViewLoginPageState extends State<_WebViewLoginPage> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Embedded Quark Login'),
+        title: Text(l10n.embeddedQuarkLoginTitle),
         actions: [
           ValueListenableBuilder<double>(
             valueListenable: _progress,
@@ -345,7 +361,7 @@ class _WebViewLoginPageState extends State<_WebViewLoginPage> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Icon(Icons.check_rounded),
-            label: const Text('Complete Login'),
+            label: Text(l10n.actionCompleteLogin),
           ),
           const SizedBox(width: 8),
         ],
@@ -383,8 +399,7 @@ class _WebViewLoginPageState extends State<_WebViewLoginPage> {
                         return;
                       }
                       setState(() {
-                        _status =
-                            'Page loaded. Finish the Quark login flow, then tap Complete Login.';
+                        _status = l10n.webLoginPageLoaded;
                       });
                     },
                     onReceivedError: (controller, request, error) {
@@ -392,8 +407,7 @@ class _WebViewLoginPageState extends State<_WebViewLoginPage> {
                         return;
                       }
                       setState(() {
-                        _status =
-                            'Web login failed to load: ${error.description}';
+                        _status = l10n.webLoginLoadFailed(error.description);
                       });
                     },
                   ),
@@ -403,4 +417,3 @@ class _WebViewLoginPageState extends State<_WebViewLoginPage> {
     );
   }
 }
-

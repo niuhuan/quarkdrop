@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:quarkdrop/src/rust/api/app.dart' as rust_api;
+import 'package:quarkdrop/src/l10n/l10n.dart';
 import 'package:quarkdrop/src/screens/home_shell.dart';
 import 'package:quarkdrop/src/screens/login_screen.dart';
 import 'package:quarkdrop/src/state/app_store.dart';
@@ -75,6 +76,7 @@ class _CloudDeviceSelectionScreenState
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -101,13 +103,13 @@ class _CloudDeviceSelectionScreenState
                 children: [
                   const _OrbMark(),
                   const SizedBox(height: 14),
-                  const Text(
-                    'Set Up Your Device',
+                  Text(
+                    l10n.setupDeviceTitle,
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
                   ),
                   const SizedBox(height: 6),
-                  const Text(
-                    'Name this device and choose how to join.',
+                  Text(
+                    l10n.setupDeviceSubtitle,
                     style: TextStyle(color: Color(0xFF54635D)),
                   ),
                   const SizedBox(height: 24),
@@ -151,6 +153,7 @@ class _DeviceNameField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -163,13 +166,13 @@ class _DeviceNameField extends StatelessWidget {
         children: [
           const Icon(Icons.devices_rounded, size: 32, color: Color(0xFFB44818)),
           const SizedBox(height: 12),
-          const Text(
-            'Device Name',
+          Text(
+            l10n.deviceNameTitle,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 6),
-          const Text(
-            'This name will be visible to other devices.',
+          Text(
+            l10n.deviceNameSubtitle,
             style: TextStyle(color: Color(0xFF5C6A64)),
           ),
           const SizedBox(height: 14),
@@ -177,8 +180,8 @@ class _DeviceNameField extends StatelessWidget {
             controller: controller,
             enabled: enabled,
             textInputAction: TextInputAction.done,
-            decoration: const InputDecoration(
-              labelText: 'Device name',
+            decoration: InputDecoration(
+              labelText: l10n.deviceNameFieldLabel,
               border: OutlineInputBorder(),
             ),
           ),
@@ -205,6 +208,7 @@ class _DeviceListSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -216,13 +220,13 @@ class _DeviceListSection extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Text(
-            'Existing Devices',
+          Text(
+            l10n.existingDevicesTitle,
             style: TextStyle(fontSize: 20, fontWeight: FontWeight.w800),
           ),
           const SizedBox(height: 6),
-          const Text(
-            'We found device folders in your cloud. Bind to an existing one or continue as new.',
+          Text(
+            l10n.existingDevicesSubtitle,
             style: TextStyle(color: Color(0xFF5C6A64)),
           ),
           if (error != null) ...[
@@ -258,10 +262,14 @@ class _DeviceListSection extends StatelessWidget {
                       contentPadding: EdgeInsets.zero,
                       leading: const Icon(Icons.cloud_sync_rounded),
                       title: Text(device.label),
-                      subtitle: Text(device.subtitle, maxLines: 1, overflow: TextOverflow.ellipsis),
+                      subtitle: Text(
+                        device.subtitle,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                       trailing: FilledButton.tonal(
                         onPressed: () => onBind(device.deviceId),
-                        child: const Text('Bind'),
+                        child: Text(l10n.actionBind),
                       ),
                     ),
                 ],
@@ -273,7 +281,7 @@ class _DeviceListSection extends StatelessWidget {
               child: OutlinedButton.icon(
                 onPressed: onContinueAsNew,
                 icon: const Icon(Icons.add_rounded),
-                label: const Text('Continue as New Device'),
+                label: Text(l10n.actionContinueAsNewDevice),
               ),
             ),
           ],
@@ -300,11 +308,8 @@ class _PasswordScreenState extends State<_PasswordScreen> {
   String? _error;
 
   bool get _isCreating {
-    final snapshot = widget.store.deviceSnapshot.value;
-    // If there's no snapshot or auth state indicates create, show create mode
-    // The passwordRequired phase is reached from NeedCreatePassword or NeedVerifyPassword
-    // We check the Rust-side auth state via the last shell snapshot result
-    return snapshot?.mailboxStatusLabel == 'Password setup required';
+    return widget.store.currentAuthState.value ==
+        rust_api.AuthState.needCreatePassword;
   }
 
   @override
@@ -315,13 +320,14 @@ class _PasswordScreenState extends State<_PasswordScreen> {
   }
 
   Future<void> _submit() async {
+    final l10n = context.l10n;
     final password = _passwordController.text;
     if (password.isEmpty) {
-      setState(() => _error = 'Password cannot be empty.');
+      setState(() => _error = l10n.errorPasswordEmpty);
       return;
     }
     if (_isCreating && password != _confirmController.text) {
-      setState(() => _error = 'Passwords do not match.');
+      setState(() => _error = l10n.errorPasswordsDoNotMatch);
       return;
     }
 
@@ -347,6 +353,7 @@ class _PasswordScreenState extends State<_PasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       body: Center(
         child: SingleChildScrollView(
@@ -359,7 +366,9 @@ class _PasswordScreenState extends State<_PasswordScreen> {
                 const _OrbMark(),
                 const SizedBox(height: 14),
                 Text(
-                  _isCreating ? 'Set Cloud Password' : 'Verify Cloud Password',
+                  _isCreating
+                      ? l10n.setCloudPasswordTitle
+                      : l10n.verifyCloudPasswordTitle,
                   style: const TextStyle(
                     fontSize: 24,
                     fontWeight: FontWeight.w800,
@@ -368,8 +377,8 @@ class _PasswordScreenState extends State<_PasswordScreen> {
                 const SizedBox(height: 6),
                 Text(
                   _isCreating
-                      ? 'Set a cloud password to encrypt your device keys.'
-                      : 'Enter your cloud password to unlock this device.',
+                      ? l10n.setCloudPasswordSubtitle
+                      : l10n.verifyCloudPasswordSubtitle,
                   style: const TextStyle(color: Color(0xFF54635D)),
                 ),
                 const SizedBox(height: 24),
@@ -380,7 +389,9 @@ class _PasswordScreenState extends State<_PasswordScreen> {
                   autofocus: true,
                   onSubmitted: (_) => _isCreating ? null : _submit(),
                   decoration: InputDecoration(
-                    labelText: _isCreating ? 'New Password' : 'Cloud Password',
+                    labelText: _isCreating
+                        ? l10n.newPasswordLabel
+                        : l10n.cloudPasswordLabel,
                     border: const OutlineInputBorder(),
                   ),
                 ),
@@ -391,8 +402,8 @@ class _PasswordScreenState extends State<_PasswordScreen> {
                     obscureText: true,
                     enabled: !_submitting,
                     onSubmitted: (_) => _submit(),
-                    decoration: const InputDecoration(
-                      labelText: 'Confirm Password',
+                    decoration: InputDecoration(
+                      labelText: l10n.confirmPasswordLabel,
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -405,8 +416,8 @@ class _PasswordScreenState extends State<_PasswordScreen> {
                     onChanged: _submitting
                         ? null
                         : (v) => setState(() => _rememberPassword = v ?? false),
-                    title: const Text(
-                      'Remember password on this device',
+                    title: Text(
+                      l10n.rememberPasswordOnDevice,
                       style: TextStyle(fontSize: 14),
                     ),
                     controlAffinity: ListTileControlAffinity.leading,
@@ -445,7 +456,11 @@ class _PasswordScreenState extends State<_PasswordScreen> {
                               color: Colors.white,
                             ),
                           )
-                        : Text(_isCreating ? 'Set Password' : 'Verify'),
+                        : Text(
+                            _isCreating
+                                ? l10n.actionSetPassword
+                                : l10n.actionVerify,
+                          ),
                   ),
                 ),
               ],
@@ -462,6 +477,7 @@ class _BootstrapScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = context.l10n;
     return Scaffold(
       body: Container(
         decoration: const BoxDecoration(
@@ -471,19 +487,19 @@ class _BootstrapScreen extends StatelessWidget {
             colors: [Color(0xFFFCF5EC), Color(0xFFE4F0EB)],
           ),
         ),
-        child: const Center(
+        child: Center(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _OrbMark(),
-              SizedBox(height: 20),
+              const _OrbMark(),
+              const SizedBox(height: 20),
               Text(
-                'Preparing QuarkDrop',
+                l10n.preparingQuarkDropTitle,
                 style: TextStyle(fontSize: 28, fontWeight: FontWeight.w800),
               ),
-              SizedBox(height: 8),
+              const SizedBox(height: 8),
               Text(
-                'Bootstrapping the encrypted relay workspace.',
+                l10n.preparingQuarkDropSubtitle,
                 style: TextStyle(color: Color(0xFF53635C)),
               ),
             ],

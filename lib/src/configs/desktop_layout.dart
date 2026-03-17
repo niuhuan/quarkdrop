@@ -38,28 +38,64 @@ class DesktopTrayListener with TrayListener {
 
 const _windowListener = DesktopWindowListener();
 const _trayListener = DesktopTrayListener();
+bool get _isDesktopPlatform =>
+    Platform.isMacOS || Platform.isWindows || Platform.isLinux;
+
+Future<void> _setTrayContextMenu({
+  required String showWindowLabel,
+  required String quitLabel,
+}) async {
+  if (!_isDesktopPlatform) {
+    return;
+  }
+  final menu = Menu(
+    items: [
+      MenuItem(key: 'show_window', label: showWindowLabel),
+      MenuItem.separator(),
+      MenuItem(key: 'exit_app', label: quitLabel),
+    ],
+  );
+  await trayManager.setContextMenu(menu);
+}
 
 Future<void> initDesktopWindow() async {
+  if (!_isDesktopPlatform) {
+    return;
+  }
   await windowManager.ensureInitialized();
   await windowManager.setPreventClose(true);
   windowManager.addListener(_windowListener);
 }
 
 Future<void> initDesktopTray() async {
+  if (!_isDesktopPlatform) {
+    return;
+  }
   if (Platform.isMacOS) {
-    await trayManager.setIcon('lib/assets/tray_icon_template.png', isTemplate: true);
+    await trayManager.setIcon(
+      'lib/assets/tray_icon_template.png',
+      isTemplate: true,
+    );
   } else {
     await trayManager.setIcon(
-      Platform.isWindows ? 'lib/assets/app_icon.ico' : 'lib/assets/app_icon.png',
+      Platform.isWindows
+          ? 'lib/assets/app_icon.ico'
+          : 'lib/assets/app_icon.png',
     );
   }
-  final menu = Menu(
-    items: [
-      MenuItem(key: 'show_window', label: 'Show Window'),
-      MenuItem.separator(),
-      MenuItem(key: 'exit_app', label: 'Quit'),
-    ],
-  );
-  await trayManager.setContextMenu(menu);
+  await _setTrayContextMenu(showWindowLabel: 'Show Window', quitLabel: 'Quit');
   trayManager.addListener(_trayListener);
+}
+
+Future<void> updateDesktopTrayMenu({
+  required String showWindowLabel,
+  required String quitLabel,
+}) async {
+  if (!_isDesktopPlatform) {
+    return;
+  }
+  await _setTrayContextMenu(
+    showWindowLabel: showWindowLabel,
+    quitLabel: quitLabel,
+  );
 }

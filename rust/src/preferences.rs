@@ -7,6 +7,8 @@ use std::path::Path;
 #[derive(Debug, Serialize, Deserialize)]
 struct AppSettings {
     #[serde(default)]
+    preferred_locale: Option<String>,
+    #[serde(default)]
     preferred_download_dir: Option<String>,
     #[serde(default)]
     auto_receive_enabled: bool,
@@ -29,6 +31,7 @@ fn default_poll_interval() -> u32 {
 impl Default for AppSettings {
     fn default() -> Self {
         Self {
+            preferred_locale: None,
             preferred_download_dir: None,
             auto_receive_enabled: false,
             navigate_after_transfer: true,
@@ -36,6 +39,29 @@ impl Default for AppSettings {
             keep_screen_on_during_transfer: true,
         }
     }
+}
+
+pub fn preferred_locale() -> anyhow::Result<Option<String>> {
+    Ok(load_settings()?
+        .preferred_locale
+        .map(|value| value.trim().to_string())
+        .filter(|value| !value.is_empty()))
+}
+
+pub fn save_preferred_locale(code: String) -> anyhow::Result<String> {
+    let normalized = code.trim().to_string();
+    anyhow::ensure!(!normalized.is_empty(), "Locale cannot be empty.");
+    let mut settings = load_settings()?;
+    settings.preferred_locale = Some(normalized.clone());
+    save_settings(&settings)?;
+    Ok(normalized)
+}
+
+pub fn clear_preferred_locale() -> anyhow::Result<()> {
+    let mut settings = load_settings()?;
+    settings.preferred_locale = None;
+    save_settings(&settings)?;
+    Ok(())
 }
 
 pub fn preferred_download_dir() -> anyhow::Result<Option<String>> {
