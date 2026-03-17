@@ -13,6 +13,7 @@ pub struct AppPaths {
     pub device_name_file: PathBuf,
     pub device_private_key_file: PathBuf,
     pub device_profiles_dir: PathBuf,
+    pub saved_key_file: PathBuf,
     pub transfer_history_file: PathBuf,
     pub transfer_db_file: PathBuf,
 }
@@ -48,6 +49,7 @@ pub fn app_paths() -> io::Result<AppPaths> {
         device_name_file: config_dir.join("device_name.txt"),
         device_private_key_file: config_dir.join("device_private_key.json"),
         device_profiles_dir: config_dir.join("device_profiles"),
+        saved_key_file: config_dir.join("saved_key.bin"),
         transfer_history_file: config_dir.join("transfer_history.json"),
         transfer_db_file: config_dir.join("transfer_tasks.sqlite3"),
         config_dir,

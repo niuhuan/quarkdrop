@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:flutter/widgets.dart';
 import 'package:quarkdrop/src/app/quarkdrop_app.dart';
 import 'package:quarkdrop/src/configs/desktop_layout.dart';
+import 'package:quarkdrop/src/configs/launch_at_startup.dart';
 import 'package:quarkdrop/src/platform/platform_paths.dart';
 import 'package:quarkdrop/src/rust/api/simple.dart' as rust_simple;
 import 'package:quarkdrop/src/rust/frb_generated.dart';
@@ -16,6 +17,7 @@ Future<void> main() async {
   if (_isDesktop) {
     await initDesktopWindow();
     await initDesktopTray();
+    await initAutoStartup();
   }
   await RustLib.init();
   final platformPaths = await PlatformPathsResolver.resolve();

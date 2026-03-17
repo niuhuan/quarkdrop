@@ -165,17 +165,22 @@ pub async fn shell_snapshot() -> anyhow::Result<ShellSnapshot> {
         });
     }
     if !key_unlocked {
-        device_snapshot.mailbox_status_label = "Password required".to_string();
-        device_snapshot.mailbox_summary =
-            "Enter your cloud password to unlock this device.".to_string();
-        return Ok(ShellSnapshot {
-            auth_state: AuthState::NeedVerifyPassword,
-            protocol_names,
-            device_snapshot,
-            inbox_previews: Vec::new(),
-            peer_devices: Vec::new(),
-            transfer_previews,
-        });
+        // Try auto-unlock with saved key before prompting for password
+        if device::try_auto_unlock().unwrap_or(false) {
+            // Key unlocked successfully from saved key — fall through to ready
+        } else {
+            device_snapshot.mailbox_status_label = "Password required".to_string();
+            device_snapshot.mailbox_summary =
+                "Enter your cloud password to unlock this device.".to_string();
+            return Ok(ShellSnapshot {
+                auth_state: AuthState::NeedVerifyPassword,
+                protocol_names,
+                device_snapshot,
+                inbox_previews: Vec::new(),
+                peer_devices: Vec::new(),
+                transfer_previews,
+            });
+        }
     }
 
     let mailbox_state = match device::ensure_mailbox_state(
@@ -359,6 +364,16 @@ pub fn set_poll_interval_seconds(seconds: u32) -> anyhow::Result<u32> {
     preferences::set_poll_interval_seconds(seconds)
 }
 
+#[flutter_rust_bridge::frb(sync)]
+pub fn keep_screen_on_during_transfer() -> anyhow::Result<bool> {
+    preferences::keep_screen_on_during_transfer()
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn set_keep_screen_on_during_transfer(enabled: bool) -> anyhow::Result<bool> {
+    preferences::set_keep_screen_on_during_transfer(enabled)
+}
+
 pub async fn create_cloud_password(password: String) -> anyhow::Result<()> {
     let cookie_session = session::current_session();
     anyhow::ensure!(cookie_session.is_configured(), "Login required.");
@@ -398,6 +413,21 @@ pub fn open_data_folder() -> anyhow::Result<()> {
             .map_err(|e| anyhow::anyhow!("Failed to open data folder: {e}"))?;
     }
     Ok(())
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn save_auto_unlock_key() -> anyhow::Result<()> {
+    device::save_auto_unlock_key()
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn has_saved_key() -> bool {
+    device::has_saved_key()
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn clear_saved_key() -> anyhow::Result<()> {
+    device::clear_saved_key()
 }
 
 pub async fn send_local_path(

@@ -4,6 +4,7 @@ import UIKit
 @main
 @objc class AppDelegate: FlutterAppDelegate {
   private let platformChannelName = "quarkdrop/platform_paths"
+  private let backgroundChannelName = "quarkdrop/background"
 
   override func application(
     _ application: UIApplication,
@@ -17,6 +18,27 @@ import UIKit
       )
       channel.setMethodCallHandler { [weak self] call, result in
         self?.handlePlatformPaths(call: call, result: result)
+      }
+    }
+    if let registrar = self.registrar(forPlugin: "quarkdrop_background") {
+      let bgChannel = FlutterMethodChannel(
+        name: backgroundChannelName,
+        binaryMessenger: registrar.messenger()
+      )
+      bgChannel.setMethodCallHandler { call, result in
+        switch call.method {
+        case "getKeepScreenOn":
+          result(UIApplication.shared.isIdleTimerDisabled)
+        case "setKeepScreenOn":
+          if let value = call.arguments as? Bool {
+            DispatchQueue.main.async {
+              UIApplication.shared.isIdleTimerDisabled = value
+            }
+          }
+          result(nil)
+        default:
+          result(FlutterMethodNotImplemented)
+        }
       }
     }
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)

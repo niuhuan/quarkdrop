@@ -70,6 +70,14 @@ int pollIntervalSeconds() =>
 int setPollIntervalSeconds({required int seconds}) =>
     RustLib.instance.api.crateApiAppSetPollIntervalSeconds(seconds: seconds);
 
+bool keepScreenOnDuringTransfer() =>
+    RustLib.instance.api.crateApiAppKeepScreenOnDuringTransfer();
+
+bool setKeepScreenOnDuringTransfer({required bool enabled}) => RustLib
+    .instance
+    .api
+    .crateApiAppSetKeepScreenOnDuringTransfer(enabled: enabled);
+
 Future<void> createCloudPassword({required String password}) =>
     RustLib.instance.api.crateApiAppCreateCloudPassword(password: password);
 
@@ -85,6 +93,12 @@ Future<void> changeCloudPassword({
 );
 
 void openDataFolder() => RustLib.instance.api.crateApiAppOpenDataFolder();
+
+void saveAutoUnlockKey() => RustLib.instance.api.crateApiAppSaveAutoUnlockKey();
+
+bool hasSavedKey() => RustLib.instance.api.crateApiAppHasSavedKey();
+
+void clearSavedKey() => RustLib.instance.api.crateApiAppClearSavedKey();
 
 Future<String> sendLocalPath({
   required String peerMailboxFolderId,

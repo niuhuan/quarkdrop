@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:quarkdrop/src/configs/launch_at_startup.dart' as startup;
 import 'package:quarkdrop/src/models/pending_send_item.dart';
 import 'package:quarkdrop/src/models/transfer_job.dart';
 import 'package:quarkdrop/src/rust/api/app.dart' as rust_api;
@@ -176,15 +177,15 @@ class _DesktopRail extends StatelessWidget {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
               child: Row(
                 children: [
-                  Icon(Icons.bolt_rounded,
-                      color: Theme.of(context).colorScheme.primary, size: 22),
+                  Icon(
+                    Icons.bolt_rounded,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 22,
+                  ),
                   const SizedBox(width: 8),
                   const Text(
                     'QuarkDrop',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                 ],
               ),
@@ -193,7 +194,10 @@ class _DesktopRail extends StatelessWidget {
 
             Expanded(
               child: ListView.builder(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 12,
+                ),
                 itemCount: values.length,
                 itemBuilder: (context, index) {
                   final dest = values[index];
@@ -234,7 +238,10 @@ class _DesktopRail extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 150),
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 12,
+                        ),
                         decoration: BoxDecoration(
                           color: isSelected
                               ? theme.colorScheme.primary.withValues(alpha: 0.1)
@@ -243,10 +250,12 @@ class _DesktopRail extends StatelessWidget {
                           boxShadow: isSelected
                               ? [
                                   BoxShadow(
-                                    color: theme.colorScheme.primary.withValues(alpha: 0.05),
+                                    color: theme.colorScheme.primary.withValues(
+                                      alpha: 0.05,
+                                    ),
                                     blurRadius: 8,
                                     offset: const Offset(0, 2),
-                                  )
+                                  ),
                                 ]
                               : null,
                         ),
@@ -266,7 +275,9 @@ class _DesktopRail extends StatelessWidget {
                                 color: isSelected
                                     ? theme.colorScheme.primary
                                     : theme.colorScheme.onSurfaceVariant,
-                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                fontWeight: isSelected
+                                    ? FontWeight.w700
+                                    : FontWeight.w500,
                                 fontSize: 14,
                               ),
                             ),
@@ -331,37 +342,6 @@ NavigationDestination _navigationDestinationFor(AppDestination destination) {
   }
 }
 
-NavigationRailDestination _navigationRailDestinationFor(
-  AppDestination destination,
-) {
-  switch (destination) {
-    case AppDestination.send:
-      return const NavigationRailDestination(
-        icon: Icon(Icons.send_outlined),
-        selectedIcon: Icon(Icons.send_rounded),
-        label: Text('Send'),
-      );
-    case AppDestination.inbox:
-      return const NavigationRailDestination(
-        icon: Icon(Icons.inbox_outlined),
-        selectedIcon: Icon(Icons.inbox_rounded),
-        label: Text('Mailbox'),
-      );
-    case AppDestination.transfers:
-      return const NavigationRailDestination(
-        icon: Icon(Icons.sync_alt_outlined),
-        selectedIcon: Icon(Icons.sync_alt_rounded),
-        label: Text('Transfers'),
-      );
-    case AppDestination.settings:
-      return const NavigationRailDestination(
-        icon: Icon(Icons.tune_outlined),
-        selectedIcon: Icon(Icons.tune_rounded),
-        label: Text('Settings'),
-      );
-  }
-}
-
 class _MainWorkspace extends StatelessWidget {
   const _MainWorkspace({required this.store});
 
@@ -417,7 +397,8 @@ class _SendPane extends StatelessWidget {
             selectedPeerLabel: selectedPeerLabel,
             onAddFiles: store.addFilesToSendQueue,
             onAddFolder: Platform.isIOS ? null : store.addDirectoryToSendQueue,
-            onAddPhotos: (Platform.isIOS || Platform.isAndroid || Platform.isMacOS)
+            onAddPhotos:
+                (Platform.isIOS || Platform.isAndroid || Platform.isMacOS)
                 ? store.addPhotosToSendQueue
                 : null,
             onClear: store.clearPendingSendItems,
@@ -443,9 +424,7 @@ class _SendPane extends StatelessWidget {
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      color: selected
-                          ? const Color(0xFFFEF7EE)
-                          : Colors.white,
+                      color: selected ? const Color(0xFFFEF7EE) : Colors.white,
                       border: Border.all(
                         color: selected
                             ? const Color(0xFFE1B48A)
@@ -926,54 +905,64 @@ class _SettingsPane extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.symmetric(horizontal: 16),
               children: [
-                  if (device != null) ...[
-                    _DeviceSettingsCard(
-                      store: store,
-                      deviceName: device.deviceName,
-                      authSource: device.authSource,
-                    ),
-                    const SizedBox(height: 14),
-                  ],
-                  if (!Platform.isIOS)
-                    _DownloadDirectoryCard(
-                      store: store,
-                      currentPath:
-                          preferredDownloadDir ??
-                          platformPaths.downloadDir ??
-                          'Choose a folder before receiving',
-                      statusMessage: downloadStatus,
-                    ),
-                  if (!Platform.isIOS) const SizedBox(height: 14),
-                  _AutoReceiveCard(store: store),
+                if (device != null) ...[
+                  _DeviceSettingsCard(
+                    store: store,
+                    deviceName: device.deviceName,
+                    authSource: device.authSource,
+                  ),
                   const SizedBox(height: 14),
-                  _NavigateAfterTransferCard(store: store),
-                  const SizedBox(height: 14),
-                  _PollIntervalCard(store: store),
-                  const SizedBox(height: 14),
-                  _PasswordCard(store: store),
-                  const SizedBox(height: 14),
-                  if (Platform.isAndroid) ...[
-                    const _BackgroundServiceCard(),
-                    const SizedBox(height: 14),
-                  ],
-                  if (kDebugMode && !Platform.isIOS && !Platform.isAndroid) ...[
-                    const _OpenDataFolderCard(),
-                    const SizedBox(height: 14),
-                  ],
-                  _SignOutCard(store: store),
-                  if (lastError != null) ...[
-                    const SizedBox(height: 14),
-                    _InfoCard(
-                      title: 'Latest Error',
-                      body: lastError,
-                      icon: Icons.warning_amber_rounded,
-                    ),
-                  ],
                 ],
-              ),
+                if (!Platform.isIOS)
+                  _DownloadDirectoryCard(
+                    store: store,
+                    currentPath:
+                        preferredDownloadDir ??
+                        platformPaths.downloadDir ??
+                        'Choose a folder before receiving',
+                    statusMessage: downloadStatus,
+                  ),
+                if (!Platform.isIOS) const SizedBox(height: 14),
+                _AutoReceiveCard(store: store),
+                const SizedBox(height: 14),
+                _NavigateAfterTransferCard(store: store),
+                const SizedBox(height: 14),
+                if (Platform.isAndroid || Platform.isIOS) ...[
+                  _KeepScreenOnCard(store: store),
+                  const SizedBox(height: 14),
+                ],
+                _PollIntervalCard(store: store),
+                const SizedBox(height: 14),
+                _PasswordCard(store: store),
+                const SizedBox(height: 14),
+                const _SavedPasswordCard(),
+                const SizedBox(height: 14),
+                if (!Platform.isIOS && !Platform.isAndroid) ...[
+                  const _AutoStartCard(),
+                  const SizedBox(height: 14),
+                ],
+                if (Platform.isAndroid) ...[
+                  const _BackgroundServiceCard(),
+                  const SizedBox(height: 14),
+                ],
+                if (kDebugMode && !Platform.isIOS && !Platform.isAndroid) ...[
+                  const _OpenDataFolderCard(),
+                  const SizedBox(height: 14),
+                ],
+                _SignOutCard(store: store),
+                if (lastError != null) ...[
+                  const SizedBox(height: 14),
+                  _InfoCard(
+                    title: 'Latest Error',
+                    body: lastError,
+                    icon: Icons.warning_amber_rounded,
+                  ),
+                ],
+              ],
             ),
-          ],
-        );
+          ),
+        ],
+      );
     });
   }
 }
@@ -1130,7 +1119,9 @@ class _DeviceSettingsCardState extends State<_DeviceSettingsCard> {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+            color: Theme.of(
+              context,
+            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
           ),
         ),
         child: Padding(
@@ -1183,9 +1174,15 @@ class _DeviceSettingsCardState extends State<_DeviceSettingsCard> {
                   onTap: _startEditing,
                   child: Container(
                     width: double.infinity,
-                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 12,
+                    ),
                     decoration: BoxDecoration(
-                      color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.4),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .surfaceContainerHighest
+                          .withValues(alpha: 0.4),
                       borderRadius: BorderRadius.circular(10),
                     ),
                     child: Row(
@@ -1196,7 +1193,11 @@ class _DeviceSettingsCardState extends State<_DeviceSettingsCard> {
                             style: const TextStyle(fontSize: 15),
                           ),
                         ),
-                        const Icon(Icons.edit_rounded, size: 16, color: Color(0xFF8A7E6F)),
+                        const Icon(
+                          Icons.edit_rounded,
+                          size: 16,
+                          color: Color(0xFF8A7E6F),
+                        ),
                       ],
                     ),
                   ),
@@ -1329,10 +1330,7 @@ class _PasswordCardState extends State<_PasswordCard> {
                   padding: EdgeInsets.only(top: 4),
                   child: Text(
                     'Change your cloud password. All device keys will be re-encrypted.',
-                    style: TextStyle(
-                      color: Color(0xFF5C6A64),
-                      fontSize: 13,
-                    ),
+                    style: TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
                   ),
                 ),
               if (_editing) ...[
@@ -1410,6 +1408,129 @@ class _PasswordCardState extends State<_PasswordCard> {
   }
 }
 
+class _SavedPasswordCard extends StatefulWidget {
+  const _SavedPasswordCard();
+
+  @override
+  State<_SavedPasswordCard> createState() => _SavedPasswordCardState();
+}
+
+class _SavedPasswordCardState extends State<_SavedPasswordCard> {
+  late bool _hasSaved = rust_api.hasSavedKey();
+
+  void _toggle() {
+    try {
+      if (_hasSaved) {
+        rust_api.clearSavedKey();
+      } else {
+        rust_api.saveAutoUnlockKey();
+      }
+      setState(() => _hasSaved = rust_api.hasSavedKey());
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              _hasSaved
+                  ? 'Password saved. The app will auto-unlock on next launch.'
+                  : 'Saved password cleared.',
+            ),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+          ),
+        );
+    } catch (e) {
+      ScaffoldMessenger.of(context)
+        ..clearSnackBars()
+        ..showSnackBar(
+          SnackBar(
+            content: Text('Failed: $e'),
+            behavior: SnackBarBehavior.floating,
+            margin: const EdgeInsets.fromLTRB(16, 0, 16, 24),
+          ),
+        );
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: Color(0xFFE7DED0)),
+      ),
+      child: SwitchListTile(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+        secondary: const Icon(Icons.key_rounded, size: 22),
+        title: const Text(
+          'Remember Password',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        ),
+        subtitle: Text(
+          _hasSaved
+              ? 'The device key is saved. Auto-unlock is enabled.'
+              : 'Save the device key so password is not required on next launch.',
+          style: const TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
+        ),
+        value: _hasSaved,
+        onChanged: (_) => _toggle(),
+      ),
+    );
+  }
+}
+
+class _AutoStartCard extends StatefulWidget {
+  const _AutoStartCard();
+
+  @override
+  State<_AutoStartCard> createState() => _AutoStartCardState();
+}
+
+class _AutoStartCardState extends State<_AutoStartCard> {
+  bool _enabled = startup.autoStartup;
+  bool _available = startup.autoStartupAvailable;
+
+  Future<void> _toggle(bool value) async {
+    await startup.setAutoStartup(value);
+    setState(() {
+      _enabled = startup.autoStartup;
+      _available = startup.autoStartupAvailable;
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Card(
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: const BorderSide(color: Color(0xFFE7DED0)),
+      ),
+      child: SwitchListTile(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 6),
+        secondary: Icon(_enabled ? Icons.power : Icons.power_off, size: 22),
+        title: const Text(
+          'Launch at Startup',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
+        ),
+        subtitle: Text(
+          !_available
+              ? 'This platform integration is not wired up yet for the current build.'
+              : _enabled
+              ? 'The app will start automatically when you log in.'
+              : 'Enable to start the app automatically at system boot.',
+          style: const TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
+        ),
+        value: _enabled,
+        onChanged: _available ? _toggle : null,
+      ),
+    );
+  }
+}
+
 class _OpenDataFolderCard extends StatelessWidget {
   const _OpenDataFolderCard();
 
@@ -1458,10 +1579,7 @@ class _OpenDataFolderCard extends StatelessWidget {
                     SizedBox(height: 4),
                     Text(
                       'Open the app configuration directory in the file manager. (Debug only)',
-                      style: TextStyle(
-                        color: Color(0xFF5C6A64),
-                        fontSize: 13,
-                      ),
+                      style: TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
                     ),
                   ],
                 ),
@@ -1547,10 +1665,7 @@ class _BackgroundServiceCardState extends State<_BackgroundServiceCard> {
                 Expanded(
                   child: Text(
                     'Background',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                 ),
               ],
@@ -1572,10 +1687,7 @@ class _BackgroundServiceCardState extends State<_BackgroundServiceCard> {
                 _ignoringBattery
                     ? 'Battery optimization is disabled. The app can run in the background.'
                     : 'Disable battery optimization to prevent background transfers from being interrupted.',
-                style: const TextStyle(
-                  color: Color(0xFF5C6A64),
-                  fontSize: 13,
-                ),
+                style: const TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
               ),
               const SizedBox(height: 12),
               if (!_ignoringBattery)
@@ -1626,7 +1738,9 @@ class _SignOutCard extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+            color: Theme.of(
+              context,
+            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
           ),
         ),
         child: Padding(
@@ -1758,7 +1872,9 @@ class _DownloadDirectoryCard extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
           side: BorderSide(
-            color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+            color: Theme.of(
+              context,
+            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
           ),
         ),
         child: Padding(
@@ -1780,7 +1896,10 @@ class _DownloadDirectoryCard extends StatelessWidget {
                         currentPath,
                         maxLines: 2,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
+                        style: const TextStyle(
+                          color: Color(0xFF5C6A64),
+                          fontSize: 13,
+                        ),
                       ),
                     ),
                   ],
@@ -1998,7 +2117,9 @@ class _PollIntervalCardState extends State<_PollIntervalCard> {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(16),
         side: BorderSide(
-          color: Theme.of(context).colorScheme.outlineVariant.withValues(alpha: 0.5),
+          color: Theme.of(
+            context,
+          ).colorScheme.outlineVariant.withValues(alpha: 0.5),
         ),
       ),
       child: InkWell(
@@ -2022,13 +2143,18 @@ class _PollIntervalCardState extends State<_PollIntervalCard> {
                         const SizedBox(height: 4),
                         Text(
                           '${seconds}s — how often to check for new files.',
-                          style: const TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
+                          style: const TextStyle(
+                            color: Color(0xFF5C6A64),
+                            fontSize: 13,
+                          ),
                         ),
                       ],
                     ),
                   ),
                   Icon(
-                    _editing ? Icons.expand_less_rounded : Icons.expand_more_rounded,
+                    _editing
+                        ? Icons.expand_less_rounded
+                        : Icons.expand_more_rounded,
                     color: const Color(0xFF8A7E6F),
                   ),
                 ],
@@ -2114,6 +2240,37 @@ class _NavigateAfterTransferCard extends StatelessWidget {
   }
 }
 
+class _KeepScreenOnCard extends StatelessWidget {
+  final AppStore store;
+  const _KeepScreenOnCard({required this.store});
+
+  @override
+  Widget build(BuildContext context) {
+    final enabled = store.keepScreenOnDuringTransfer.watch(context);
+    return Card(
+      elevation: 0,
+      margin: EdgeInsets.zero,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(16),
+        side: BorderSide(
+          color: Theme.of(
+            context,
+          ).colorScheme.outlineVariant.withValues(alpha: 0.5),
+        ),
+      ),
+      child: SwitchListTile(
+        title: const Text('Keep Screen On During Transfer'),
+        subtitle: const Text(
+          'Prevent the screen from turning off while files are being sent or received.',
+        ),
+        value: enabled,
+        onChanged: (val) => store.toggleKeepScreenOnDuringTransfer(val),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      ),
+    );
+  }
+}
+
 class _InboxPane extends StatelessWidget {
   final AppStore store;
 
@@ -2164,8 +2321,9 @@ class _InboxPane extends StatelessWidget {
                 ),
               ),
               FilledButton.icon(
-                onPressed:
-                    receiveInProgress || selectedCount == 0 ? null : store.receiveSelectedMailboxJobs,
+                onPressed: receiveInProgress || selectedCount == 0
+                    ? null
+                    : store.receiveSelectedMailboxJobs,
                 icon: receiveInProgress
                     ? const SizedBox(
                         width: 16,
@@ -2177,9 +2335,7 @@ class _InboxPane extends StatelessWidget {
                       )
                     : const Icon(Icons.download_rounded, size: 18),
                 label: Text(
-                  selectedCount == 0
-                      ? 'Receive'
-                      : 'Receive $selectedCount',
+                  selectedCount == 0 ? 'Receive' : 'Receive $selectedCount',
                 ),
               ),
             ],
@@ -2196,7 +2352,10 @@ class _InboxPane extends StatelessWidget {
                   ),
                 )
               : ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 16,
+                    vertical: 8,
+                  ),
                   itemCount: sortedJobs.length,
                   separatorBuilder: (_, _) => const SizedBox(height: 8),
                   itemBuilder: (context, index) {
@@ -2207,7 +2366,9 @@ class _InboxPane extends StatelessWidget {
                       onTap: receiveInProgress
                           ? null
                           : () => store.toggleMailboxJobSelection(
-                              job.id, !selected),
+                              job.id,
+                              !selected,
+                            ),
                       child: Container(
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
@@ -2228,7 +2389,9 @@ class _InboxPane extends StatelessWidget {
                               onChanged: receiveInProgress
                                   ? null
                                   : (value) => store.toggleMailboxJobSelection(
-                                      job.id, value ?? false),
+                                      job.id,
+                                      value ?? false,
+                                    ),
                             ),
                             const SizedBox(width: 8),
                             Expanded(

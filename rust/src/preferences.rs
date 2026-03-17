@@ -14,6 +14,8 @@ struct AppSettings {
     navigate_after_transfer: bool,
     #[serde(default = "default_poll_interval")]
     poll_interval_seconds: u32,
+    #[serde(default = "default_true")]
+    keep_screen_on_during_transfer: bool,
 }
 
 fn default_true() -> bool {
@@ -31,6 +33,7 @@ impl Default for AppSettings {
             auto_receive_enabled: false,
             navigate_after_transfer: true,
             poll_interval_seconds: 30,
+            keep_screen_on_during_transfer: true,
         }
     }
 }
@@ -97,6 +100,17 @@ pub fn set_poll_interval_seconds(seconds: u32) -> anyhow::Result<u32> {
     settings.poll_interval_seconds = clamped;
     save_settings(&settings)?;
     Ok(clamped)
+}
+
+pub fn keep_screen_on_during_transfer() -> anyhow::Result<bool> {
+    Ok(load_settings()?.keep_screen_on_during_transfer)
+}
+
+pub fn set_keep_screen_on_during_transfer(enabled: bool) -> anyhow::Result<bool> {
+    let mut settings = load_settings()?;
+    settings.keep_screen_on_during_transfer = enabled;
+    save_settings(&settings)?;
+    Ok(enabled)
 }
 
 fn load_settings() -> anyhow::Result<AppSettings> {

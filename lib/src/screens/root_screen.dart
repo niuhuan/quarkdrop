@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:quarkdrop/src/rust/api/app.dart' as rust_api;
 import 'package:quarkdrop/src/screens/home_shell.dart';
 import 'package:quarkdrop/src/screens/login_screen.dart';
 import 'package:quarkdrop/src/state/app_store.dart';
@@ -295,6 +296,7 @@ class _PasswordScreenState extends State<_PasswordScreen> {
   final _passwordController = TextEditingController();
   final _confirmController = TextEditingController();
   bool _submitting = false;
+  bool _rememberPassword = false;
   String? _error;
 
   bool get _isCreating {
@@ -332,6 +334,9 @@ class _PasswordScreenState extends State<_PasswordScreen> {
         await widget.store.createCloudPassword(password);
       } else {
         await widget.store.verifyCloudPassword(password);
+        if (_rememberPassword) {
+          rust_api.saveAutoUnlockKey();
+        }
       }
     } catch (e) {
       setState(() => _error = e.toString());
@@ -390,6 +395,22 @@ class _PasswordScreenState extends State<_PasswordScreen> {
                       labelText: 'Confirm Password',
                       border: OutlineInputBorder(),
                     ),
+                  ),
+                ],
+                if (!_isCreating) ...[
+                  const SizedBox(height: 10),
+                  CheckboxListTile(
+                    contentPadding: EdgeInsets.zero,
+                    value: _rememberPassword,
+                    onChanged: _submitting
+                        ? null
+                        : (v) => setState(() => _rememberPassword = v ?? false),
+                    title: const Text(
+                      'Remember password on this device',
+                      style: TextStyle(fontSize: 14),
+                    ),
+                    controlAffinity: ListTileControlAffinity.leading,
+                    dense: true,
                   ),
                 ],
                 if (_error != null) ...[

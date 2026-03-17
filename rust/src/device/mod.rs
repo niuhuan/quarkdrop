@@ -10,6 +10,7 @@ use rand::rngs::OsRng;
 use rand::RngCore;
 use serde::{Deserialize, Serialize};
 use sha1::{Digest as Sha1Digest, Sha1};
+use sha2::Sha256;
 use std::env;
 use std::fs;
 use std::sync::{OnceLock, RwLock};
@@ -455,6 +456,9 @@ pub async fn change_cloud_password(
         upload_small_bytes(quark, &entry.fid, DEVICE_METADATA_FILE_NAME, new_payload).await?;
     }
 
+    // Clear saved auto-unlock key (user must re-save after changing password)
+    let _ = clear_saved_key();
+
     Ok(())
 }
 
@@ -462,6 +466,84 @@ pub fn lock_key() {
     *unlocked_key_cell()
         .write()
         .expect("unlocked key lock poisoned") = None;
+}
+
+/// Derive a local encryption key from the device_id using SHA-256.
+fn device_local_key(device_id: &str) -> [u8; 32] {
+    use sha2::Digest;
+    let mut hasher = Sha256::new();
+    hasher.update(b"quarkdrop-saved-key-v1:");
+    hasher.update(device_id.as_bytes());
+    let result = hasher.finalize();
+    let mut key = [0u8; 32];
+    key.copy_from_slice(&result);
+    key
+}
+
+/// Save the currently unlocked private key to a local file, encrypted with
+/// a key derived from the device_id. This is the "intermediate state" —
+/// not the password itself, but the unlocked key encrypted for this device.
+pub fn save_auto_unlock_key() -> anyhow::Result<()> {
+    let secret = load_device_private_key()?;
+    let paths = app_paths()?;
+    let device_id = fs::read_to_string(&paths.device_id_file)?
+        .trim()
+        .to_string();
+    let local_key = device_local_key(&device_id);
+    let cipher = ChaCha20Poly1305::new(Key::from_slice(&local_key));
+    let mut nonce_bytes = [0u8; 12];
+    OsRng.fill_bytes(&mut nonce_bytes);
+    let ciphertext = cipher
+        .encrypt(Nonce::from_slice(&nonce_bytes), secret.as_ref())
+        .map_err(|e| anyhow::anyhow!("failed to encrypt saved key: {e}"))?;
+    let mut blob = Vec::with_capacity(12 + ciphertext.len());
+    blob.extend_from_slice(&nonce_bytes);
+    blob.extend_from_slice(&ciphertext);
+    fs::write(&paths.saved_key_file, blob)?;
+    Ok(())
+}
+
+/// Try to load and decrypt the saved auto-unlock key. On success sets
+/// `UNLOCKED_KEY` and `CLOUD_VERIFY_CACHED` and returns `true`.
+pub fn try_auto_unlock() -> anyhow::Result<bool> {
+    let paths = app_paths()?;
+    if !paths.saved_key_file.exists() {
+        return Ok(false);
+    }
+    let blob = fs::read(&paths.saved_key_file)?;
+    anyhow::ensure!(blob.len() > 12, "saved key file is too short");
+    let nonce_bytes = &blob[..12];
+    let ciphertext = &blob[12..];
+    let device_id = fs::read_to_string(&paths.device_id_file)?
+        .trim()
+        .to_string();
+    let local_key = device_local_key(&device_id);
+    let cipher = ChaCha20Poly1305::new(Key::from_slice(&local_key));
+    let plaintext = cipher
+        .decrypt(Nonce::from_slice(nonce_bytes), ciphertext)
+        .map_err(|_| anyhow::anyhow!("saved key decryption failed"))?;
+    anyhow::ensure!(plaintext.len() == 32, "saved key must be 32 bytes");
+    let mut key = [0u8; 32];
+    key.copy_from_slice(&plaintext);
+    *unlocked_key_cell()
+        .write()
+        .expect("unlocked key lock poisoned") = Some(key);
+    *cloud_verify_cache()
+        .write()
+        .expect("cloud verify cache poisoned") = Some(true);
+    Ok(true)
+}
+
+pub fn has_saved_key() -> bool {
+    app_paths()
+        .map(|p| p.saved_key_file.exists())
+        .unwrap_or(false)
+}
+
+pub fn clear_saved_key() -> anyhow::Result<()> {
+    let paths = app_paths()?;
+    let _ = fs::remove_file(&paths.saved_key_file);
+    Ok(())
 }
 
 pub(crate) fn local_public_key_hex() -> anyhow::Result<String> {
@@ -780,6 +862,7 @@ pub fn clear_local_device_files() -> anyhow::Result<()> {
     let _ = fs::remove_file(&paths.device_id_file);
     let _ = fs::remove_file(&paths.device_name_file);
     let _ = fs::remove_file(&paths.device_private_key_file);
+    let _ = fs::remove_file(&paths.saved_key_file);
     lock_key();
     reset_cloud_verify_cache();
     Ok(())

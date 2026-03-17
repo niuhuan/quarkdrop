@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:io';
 import 'package:file_selector/file_selector.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:quarkdrop/src/configs/screen_wakelock.dart';
 import 'package:quarkdrop/src/models/inbox_job.dart';
 import 'package:quarkdrop/src/models/pending_send_item.dart';
 import 'package:quarkdrop/src/models/transfer_job.dart';
@@ -99,6 +100,10 @@ class AppStore {
     30,
     debugLabel: 'pollIntervalSeconds',
   );
+  final keepScreenOnDuringTransfer = signal<bool>(
+    true,
+    debugLabel: 'keepScreenOnDuringTransfer',
+  );
   final downloadDirectorySaving = signal(
     false,
     debugLabel: 'downloadDirectorySaving',
@@ -169,11 +174,16 @@ class AppStore {
   }, debugLabel: 'selectedPeerDevice');
 
   Future<void> bootstrap() async {
-    await _loadShell(showBooting: true);
+    await _loadShell();
   }
 
   Future<void> refresh() async {
-    await _loadShell(showBooting: false);
+    try {
+      final snapshot = await rust_api.shellSnapshot();
+      _applySnapshot(snapshot);
+    } catch (error) {
+      lastErrorMessage.value = error.toString();
+    }
   }
 
   void _checkPolling() {
@@ -194,6 +204,8 @@ class AppStore {
       _pollingTimer?.cancel();
       _pollingTimer = null;
     }
+    // Keep screen on during active transfers (mobile only)
+    ScreenWakelock.setKeepScreenOn(active && keepScreenOnDuringTransfer.value);
     // Mailbox polling - always active when authenticated
     if (bootstrapPhase.value == BootstrapPhase.ready && _mailboxTimer == null) {
       final interval = pollIntervalSeconds.value.clamp(5, 300);
@@ -315,7 +327,7 @@ class AppStore {
       selectedMailboxJobIds.value = <String>{};
       transferActionStatusMessage.value = null;
       lastErrorMessage.value = null;
-      await _loadShell(showBooting: false);
+      await _loadShell();
     } catch (error) {
       lastErrorMessage.value = error.toString();
     } finally {
@@ -407,6 +419,16 @@ class AppStore {
       // Restart mailbox timer with new interval
       _mailboxTimer?.cancel();
       _mailboxTimer = null;
+      _checkPolling();
+    } catch (error) {
+      lastErrorMessage.value = error.toString();
+    }
+  }
+
+  void toggleKeepScreenOnDuringTransfer(bool enabled) {
+    try {
+      rust_api.setKeepScreenOnDuringTransfer(enabled: enabled);
+      keepScreenOnDuringTransfer.value = enabled;
       _checkPolling();
     } catch (error) {
       lastErrorMessage.value = error.toString();
@@ -901,10 +923,8 @@ class AppStore {
     }
   }
 
-  Future<void> _loadShell({required bool showBooting}) async {
-    if (showBooting) {
-      bootstrapPhase.value = BootstrapPhase.booting;
-    }
+  Future<void> _loadShell() async {
+    bootstrapPhase.value = BootstrapPhase.booting;
     lastErrorMessage.value = null;
     quarkLoginUrl.value = rust_api.quarkLoginUrl();
 
@@ -920,6 +940,9 @@ class AppStore {
       } catch (_) {}
       try {
         pollIntervalSeconds.value = rust_api.pollIntervalSeconds();
+      } catch (_) {}
+      try {
+        keepScreenOnDuringTransfer.value = rust_api.keepScreenOnDuringTransfer();
       } catch (_) {}
       final snapshot = await rust_api.shellSnapshot();
       _applySnapshot(snapshot);
