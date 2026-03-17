@@ -55,12 +55,12 @@ class _InboxPane extends StatelessWidget {
                     ? null
                     : store.receiveSelectedMailboxJobs,
                 icon: receiveInProgress
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 16,
                         height: 16,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.surface,
                         ),
                       )
                     : const Icon(Icons.download_rounded, size: 18),

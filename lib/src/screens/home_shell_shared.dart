@@ -16,7 +16,7 @@ class _PaneTitle extends StatelessWidget {
           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
         ),
         const SizedBox(height: 6),
-        Text(subtitle, style: const TextStyle(color: Color(0xFF5C6A64))),
+        Text(subtitle, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
       ],
     );
   }
@@ -60,7 +60,7 @@ class _DirectionChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: const Color(0xFFF1ECE3),
+        color: Theme.of(context).colorScheme.secondaryContainer,
         borderRadius: BorderRadius.circular(999),
       ),
       child: Row(
@@ -91,7 +91,7 @@ class _InfoCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F3EB),
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(22),
       ),
       child: Row(
@@ -101,7 +101,7 @@ class _InfoCard extends StatelessWidget {
             width: 44,
             height: 44,
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.8),
+              color: Theme.of(context).colorScheme.surface,
               borderRadius: BorderRadius.circular(14),
             ),
             child: Icon(icon, size: 22),
@@ -148,7 +148,7 @@ class _EmptyPaneMessage extends StatelessWidget {
               width: 66,
               height: 66,
               decoration: BoxDecoration(
-                color: const Color(0xFFF7F2E9),
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(22),
               ),
               child: const Icon(Icons.inbox_outlined, size: 30),
@@ -163,7 +163,7 @@ class _EmptyPaneMessage extends StatelessWidget {
             Text(
               body,
               textAlign: TextAlign.center,
-              style: const TextStyle(color: Color(0xFF586961), height: 1.5),
+              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.5),
             ),
           ],
         ),

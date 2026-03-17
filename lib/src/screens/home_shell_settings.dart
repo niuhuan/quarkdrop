@@ -1112,7 +1112,7 @@ class _ThemeModeCard extends StatelessWidget {
                     vertical: 8,
                   ),
                   child: Text(
-                    l10n.actionChooseFolder,
+                    l10n.actionSelect,
                     style: TextStyle(
                       color: Theme.of(context).colorScheme.onSecondaryContainer,
                       fontWeight: FontWeight.w600,
@@ -1623,16 +1623,23 @@ class _MinimizeToTrayCard extends StatelessWidget {
   }
 }
 
-class _PeerDiscoveryCard extends StatelessWidget {
+class _PeerDiscoveryCard extends StatefulWidget {
   const _PeerDiscoveryCard({required this.store});
 
   final AppStore store;
 
   @override
+  State<_PeerDiscoveryCard> createState() => _PeerDiscoveryCardState();
+}
+
+class _PeerDiscoveryCardState extends State<_PeerDiscoveryCard> {
+  bool _editing = false;
+
+  @override
   Widget build(BuildContext context) {
     return Watch((context) {
       final l10n = context.l10n;
-      final value = store.peerDiscoveryIntervalMinutes.value;
+      final value = widget.store.peerDiscoveryIntervalMinutes.value;
       return Card(
         elevation: 0,
         margin: EdgeInsets.zero,
@@ -1644,64 +1651,94 @@ class _PeerDiscoveryCard extends StatelessWidget {
             ).colorScheme.outlineVariant.withValues(alpha: 0.5),
           ),
         ),
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.settingPeerDiscoveryTitle,
-                style: const TextStyle(
-                  fontWeight: FontWeight.w600,
-                  fontSize: 15,
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: () {
+            setState(() {
+              _editing = !_editing;
+            });
+          },
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            l10n.settingPeerDiscoveryTitle,
+                            style: const TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            l10n.settingPeerDiscoveryDescription,
+                            style: TextStyle(
+                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              fontSize: 13,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(width: 16),
+                    Icon(
+                      _editing ? Icons.expand_less : Icons.expand_more,
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
+                  ],
                 ),
-              ),
-              const SizedBox(height: 4),
-              Text(
-                l10n.settingPeerDiscoveryDescription,
-                style: const TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                children: [
-                  Expanded(
-                    child: SliderTheme(
-                      data: SliderTheme.of(context).copyWith(
-                        trackHeight: 4,
-                        thumbShape: const RoundSliderThumbShape(
-                          enabledThumbRadius: 8,
+                if (_editing) ...[
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: SliderTheme(
+                          data: SliderTheme.of(context).copyWith(
+                            trackHeight: 4,
+                            thumbShape: const RoundSliderThumbShape(
+                              enabledThumbRadius: 8,
+                            ),
+                            overlayShape: const RoundSliderOverlayShape(
+                              overlayRadius: 16,
+                            ),
+                          ),
+                          child: Slider(
+                            value: value.toDouble(),
+                            min: 1,
+                            max: 60,
+                            divisions: 59,
+                            onChanged: (v) {
+                              widget.store.setPeerDiscoveryIntervalMinutes(v.round());
+                            },
+                          ),
                         ),
-                        overlayShape: const RoundSliderOverlayShape(
-                          overlayRadius: 16,
+                      ),
+                      const SizedBox(width: 16),
+                      SizedBox(
+                        width: 48,
+                        child: Text(
+                          '$value',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                            fontFeatures: [FontFeature.tabularFigures()],
+                          ),
+                          textAlign: TextAlign.end,
                         ),
                       ),
-                      child: Slider(
-                        value: value.toDouble(),
-                        min: 1,
-                        max: 60,
-                        divisions: 59,
-                        onChanged: (v) {
-                          store.setPeerDiscoveryIntervalMinutes(v.round());
-                        },
-                      ),
-                    ),
-                  ),
-                  const SizedBox(width: 16),
-                  SizedBox(
-                    width: 48,
-                    child: Text(
-                      '$value',
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                        fontFeatures: [FontFeature.tabularFigures()],
-                      ),
-                      textAlign: TextAlign.end,
-                    ),
+                    ],
                   ),
                 ],
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       );

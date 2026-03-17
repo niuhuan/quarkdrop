@@ -54,7 +54,7 @@ class _SendPane extends StatelessWidget {
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      color: selected ? const Color(0xFFFEF7EE) : Colors.white,
+                      color: selected ? Theme.of(context).colorScheme.secondaryContainer : Theme.of(context).colorScheme.surface,
                       border: Border.all(
                         color: selected
                             ? const Color(0xFFE1B48A)
@@ -138,7 +138,7 @@ class _SendComposerCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F3EB),
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(22),
       ),
       child: Column(
@@ -183,12 +183,12 @@ class _SendComposerCard extends StatelessWidget {
                     ? null
                     : onSend,
                 icon: sendInProgress
-                    ? const SizedBox(
+                    ? SizedBox(
                         width: 16,
                         height: 16,
                         child: CircularProgressIndicator(
                           strokeWidth: 2,
-                          color: Colors.white,
+                          color: Theme.of(context).colorScheme.surface,
                         ),
                       )
                     : const Icon(Icons.send_rounded),

@@ -201,9 +201,9 @@ class _TransferListTile extends StatelessWidget {
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(22),
-          color: selected ? const Color(0xFFFEF7EE) : Colors.white,
+          color: selected ? Theme.of(context).colorScheme.secondaryContainer : Theme.of(context).colorScheme.surface,
           border: Border.all(
-            color: selected ? const Color(0xFFE1B48A) : const Color(0xFFE7DED0),
+            color: selected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outlineVariant,
           ),
         ),
         child: Column(
@@ -218,7 +218,7 @@ class _TransferListTile extends StatelessWidget {
                     job.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: const TextStyle(
+                    style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
                     ),
@@ -231,7 +231,7 @@ class _TransferListTile extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 10),
-            Text(job.subtitle, style: const TextStyle(height: 1.45)),
+            Text(job.subtitle, style: TextStyle(height: 1.45)),
             const SizedBox(height: 14),
             ClipRRect(
               borderRadius: BorderRadius.circular(999),
@@ -241,7 +241,7 @@ class _TransferListTile extends StatelessWidget {
                 valueColor: AlwaysStoppedAnimation<Color>(
                   _stageColor(job.stage),
                 ),
-                backgroundColor: const Color(0xFFE8E0D3),
+                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
               ),
             ),
             const SizedBox(height: 8),
@@ -250,14 +250,14 @@ class _TransferListTile extends StatelessWidget {
                 Expanded(
                   child: Text(
                     _progressLabel(context, job),
-                    style: const TextStyle(color: Color(0xFF5C6A64)),
+                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
                   ),
                 ),
                 if (job.sizeLabel.isNotEmpty)
                   Text(
                     job.sizeLabel,
-                    style: const TextStyle(
-                      color: Color(0xFF8A7E6F),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
                       fontSize: 13,
                       fontWeight: FontWeight.w600,
                     ),
@@ -293,9 +293,9 @@ class _TransferDetailCard extends StatelessWidget {
       return Container(
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
-          color: const Color(0xFFF9F4EC),
+          color: Theme.of(context).colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: const Color(0xFFE7DED0)),
+          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
         ),
         child: _EmptyPaneMessage(
           title: l10n.selectTransferTitle,
@@ -307,9 +307,9 @@ class _TransferDetailCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFFF9F4EC),
+        color: Theme.of(context).colorScheme.surfaceContainerLow,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: const Color(0xFFE7DED0)),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -328,7 +328,7 @@ class _TransferDetailCard extends StatelessWidget {
                   job!.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.w800,
                   ),
@@ -343,7 +343,7 @@ class _TransferDetailCard extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             job!.subtitle,
-            style: const TextStyle(height: 1.5, color: Color(0xFF5C6A64)),
+            style: TextStyle(height: 1.5, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 18),
           ClipRRect(
@@ -354,13 +354,13 @@ class _TransferDetailCard extends StatelessWidget {
               valueColor: AlwaysStoppedAnimation<Color>(
                 _stageColor(job!.stage),
               ),
-              backgroundColor: const Color(0xFFE8E0D3),
+              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
             ),
           ),
           const SizedBox(height: 10),
           Text(
             _progressLabel(context, job!),
-            style: const TextStyle(fontSize: 15, color: Color(0xFF5C6A64)),
+            style: TextStyle(fontSize: 15, color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
           const SizedBox(height: 18),
           Wrap(
@@ -433,14 +433,14 @@ class _DetailMetaChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Theme.of(context).colorScheme.surface,
         borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: const Color(0xFFE7DED0)),
+        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18, color: const Color(0xFF6A5C4D)),
+          Icon(icon, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
           const SizedBox(width: 8),
           Text(label),
         ],
