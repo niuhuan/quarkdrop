@@ -11,6 +11,7 @@ import 'package:quarkdrop/src/l10n/app_locale.dart';
 import 'package:quarkdrop/src/models/inbox_job.dart';
 import 'package:quarkdrop/src/models/pending_send_item.dart';
 import 'package:quarkdrop/src/models/transfer_job.dart';
+import 'package:quarkdrop/src/platform/ios_photo_picker.dart';
 import 'package:quarkdrop/src/platform/platform_paths.dart';
 import 'package:quarkdrop/src/rust/api/app.dart' as rust_api;
 import 'package:signals_flutter/signals_flutter.dart';

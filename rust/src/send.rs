@@ -114,6 +114,7 @@ pub async fn send_local_path(
     peer_device_id: &str,
     peer_label: &str,
     source_path: &str,
+    source_name: Option<&str>,
 ) -> anyhow::Result<String> {
     send_local_path_impl(
         quark,
@@ -122,6 +123,7 @@ pub async fn send_local_path(
         peer_device_id,
         peer_label,
         source_path,
+        source_name,
         None,
     )
     .await
@@ -139,6 +141,7 @@ pub async fn resume_send_task(
         &snapshot.counterpart_device_id,
         &snapshot.counterpart_label,
         &snapshot.local_path,
+        Some(&snapshot.display_name),
         Some(snapshot),
     )
     .await
@@ -151,10 +154,11 @@ async fn send_local_path_impl(
     peer_device_id: &str,
     peer_label: &str,
     source_path: &str,
+    source_name: Option<&str>,
     existing_task: Option<&TaskSnapshot>,
 ) -> anyhow::Result<String> {
     let source = Path::new(source_path);
-    let payload = collect_payload_plan(source)?;
+    let payload = collect_payload_plan(source, source_name)?;
     let payload_cipher = existing_task
         .and_then(|task| PayloadCipher::from_manifest_name(&task.protocol_name))
         .unwrap_or(PayloadCipher::EncryptedSizedV1);
@@ -413,16 +417,25 @@ async fn send_local_path_impl(
     }
 }
 
-fn collect_payload_plan(source: &Path) -> anyhow::Result<LocalPayloadPlan> {
+fn collect_payload_plan(
+    source: &Path,
+    source_name: Option<&str>,
+) -> anyhow::Result<LocalPayloadPlan> {
     let metadata = fs::metadata(source)?;
-    let root_name = source
-        .file_name()
-        .map(|value| value.to_string_lossy().into_owned())
+    let root_name = source_name
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .map(ToOwned::to_owned)
         .or_else(|| {
             source
-                .components()
-                .next_back()
-                .map(|value| value.as_os_str().to_string_lossy().into_owned())
+                .file_name()
+                .map(|value| value.to_string_lossy().into_owned())
+                .or_else(|| {
+                    source
+                        .components()
+                        .next_back()
+                        .map(|value| value.as_os_str().to_string_lossy().into_owned())
+                })
         })
         .filter(|value| !value.is_empty())
         .ok_or_else(|| anyhow::anyhow!("cannot determine file or folder name from path"))?;
@@ -915,7 +928,7 @@ pub(crate) async fn stage_partial_send_for_test(
     source_path: &str,
 ) -> anyhow::Result<TaskSnapshot> {
     let source = Path::new(source_path);
-    let payload = collect_payload_plan(source)?;
+    let payload = collect_payload_plan(source, None)?;
     anyhow::ensure!(
         payload.root_kind == "file",
         "partial send test currently expects a single file source"
@@ -1000,7 +1013,7 @@ mod tests {
         write(root.join("hello.txt"), b"abc").unwrap();
         write(root.join("docs/nested/readme.md"), b"xyz").unwrap();
 
-        let plan = collect_payload_plan(&root).unwrap();
+        let plan = collect_payload_plan(&root, None).unwrap();
         assert_eq!(plan.root_kind, "directory");
         assert_eq!(plan.total_size, 6);
         assert!(plan.entries.iter().any(|entry| {
@@ -1036,6 +1049,22 @@ mod tests {
         .unwrap();
         let sizes = blobs.into_iter().map(|blob| blob.size).collect::<Vec<_>>();
         assert_eq!(sizes, vec![4, 4, 3]);
+
+        std::fs::remove_file(root).unwrap();
+    }
+
+    #[test]
+    fn file_payload_prefers_explicit_source_name() {
+        let root = temp_test_dir("ios-cache-name");
+        write(&root, b"abc").unwrap();
+
+        let plan = collect_payload_plan(&root, Some("IMG_1234.HEIC")).unwrap();
+        assert_eq!(plan.root_kind, "file");
+        assert_eq!(plan.root_name, "IMG_1234.HEIC");
+        assert_eq!(
+            plan.entries[0].relative_path,
+            vec!["IMG_1234.HEIC".to_string()]
+        );
 
         std::fs::remove_file(root).unwrap();
     }

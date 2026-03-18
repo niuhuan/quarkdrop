@@ -166,6 +166,7 @@ abstract class RustLibApi extends BaseApi {
     required String peerDeviceId,
     required String peerLabel,
     required String sourcePath,
+    String? sourceName,
   });
 
   bool crateApiAppSetAutoReceiveEnabled({required bool enabled});
@@ -1169,6 +1170,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     required String peerDeviceId,
     required String peerLabel,
     required String sourcePath,
+    String? sourceName,
   }) {
     return handler.executeNormal(
       NormalTask(
@@ -1178,6 +1180,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           sse_encode_String(peerDeviceId, serializer);
           sse_encode_String(peerLabel, serializer);
           sse_encode_String(sourcePath, serializer);
+          sse_encode_opt_String(sourceName, serializer);
           pdeCallFfi(
             generalizedFrbRustBinding,
             serializer,
@@ -1190,7 +1193,13 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
           decodeErrorData: sse_decode_AnyhowException,
         ),
         constMeta: kCrateApiAppSendLocalPathConstMeta,
-        argValues: [peerMailboxFolderId, peerDeviceId, peerLabel, sourcePath],
+        argValues: [
+          peerMailboxFolderId,
+          peerDeviceId,
+          peerLabel,
+          sourcePath,
+          sourceName,
+        ],
         apiImpl: this,
       ),
     );
@@ -1203,6 +1212,7 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       "peerDeviceId",
       "peerLabel",
       "sourcePath",
+      "sourceName",
     ],
   );
 
@@ -1707,6 +1717,12 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   }
 
   @protected
+  String? dco_decode_opt_String(dynamic raw) {
+    // Codec=Dco (DartCObject based), see doc to use other codecs
+    return raw == null ? null : dco_decode_String(raw);
+  }
+
+  @protected
   PeerDevice dco_decode_peer_device(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
@@ -1954,6 +1970,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
       ans_.add(sse_decode_transfer_preview(deserializer));
     }
     return ans_;
+  }
+
+  @protected
+  String? sse_decode_opt_String(SseDeserializer deserializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    if (sse_decode_bool(deserializer)) {
+      return (sse_decode_String(deserializer));
+    } else {
+      return null;
+    }
   }
 
   @protected
@@ -2205,6 +2232,16 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     sse_encode_i_32(self.length, serializer);
     for (final item in self) {
       sse_encode_transfer_preview(item, serializer);
+    }
+  }
+
+  @protected
+  void sse_encode_opt_String(String? self, SseSerializer serializer) {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+
+    sse_encode_bool(self != null, serializer);
+    if (self != null) {
+      sse_encode_String(self, serializer);
     }
   }
 

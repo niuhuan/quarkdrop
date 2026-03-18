@@ -508,6 +508,7 @@ pub async fn send_local_path(
     peer_device_id: String,
     peer_label: String,
     source_path: String,
+    source_name: Option<String>,
 ) -> anyhow::Result<String> {
     let cookie_session = session::current_session();
     anyhow::ensure!(
@@ -526,6 +527,7 @@ pub async fn send_local_path(
         &peer_device_id,
         &peer_label,
         &source_path,
+        source_name.as_deref(),
     )
     .await
 }
@@ -728,6 +730,6 @@ pub async fn remove_peer_device(peer_device_id: String) -> anyhow::Result<()> {
     let quark = QuarkPan::builder()
         .cookie(cookie_session.raw_cookie)
         .prepare()?;
-    
+
     device::remove_peer_mailbox(&quark, &peer_device_id).await
 }

@@ -143,11 +143,13 @@ Future<String> sendLocalPath({
   required String peerDeviceId,
   required String peerLabel,
   required String sourcePath,
+  String? sourceName,
 }) => RustLib.instance.api.crateApiAppSendLocalPath(
   peerMailboxFolderId: peerMailboxFolderId,
   peerDeviceId: peerDeviceId,
   peerLabel: peerLabel,
   sourcePath: sourcePath,
+  sourceName: sourceName,
 );
 
 Future<String> receiveJob({

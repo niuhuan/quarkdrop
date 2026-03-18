@@ -17,28 +17,43 @@ extension AppStoreSendReceive on AppStore {
 
   Future<void> addPhotosToSendQueue() async {
     try {
-      final picker = ImagePicker();
-      List<XFile> images;
-      try {
-        images = await picker.pickMultiImage();
-      } catch (e) {
-        // Fallback for some iOS versions where full metadata causes an error without permissions
-        images = await picker.pickMultiImage(requestFullMetadata: false);
-      }
-      if (images.isEmpty) {
+      final items = Platform.isIOS
+          ? await pickImagesPreservingNames().then(
+              (images) => images
+                  .map(
+                    (image) => PendingSendItem(
+                      path: image.path,
+                      name: image.name,
+                      kind: PendingSendKind.file,
+                    ),
+                  )
+                  .toList(growable: false),
+            )
+          : await (() async {
+              final picker = ImagePicker();
+              List<XFile> images;
+              try {
+                images = await picker.pickMultiImage();
+              } catch (e) {
+                // Fallback for some iOS versions where full metadata causes an error without permissions
+                images = await picker.pickMultiImage(
+                  requestFullMetadata: false,
+                );
+              }
+              return images
+                  .map(
+                    (image) => PendingSendItem(
+                      path: image.path,
+                      name: image.name,
+                      kind: PendingSendKind.file,
+                    ),
+                  )
+                  .toList(growable: false);
+            })();
+      if (items.isEmpty) {
         return;
       }
-      _mergePendingSendItems(
-        images
-            .map(
-              (image) => PendingSendItem(
-                path: image.path,
-                name: image.name,
-                kind: PendingSendKind.file,
-              ),
-            )
-            .toList(growable: false),
-      );
+      _mergePendingSendItems(items);
     } catch (e) {
       lastErrorMessage.value = e.toString();
     }
@@ -135,6 +150,7 @@ extension AppStoreSendReceive on AppStore {
           peerDeviceId: peer.deviceId,
           peerLabel: peer.label,
           sourcePath: item.path,
+          sourceName: item.name,
         );
         await refresh();
         _focusTransferJobIds([jobId]);
