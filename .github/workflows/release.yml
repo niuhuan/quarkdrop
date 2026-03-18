@@ -160,7 +160,7 @@ jobs:
           wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x appimagetool-x86_64.AppImage
           ./appimagetool-x86_64.AppImage build/linux/x64/release/bundle/
-          mv quarkdrop-x86_64.AppImage quarkdrop-${{ needs.check-version.outputs.version }}-linux-x86_64.AppImage
+          mv *.AppImage quarkdrop-${{ needs.check-version.outputs.version }}-linux-x86_64.AppImage
 
       - name: Build Linux arm64
         if: matrix.platform == 'linux-aarch64'
@@ -171,7 +171,7 @@ jobs:
           wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-aarch64.AppImage
           chmod +x appimagetool-aarch64.AppImage
           ./appimagetool-aarch64.AppImage build/linux/arm64/release/bundle/
-          mv quarkdrop-aarch64.AppImage quarkdrop-${{ needs.check-version.outputs.version }}-linux-aarch64.AppImage
+          mv *.AppImage quarkdrop-${{ needs.check-version.outputs.version }}-linux-aarch64.AppImage
 
       - name: Build macOS
         if: matrix.platform == 'macos'
