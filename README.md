@@ -1,12 +1,10 @@
 # QuarkDrop
 
-[![pub version](https://img.shields.io/badge/version-1.0.0-blue)](https://github.com/niuhuan/libquark)
-
 English | [简体中文](./README-zh_Hans.md)
 
 ---
 
-QuarkDrop is a cross-platform encrypted relay file transfer app powered by **Quark Drive** (夸克网盘).  
+QuarkDrop is a cross-platform encrypted relay file transfer app powered by **Quark Drive**.  
 Files are end-to-end encrypted before being uploaded as a temporary relay package.  
 The recipient device downloads and decrypts the package, then the cloud copy is automatically cleaned up.
 

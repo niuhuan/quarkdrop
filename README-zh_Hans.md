@@ -1,7 +1,5 @@
 # QuarkDrop
 
-[![版本](https://img.shields.io/badge/版本-1.0.0-blue)](https://github.com/niuhuan/libquark)
-
 [English](./README.md) | 简体中文
 
 ---
