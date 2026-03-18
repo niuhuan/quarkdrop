@@ -15,7 +15,7 @@ jobs:
       - name: Get version
         id: get-version
         run: |
-          VERSION=$(grep '^version:' quarkdrop/pubspec.yaml | sed 's/version: //' | sed 's/+.*$//')
+          VERSION=$(grep '^version:' pubspec.yaml | sed 's/version: //' | sed 's/+.*$//')
           VERSION="v$VERSION"
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
@@ -95,9 +95,6 @@ jobs:
       fail-fast: false
       matrix: ${{ fromJson(needs.check-assets.outputs.matrix) }}
     runs-on: ${{ matrix.platform == 'windows-x64' && 'windows-latest' || matrix.platform == 'macos' && 'macos-14' || matrix.platform == 'ios' && 'macos-14' || matrix.platform == 'linux-x86_64' && 'ubuntu-24.04' || matrix.platform == 'android-arm64' && 'ubuntu-24.04' || matrix.platform == 'linux-aarch64' && 'ubuntu-24.04-arm' }}
-    defaults:
-      run:
-        working-directory: quarkdrop
     steps:
       - uses: actions/checkout@v4
 
@@ -150,7 +147,7 @@ jobs:
             base64 -d key.jks.base64 > key.jks
             echo $ANDROID_JKS_PASSWORD | $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks key.jks build/app/outputs/flutter-apk/app-release.apk
           fi
-          mv build/app/outputs/flutter-apk/app-release.apk ../quarkdrop-${{ needs.check-version.outputs.version }}-android-arm64.apk
+          mv build/app/outputs/flutter-apk/app-release.apk quarkdrop-${{ needs.check-version.outputs.version }}-android-arm64.apk
 
       - name: Build Windows
         if: matrix.platform == 'windows-x64'
@@ -169,7 +166,7 @@ jobs:
           wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-x86_64.AppImage
           chmod +x appimagetool-x86_64.AppImage
           ./appimagetool-x86_64.AppImage build/linux/x64/release/bundle/
-          mv quarkdrop-x86_64.AppImage ../quarkdrop-${{ needs.check-version.outputs.version }}-linux-x86_64.AppImage
+          mv quarkdrop-x86_64.AppImage quarkdrop-${{ needs.check-version.outputs.version }}-linux-x86_64.AppImage
 
       - name: Build Linux arm64
         if: matrix.platform == 'linux-aarch64'
@@ -180,7 +177,7 @@ jobs:
           wget https://github.com/AppImage/appimagetool/releases/download/continuous/appimagetool-aarch64.AppImage
           chmod +x appimagetool-aarch64.AppImage
           ./appimagetool-aarch64.AppImage build/linux/arm64/release/bundle/
-          mv quarkdrop-aarch64.AppImage ../quarkdrop-${{ needs.check-version.outputs.version }}-linux-aarch64.AppImage
+          mv quarkdrop-aarch64.AppImage quarkdrop-${{ needs.check-version.outputs.version }}-linux-aarch64.AppImage
 
       - name: Build macOS
         if: matrix.platform == 'macos'
@@ -189,7 +186,7 @@ jobs:
           mkdir -p macos_bundle
           ln -sf /Applications macos_bundle/
           mv build/macos/Build/Products/Release/quarkdrop.app macos_bundle/
-          hdiutil create -volname quarkdrop -srcfolder macos_bundle -ov -format UDBZ ../quarkdrop-${{ needs.check-version.outputs.version }}-macos.dmg
+          hdiutil create -volname quarkdrop -srcfolder macos_bundle -ov -format UDBZ quarkdrop-${{ needs.check-version.outputs.version }}-macos.dmg
           rm -rf macos_bundle
 
       - name: Build iOS
@@ -198,7 +195,7 @@ jobs:
           flutter build ios --release --no-codesign
           mkdir -p Payload
           mv build/ios/iphoneos/Runner.app Payload/
-          zip -r ../quarkdrop-${{ needs.check-version.outputs.version }}-ios-nosign.ipa Payload
+          zip -r quarkdrop-${{ needs.check-version.outputs.version }}-ios-nosign.ipa Payload
           rm -rf Payload
 
       - name: Upload Release Asset
