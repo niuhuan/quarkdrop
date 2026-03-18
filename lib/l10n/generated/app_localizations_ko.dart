@@ -532,7 +532,7 @@ class AppLocalizationsKo extends AppLocalizations {
   String get actionAddFolder => '폴더 추가';
 
   @override
-  String get actionAddPhotos => '사진 추가';
+  String get actionAddMedia => '미디어 추가';
 
   @override
   String get actionClearBatch => '배치 비우기';

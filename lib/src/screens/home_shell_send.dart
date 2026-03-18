@@ -28,9 +28,9 @@ class _SendPane extends StatelessWidget {
             selectedPeerLabel: selectedPeerLabel,
             onAddFiles: store.addFilesToSendQueue,
             onAddFolder: Platform.isIOS ? null : store.addDirectoryToSendQueue,
-            onAddPhotos:
+            onAddMedia:
                 (Platform.isIOS || Platform.isAndroid || Platform.isMacOS)
-                ? store.addPhotosToSendQueue
+                ? store.addMediaToSendQueue
                 : null,
             onClear: store.clearPendingSendItems,
             onRemoveItem: store.removePendingSendItem,
@@ -121,7 +121,7 @@ class _SendComposerCard extends StatelessWidget {
     required this.selectedPeerLabel,
     required this.onAddFiles,
     required this.onAddFolder,
-    required this.onAddPhotos,
+    required this.onAddMedia,
     required this.onClear,
     required this.onRemoveItem,
     required this.onSend,
@@ -132,7 +132,7 @@ class _SendComposerCard extends StatelessWidget {
   final String? selectedPeerLabel;
   final Future<void> Function() onAddFiles;
   final Future<void> Function()? onAddFolder;
-  final Future<void> Function()? onAddPhotos;
+  final Future<void> Function()? onAddMedia;
   final VoidCallback onClear;
   final ValueChanged<String> onRemoveItem;
   final Future<void> Function() onSend;
@@ -172,11 +172,11 @@ class _SendComposerCard extends StatelessWidget {
                   icon: const Icon(Icons.create_new_folder_rounded),
                   label: Text(l10n.actionAddFolder),
                 ),
-              if (onAddPhotos != null)
+              if (onAddMedia != null)
                 OutlinedButton.icon(
-                  onPressed: sendInProgress ? null : onAddPhotos,
+                  onPressed: sendInProgress ? null : onAddMedia,
                   icon: const Icon(Icons.photo_library_rounded),
-                  label: Text(l10n.actionAddPhotos),
+                  label: Text(l10n.actionAddMedia),
                 ),
               OutlinedButton(
                 onPressed: sendInProgress || pendingItems.isEmpty

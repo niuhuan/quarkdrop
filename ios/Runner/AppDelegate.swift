@@ -8,8 +8,8 @@ import UIKit
 @objc class AppDelegate: FlutterAppDelegate {
   private let platformChannelName = "quarkdrop/platform_paths"
   private let backgroundChannelName = "quarkdrop/background"
-  private let photoPickerChannelName = "quarkdrop/photo_picker"
-  private var preservingPhotoPicker: PreservingPhotoPicker?
+  private let mediaPickerChannelName = "quarkdrop/media_picker"
+  private var preservingMediaPicker: PreservingMediaPicker?
 
   override func application(
     _ application: UIApplication,
@@ -46,37 +46,37 @@ import UIKit
         }
       }
     }
-    if let registrar = self.registrar(forPlugin: "quarkdrop_photo_picker") {
+    if let registrar = self.registrar(forPlugin: "quarkdrop_media_picker") {
       let photoChannel = FlutterMethodChannel(
-        name: photoPickerChannelName,
+        name: mediaPickerChannelName,
         binaryMessenger: registrar.messenger()
       )
       photoChannel.setMethodCallHandler { [weak self] call, result in
-        self?.handlePhotoPicker(call: call, result: result)
+        self?.handleMediaPicker(call: call, result: result)
       }
     }
     return super.application(application, didFinishLaunchingWithOptions: launchOptions)
   }
 
-  private func handlePhotoPicker(call: FlutterMethodCall, result: @escaping FlutterResult) {
-    guard call.method == "pickImagesPreservingNames" else {
+  private func handleMediaPicker(call: FlutterMethodCall, result: @escaping FlutterResult) {
+    guard call.method == "pickMediaPreservingNames" else {
       result(FlutterMethodNotImplemented)
       return
     }
     guard #available(iOS 14, *) else {
       result(
         FlutterError(
-          code: "photo_picker_unsupported",
+          code: "media_picker_unsupported",
           message: "This picker requires iOS 14 or later.",
           details: nil
         ))
       return
     }
-    guard preservingPhotoPicker == nil else {
+    guard preservingMediaPicker == nil else {
       result(
         FlutterError(
-          code: "photo_picker_busy",
-          message: "A photo picker request is already in progress.",
+          code: "media_picker_busy",
+          message: "A media picker request is already in progress.",
           details: nil
         ))
       return
@@ -84,17 +84,17 @@ import UIKit
     guard let controller = rootFlutterViewController() else {
       result(
         FlutterError(
-          code: "photo_picker_unavailable",
+          code: "media_picker_unavailable",
           message: "Unable to locate the current Flutter view controller.",
           details: nil
         ))
       return
     }
 
-    let picker = PreservingPhotoPicker()
-    preservingPhotoPicker = picker
+    let picker = PreservingMediaPicker()
+    preservingMediaPicker = picker
     picker.pick(from: controller) { [weak self] pickedItems, error in
-      self?.preservingPhotoPicker = nil
+      self?.preservingMediaPicker = nil
       if let error {
         result(
           FlutterError(
@@ -184,7 +184,13 @@ private struct PickedPhotoError {
 }
 
 @available(iOS 14, *)
-private final class PreservingPhotoPicker: NSObject, PHPickerViewControllerDelegate {
+private enum PickedMediaKind {
+  case image
+  case video
+}
+
+@available(iOS 14, *)
+private final class PreservingMediaPicker: NSObject, PHPickerViewControllerDelegate {
   private var completion: (([PickedPhotoItem], PickedPhotoError?) -> Void)?
 
   func pick(
@@ -192,7 +198,7 @@ private final class PreservingPhotoPicker: NSObject, PHPickerViewControllerDeleg
     completion: @escaping ([PickedPhotoItem], PickedPhotoError?) -> Void
   ) {
     var configuration = PHPickerConfiguration(photoLibrary: .shared())
-    configuration.filter = .images
+    configuration.filter = .any(of: [.images, .videos])
     configuration.selectionLimit = 0
     configuration.preferredAssetRepresentationMode = .current
 
@@ -250,24 +256,25 @@ private final class PreservingPhotoPicker: NSObject, PHPickerViewControllerDeleg
     completion: @escaping (PickedPhotoItem?, PickedPhotoError?) -> Void
   ) {
     let provider = result.itemProvider
-    let typeIdentifier = UTType.image.identifier
-    guard provider.hasItemConformingToTypeIdentifier(typeIdentifier) else {
+    let mediaType = selectedMediaType(for: provider)
+    guard let mediaType else {
       completion(
         nil,
         PickedPhotoError(
-          code: "photo_picker_invalid_item",
-          message: "One of the selected items is not an image.",
+          code: "media_picker_invalid_item",
+          message: "One of the selected items is not supported.",
           details: nil
         ))
       return
     }
 
+    let typeIdentifier = mediaType == .image ? UTType.image.identifier : UTType.movie.identifier
     provider.loadFileRepresentation(forTypeIdentifier: typeIdentifier) { url, error in
       if let error {
         completion(
           nil,
           PickedPhotoError(
-            code: "photo_picker_load_failed",
+            code: "media_picker_load_failed",
             message: error.localizedDescription,
             details: nil
           ))
@@ -277,8 +284,8 @@ private final class PreservingPhotoPicker: NSObject, PHPickerViewControllerDeleg
         completion(
           nil,
           PickedPhotoError(
-            code: "photo_picker_missing_url",
-            message: "The selected image could not be loaded.",
+            code: "media_picker_missing_url",
+            message: "The selected media could not be loaded.",
             details: nil
           ))
         return
@@ -292,12 +299,24 @@ private final class PreservingPhotoPicker: NSObject, PHPickerViewControllerDeleg
         completion(
           nil,
           PickedPhotoError(
-            code: "photo_picker_copy_failed",
+            code: "media_picker_copy_failed",
             message: error.localizedDescription,
             details: nil
           ))
       }
     }
+  }
+
+  private func selectedMediaType(for provider: NSItemProvider) -> PickedMediaKind? {
+    if provider.hasItemConformingToTypeIdentifier(UTType.image.identifier) {
+      return .image
+    }
+    if provider.hasItemConformingToTypeIdentifier(UTType.movie.identifier)
+      || provider.hasItemConformingToTypeIdentifier(UTType.video.identifier)
+    {
+      return .video
+    }
+    return nil
   }
 
   private func originalFilename(for result: PHPickerResult, fallbackURL: URL) -> String {

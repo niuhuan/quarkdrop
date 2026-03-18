@@ -159,7 +159,7 @@
   "sendComposerReadyToSend": "已准备好发送到 {target}。",
   "actionAddFiles": "添加文件",
   "actionAddFolder": "添加文件夹",
-  "actionAddPhotos": "添加照片",
+  "actionAddMedia": "添加媒体",
   "actionClearBatch": "清空批次",
   "actionSendBatch": "发送批次",
   "actionSendItemCount": "发送 {count} 项",

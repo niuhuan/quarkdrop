@@ -530,7 +530,7 @@ class AppLocalizationsJa extends AppLocalizations {
   String get actionAddFolder => 'フォルダを追加';
 
   @override
-  String get actionAddPhotos => '写真を追加';
+  String get actionAddMedia => 'メディアを追加';
 
   @override
   String get actionClearBatch => 'バッチをクリア';

@@ -1,2 +1,2 @@
 "CFBundleDisplayName" = "QuarkDrop";
-"NSPhotoLibraryUsageDescription" = "QuarkDrop needs access to your photos to send images.";
+"NSPhotoLibraryUsageDescription" = "QuarkDrop needs access to your photos and videos to send media.";

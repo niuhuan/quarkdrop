@@ -1058,11 +1058,11 @@ abstract class AppLocalizations {
   /// **'Add Folder'**
   String get actionAddFolder;
 
-  /// No description provided for @actionAddPhotos.
+  /// No description provided for @actionAddMedia.
   ///
   /// In en, this message translates to:
-  /// **'Add Photos'**
-  String get actionAddPhotos;
+  /// **'Add Media'**
+  String get actionAddMedia;
 
   /// No description provided for @actionClearBatch.
   ///

@@ -159,7 +159,7 @@
   "sendComposerReadyToSend": "{target} へ送信する準備ができました。",
   "actionAddFiles": "ファイルを追加",
   "actionAddFolder": "フォルダを追加",
-  "actionAddPhotos": "写真を追加",
+  "actionAddMedia": "メディアを追加",
   "actionClearBatch": "バッチをクリア",
   "actionSendBatch": "バッチ送信",
   "actionSendItemCount": "{count} 件送信",

@@ -15,15 +15,15 @@ extension AppStoreSendReceive on AppStore {
     destination.value = AppDestination.send;
   }
 
-  Future<void> addPhotosToSendQueue() async {
+  Future<void> addMediaToSendQueue() async {
     try {
       final items = Platform.isIOS
-          ? await pickImagesPreservingNames().then(
-              (images) => images
+          ? await pickMediaPreservingNames().then(
+              (media) => media
                   .map(
-                    (image) => PendingSendItem(
-                      path: image.path,
-                      name: image.name,
+                    (item) => PendingSendItem(
+                      path: item.path,
+                      name: item.name,
                       kind: PendingSendKind.file,
                     ),
                   )
@@ -31,20 +31,19 @@ extension AppStoreSendReceive on AppStore {
             )
           : await (() async {
               final picker = ImagePicker();
-              List<XFile> images;
+              List<XFile> media;
               try {
-                images = await picker.pickMultiImage();
+                media = await picker.pickMultipleMedia();
               } catch (e) {
-                // Fallback for some iOS versions where full metadata causes an error without permissions
-                images = await picker.pickMultiImage(
+                media = await picker.pickMultipleMedia(
                   requestFullMetadata: false,
                 );
               }
-              return images
+              return media
                   .map(
-                    (image) => PendingSendItem(
-                      path: image.path,
-                      name: image.name,
+                    (item) => PendingSendItem(
+                      path: item.path,
+                      name: item.name,
                       kind: PendingSendKind.file,
                     ),
                   )

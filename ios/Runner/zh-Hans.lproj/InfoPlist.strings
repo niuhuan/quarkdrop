@@ -1,2 +1,2 @@
 "CFBundleDisplayName" = "QuarkDrop";
-"NSPhotoLibraryUsageDescription" = "QuarkDrop 需要访问你的照片以发送图片。";
+"NSPhotoLibraryUsageDescription" = "QuarkDrop 需要访问你的照片和视频以发送媒体。";

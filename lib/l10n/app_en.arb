@@ -159,7 +159,7 @@
   "sendComposerReadyToSend": "Ready to send to {target}.",
   "actionAddFiles": "Add Files",
   "actionAddFolder": "Add Folder",
-  "actionAddPhotos": "Add Photos",
+  "actionAddMedia": "Add Media",
   "actionClearBatch": "Clear Batch",
   "actionSendBatch": "Send Batch",
   "actionSendItemCount": "Send {count} Item(s)",

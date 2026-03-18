@@ -558,7 +558,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionAddFolder => 'Add Folder';
 
   @override
-  String get actionAddPhotos => 'Add Photos';
+  String get actionAddMedia => 'Add Media';
 
   @override
   String get actionClearBatch => 'Clear Batch';

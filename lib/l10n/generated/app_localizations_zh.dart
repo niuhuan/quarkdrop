@@ -522,7 +522,7 @@ class AppLocalizationsZh extends AppLocalizations {
   String get actionAddFolder => '添加文件夹';
 
   @override
-  String get actionAddPhotos => '添加照片';
+  String get actionAddMedia => '添加媒体';
 
   @override
   String get actionClearBatch => '清空批次';
@@ -1231,7 +1231,7 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get actionAddFolder => '添加文件夹';
 
   @override
-  String get actionAddPhotos => '添加照片';
+  String get actionAddMedia => '添加媒体';
 
   @override
   String get actionClearBatch => '清空批次';
@@ -1940,7 +1940,7 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get actionAddFolder => '新增資料夾';
 
   @override
-  String get actionAddPhotos => '新增照片';
+  String get actionAddMedia => '新增媒體';
 
   @override
   String get actionClearBatch => '清空批次';

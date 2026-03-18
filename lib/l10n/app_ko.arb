@@ -159,7 +159,7 @@
   "sendComposerReadyToSend": "{target}(으)로 보낼 준비가 되었습니다.",
   "actionAddFiles": "파일 추가",
   "actionAddFolder": "폴더 추가",
-  "actionAddPhotos": "사진 추가",
+  "actionAddMedia": "미디어 추가",
   "actionClearBatch": "배치 비우기",
   "actionSendBatch": "배치 보내기",
   "actionSendItemCount": "{count}개 보내기",
