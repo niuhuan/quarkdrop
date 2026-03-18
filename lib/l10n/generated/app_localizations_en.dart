@@ -35,6 +35,88 @@ class AppLocalizationsEn extends AppLocalizations {
       'We found device folders in your cloud. Bind to an existing one or continue as new.';
 
   @override
+  String get currentDeviceSubtitle =>
+      'Current device. Cleanup is allowed, deletion is disabled.';
+
+  @override
+  String get deviceMailboxManageEntry => 'Mailbox';
+
+  @override
+  String get garbageCleanupEntry => 'Cleanup';
+
+  @override
+  String deviceMailboxManageTitle(Object device) {
+    return '$device Mailbox';
+  }
+
+  @override
+  String get deviceMailboxManageHintTitle => 'Review this device mailbox';
+
+  @override
+  String get deviceMailboxManageHintBody =>
+      'This screen will group the remote mailbox into completed jobs, incomplete jobs, broken jobs, and other files so each item can later be deleted safely.';
+
+  @override
+  String get deviceMaintenanceActiveTransferTitle =>
+      'Active transfers detected';
+
+  @override
+  String get deviceMaintenanceActiveTransferBody =>
+      'Try to run mailbox management and garbage cleanup when no send or receive task is still active. Device operations will be temporarily disabled during cleanup.';
+
+  @override
+  String get deviceCleanupCategoryReadyTasks => 'Pending Download Tasks';
+
+  @override
+  String get deviceCleanupCategoryReadyTasksBody =>
+      'Remote jobs that are complete and still waiting for this device to download them will appear here.';
+
+  @override
+  String get deviceCleanupCategoryIncompleteUploads =>
+      'Incomplete Upload Tasks';
+
+  @override
+  String get deviceCleanupCategoryIncompleteUploadsBody =>
+      'Partially uploaded tasks left behind by interrupted senders will appear here and should be reviewed before deletion.';
+
+  @override
+  String get deviceCleanupCategoryBrokenTasks => 'Broken Tasks';
+
+  @override
+  String get deviceCleanupCategoryBrokenTasksBody =>
+      'Items that look like jobs but fail parsing, validation, or integrity checks will appear here.';
+
+  @override
+  String get deviceCleanupCategoryOtherFiles => 'Other Files';
+
+  @override
+  String get deviceCleanupCategoryOtherFilesBody =>
+      'Regular files, folders, or leftovers that are not part of the QuarkDrop protocol will appear here.';
+
+  @override
+  String get deviceCleanupEmptyPreview => 'Scan results will be shown here.';
+
+  @override
+  String get deviceMaintenanceBusyDeletingMailbox =>
+      'Processing mailbox items. Please wait…';
+
+  @override
+  String get deviceMaintenanceBusyGarbageCleanup =>
+      'Scanning or cleaning garbage data. Please wait…';
+
+  @override
+  String get garbageCleanupTitle => 'Garbage Cleanup';
+
+  @override
+  String get garbageCleanupHintBody =>
+      'This page will aggregate the same cleanup categories across all devices: pending download tasks, incomplete upload tasks, broken tasks, and other files. The first version shows the planned scan layout.';
+
+  @override
+  String cleanupSummaryLabel(Object count, Object size) {
+    return '$count items · $size';
+  }
+
+  @override
   String get actionBind => 'Bind';
 
   @override
@@ -173,6 +255,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionSelect => 'Select';
 
   @override
+  String get actionRetry => 'Retry';
+
+  @override
   String get noTransfersTitle => 'No transfers';
 
   @override
@@ -274,6 +359,11 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String accountLabel(Object authSource) {
     return 'Account: $authSource';
+  }
+
+  @override
+  String deviceIdLabel(Object deviceId) {
+    return 'Device ID: $deviceId';
   }
 
   @override

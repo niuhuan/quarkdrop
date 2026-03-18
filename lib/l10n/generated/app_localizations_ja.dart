@@ -34,6 +34,85 @@ class AppLocalizationsJa extends AppLocalizations {
       'クラウド内にデバイスフォルダが見つかりました。既存デバイスにバインドするか、新しいデバイスとして続行できます。';
 
   @override
+  String get currentDeviceSubtitle => '現在のデバイスです。整理のみ可能で、削除はできません。';
+
+  @override
+  String get deviceMailboxManageEntry => '受信箱管理';
+
+  @override
+  String get garbageCleanupEntry => '不要データ回収';
+
+  @override
+  String deviceMailboxManageTitle(Object device) {
+    return '$device の受信箱';
+  }
+
+  @override
+  String get deviceMailboxManageHintTitle => 'このデバイスの遠端受信箱を確認';
+
+  @override
+  String get deviceMailboxManageHintBody =>
+      'この画面では、遠端 mailbox の内容を完了タスク、未完了タスク、異常タスク、その他のファイルに分類して表示し、今後は項目ごとに削除できるようにします。';
+
+  @override
+  String get deviceMaintenanceActiveTransferTitle => '進行中の転送があります';
+
+  @override
+  String get deviceMaintenanceActiveTransferBody =>
+      '送信または受信タスクが進行中でないときに受信箱管理や不要データ回収を行うことをおすすめします。回収中はデバイス操作が一時的に無効になります。';
+
+  @override
+  String get deviceCleanupCategoryReadyTasks => '未受信タスク';
+
+  @override
+  String get deviceCleanupCategoryReadyTasksBody =>
+      '構造が完全で、このデバイスがまだ遠端から受信していないタスクがここに表示されます。';
+
+  @override
+  String get deviceCleanupCategoryIncompleteUploads => '未完了アップロードタスク';
+
+  @override
+  String get deviceCleanupCategoryIncompleteUploadsBody =>
+      '送信側の中断で残った不完全なアップロードタスクがここに表示され、削除前に確認が必要です。';
+
+  @override
+  String get deviceCleanupCategoryBrokenTasks => '異常タスク';
+
+  @override
+  String get deviceCleanupCategoryBrokenTasksBody =>
+      'タスクのように見えても解析失敗、検証失敗、内容不整合のある項目がここに表示されます。';
+
+  @override
+  String get deviceCleanupCategoryOtherFiles => 'その他のファイル';
+
+  @override
+  String get deviceCleanupCategoryOtherFilesBody =>
+      'QuarkDrop プロトコルに属さない通常ファイル、フォルダ、残留物がここに表示されます。';
+
+  @override
+  String get deviceCleanupEmptyPreview => 'スキャン結果はここに表示されます。';
+
+  @override
+  String get deviceMaintenanceBusyDeletingMailbox =>
+      '受信箱の項目を処理中です。しばらくお待ちください…';
+
+  @override
+  String get deviceMaintenanceBusyGarbageCleanup =>
+      '不要データをスキャンまたは整理中です。しばらくお待ちください…';
+
+  @override
+  String get garbageCleanupTitle => '不要データ回収';
+
+  @override
+  String get garbageCleanupHintBody =>
+      'この画面では、全デバイスの可整理項目を未受信タスク、未完了アップロードタスク、異常タスク、その他のファイルという同じ分類でまとめて表示します。第一版ではスキャン分類の骨組みを先に表示します。';
+
+  @override
+  String cleanupSummaryLabel(Object count, Object size) {
+    return '$count 件 · $size';
+  }
+
+  @override
   String get actionBind => 'バインド';
 
   @override
@@ -168,6 +247,9 @@ class AppLocalizationsJa extends AppLocalizations {
   String get actionSelect => '選択';
 
   @override
+  String get actionRetry => '再試行';
+
+  @override
   String get noTransfersTitle => '転送がありません';
 
   @override
@@ -265,6 +347,11 @@ class AppLocalizationsJa extends AppLocalizations {
   @override
   String accountLabel(Object authSource) {
     return 'アカウント: $authSource';
+  }
+
+  @override
+  String deviceIdLabel(Object deviceId) {
+    return 'デバイス ID: $deviceId';
   }
 
   @override

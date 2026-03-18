@@ -31,6 +31,7 @@ class _SettingsPane extends StatelessWidget {
                   _DeviceSettingsCard(
                     store: store,
                     deviceName: device.deviceName,
+                    deviceId: device.deviceId,
                     authSource: device.authSource,
                   ),
                   const SizedBox(height: 14),
@@ -109,11 +110,13 @@ class _DeviceSettingsCard extends StatefulWidget {
   const _DeviceSettingsCard({
     required this.store,
     required this.deviceName,
+    required this.deviceId,
     required this.authSource,
   });
 
   final AppStore store;
   final String deviceName;
+  final String deviceId;
   final String authSource;
 
   @override
@@ -202,6 +205,11 @@ class _DeviceSettingsCardState extends State<_DeviceSettingsCard> {
               const SizedBox(height: 2),
               Text(
                 l10n.accountLabel(widget.authSource),
+                style: const TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                l10n.deviceIdLabel(widget.deviceId),
                 style: const TextStyle(color: Color(0xFF5C6A64), fontSize: 13),
               ),
               const SizedBox(height: 12),

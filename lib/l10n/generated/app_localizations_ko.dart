@@ -34,6 +34,85 @@ class AppLocalizationsKo extends AppLocalizations {
       '클라우드에서 기기 폴더를 찾았습니다. 기존 기기에 바인드하거나 새 기기로 계속할 수 있습니다.';
 
   @override
+  String get currentDeviceSubtitle => '현재 기기입니다. 정리만 가능하고 삭제는 할 수 없습니다.';
+
+  @override
+  String get deviceMailboxManageEntry => '수신함 관리';
+
+  @override
+  String get garbageCleanupEntry => '오염 데이터 정리';
+
+  @override
+  String deviceMailboxManageTitle(Object device) {
+    return '$device 수신함';
+  }
+
+  @override
+  String get deviceMailboxManageHintTitle => '이 기기의 원격 수신함 보기';
+
+  @override
+  String get deviceMailboxManageHintBody =>
+      '이 화면에서는 원격 mailbox 내용을 완료 작업, 미완료 작업, 이상 작업, 기타 파일로 나누어 보여주고 이후 항목별 삭제를 지원할 예정입니다.';
+
+  @override
+  String get deviceMaintenanceActiveTransferTitle => '진행 중인 전송이 있습니다';
+
+  @override
+  String get deviceMaintenanceActiveTransferBody =>
+      '전송 또는 수신 작업이 진행 중이지 않을 때 수신함 관리와 오염 데이터 정리를 실행하는 것이 좋습니다. 정리 중에는 기기 작업이 일시적으로 비활성화됩니다.';
+
+  @override
+  String get deviceCleanupCategoryReadyTasks => '다운로드 대기 작업';
+
+  @override
+  String get deviceCleanupCategoryReadyTasksBody =>
+      '구조가 완전하고 현재 이 기기가 아직 내려받지 않은 원격 작업이 여기에 표시됩니다.';
+
+  @override
+  String get deviceCleanupCategoryIncompleteUploads => '미완료 업로드 작업';
+
+  @override
+  String get deviceCleanupCategoryIncompleteUploadsBody =>
+      '보내는 쪽 업로드가 중단되어 남은 불완전한 작업이 여기에 표시되며, 삭제 전 확인이 필요합니다.';
+
+  @override
+  String get deviceCleanupCategoryBrokenTasks => '이상 작업';
+
+  @override
+  String get deviceCleanupCategoryBrokenTasksBody =>
+      '작업처럼 보이지만 파싱 실패, 검증 실패, 내용 손상이 있는 항목이 여기에 표시됩니다.';
+
+  @override
+  String get deviceCleanupCategoryOtherFiles => '기타 파일';
+
+  @override
+  String get deviceCleanupCategoryOtherFilesBody =>
+      'QuarkDrop 프로토콜 작업에 속하지 않는 일반 파일, 폴더, 잔여물이 여기에 표시됩니다.';
+
+  @override
+  String get deviceCleanupEmptyPreview => '스캔 결과가 여기에 표시됩니다.';
+
+  @override
+  String get deviceMaintenanceBusyDeletingMailbox =>
+      '수신함 항목을 처리하는 중입니다. 잠시만 기다려 주세요…';
+
+  @override
+  String get deviceMaintenanceBusyGarbageCleanup =>
+      '오염 데이터를 스캔하거나 정리하는 중입니다. 잠시만 기다려 주세요…';
+
+  @override
+  String get garbageCleanupTitle => '오염 데이터 정리';
+
+  @override
+  String get garbageCleanupHintBody =>
+      '이 페이지에서는 모든 기기의 정리 대상을 다운로드 대기 작업, 미완료 업로드 작업, 이상 작업, 기타 파일이라는 같은 분류로 모아 보여줍니다. 첫 버전에서는 스캔 레이아웃만 먼저 보여줍니다.';
+
+  @override
+  String cleanupSummaryLabel(Object count, Object size) {
+    return '$count개 · $size';
+  }
+
+  @override
   String get actionBind => '바인드';
 
   @override
@@ -168,6 +247,9 @@ class AppLocalizationsKo extends AppLocalizations {
   String get actionSelect => '선택';
 
   @override
+  String get actionRetry => '다시 시도';
+
+  @override
   String get noTransfersTitle => '전송 없음';
 
   @override
@@ -266,6 +348,11 @@ class AppLocalizationsKo extends AppLocalizations {
   @override
   String accountLabel(Object authSource) {
     return '계정: $authSource';
+  }
+
+  @override
+  String deviceIdLabel(Object deviceId) {
+    return '기기 ID: $deviceId';
   }
 
   @override

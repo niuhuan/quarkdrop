@@ -39,6 +39,7 @@ pub struct RememberedDevice {
 
 #[derive(Clone, Debug)]
 pub struct MailboxState {
+    pub mailbox_folder_id: String,
     pub mailbox_status_label: String,
     pub mailbox_summary: String,
     pub inbox_job_count: i32,
@@ -86,7 +87,7 @@ struct CachedPeerMetadata {
     fetched_at_unix_ms: u64,
 }
 
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Clone, Debug, Eq, PartialEq, Serialize, Deserialize)]
 pub(crate) struct EncryptedPrivateKey {
     version: u32,
     algorithm: String,
@@ -425,7 +426,7 @@ async fn validate_created_key_verify(
         .find(|entry| entry.file && entry.fid == uploaded_fid)
     {
         if uploaded_entry.file_name != KEY_VERIFY_FILE_NAME {
-            let _ = quark.delete(uploaded_fid).await;
+            let _ = quark.delete(&[uploaded_fid]).await;
             if exact_exists {
                 *cloud_verify_cache()
                     .write()
@@ -472,7 +473,7 @@ pub async fn change_cloud_password(
 
     // Re-encrypt verify blob with new password and upload
     let new_verify = encrypt_private_key_blob(VERIFY_PLAINTEXT, new_password)?;
-    quark.delete(&verify_entry.fid).await?;
+    quark.delete(&[&verify_entry.fid]).await?;
     upload_small_bytes(
         quark,
         &root_id,
@@ -546,7 +547,7 @@ pub async fn change_cloud_password(
             .iter()
             .find(|c| c.file && c.file_name == DEVICE_METADATA_BAK_FILE_NAME)
         {
-            quark.delete(&old_bak.fid).await?;
+            quark.delete(&[&old_bak.fid]).await?;
         }
         quark
             .rename()
@@ -684,6 +685,7 @@ pub async fn ensure_mailbox_state(
     let inbox_job_count = i32::try_from(inbox_previews.len()).unwrap_or(i32::MAX);
 
     Ok(MailboxState {
+        mailbox_folder_id: mailbox_id,
         mailbox_status_label: "Mailbox ready".to_string(),
         mailbox_summary: format!(
             "QuarkDrop ensured this device mailbox in Quark Drive and found {inbox_job_count} ready relay job(s)."
@@ -711,7 +713,7 @@ pub async fn remove_local_mailbox(
         .iter()
         .find(|entry| entry.dir && entry.file_name == mailbox_name)
     {
-        quark.delete(&mailbox.fid).await?;
+        quark.delete(&[&mailbox.fid]).await?;
     }
     Ok(())
 }
@@ -1130,7 +1132,7 @@ async fn publish_device_metadata(
     } else {
         None
     };
-    let payload = serde_json::to_vec(&DeviceMetadata {
+    let metadata = DeviceMetadata {
         version: 1,
         device_id: local_device.device_id.clone(),
         device_name: local_device.device_name.clone(),
@@ -1140,13 +1142,26 @@ async fn publish_device_metadata(
             .duration_since(UNIX_EPOCH)
             .map(|duration| duration.as_millis() as u64)
             .unwrap_or(0),
-    })?;
+    };
+    let payload = serde_json::to_vec(&metadata)?;
     let existing = list_all_entries(quark, mailbox_id).await?;
+    if let Some(old_current) = existing
+        .iter()
+        .find(|entry| entry.file_name == DEVICE_METADATA_FILE_NAME && entry.file)
+    {
+        if let Ok(current_bytes) = download_bytes(quark, &old_current.fid).await {
+            if let Ok(current_metadata) = serde_json::from_slice::<DeviceMetadata>(&current_bytes) {
+                if same_device_metadata(&current_metadata, &metadata) {
+                    return Ok(());
+                }
+            }
+        }
+    }
     if let Some(old_bak) = existing
         .iter()
         .find(|entry| entry.file_name == DEVICE_METADATA_BAK_FILE_NAME && entry.file)
     {
-        quark.delete(&old_bak.fid).await?;
+        quark.delete(&[&old_bak.fid]).await?;
     }
     if let Some(old_current) = existing
         .iter()
@@ -1162,6 +1177,14 @@ async fn publish_device_metadata(
     }
     upload_small_bytes(quark, mailbox_id, DEVICE_METADATA_FILE_NAME, payload).await?;
     Ok(())
+}
+
+fn same_device_metadata(left: &DeviceMetadata, right: &DeviceMetadata) -> bool {
+    left.version == right.version
+        && left.device_id == right.device_id
+        && left.device_name == right.device_name
+        && left.public_key == right.public_key
+        && left.encrypted_key == right.encrypted_key
 }
 
 async fn read_device_metadata(
@@ -1349,7 +1372,7 @@ pub async fn remove_peer_mailbox(quark: &QuarkPan, peer_device_id: &str) -> anyh
         .iter()
         .find(|entry| entry.dir && entry.file_name == mailbox_name)
     {
-        quark.delete(&mailbox.fid).await?;
+        quark.delete(&[&mailbox.fid]).await?;
     }
     Ok(())
 }

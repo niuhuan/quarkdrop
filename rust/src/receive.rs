@@ -275,7 +275,7 @@ async fn receive_job_impl(
         snapshot.last_error_message.clear();
         snapshot.updated_at_unix_ms = now_unix_ms();
         persist_snapshot(&snapshot)?;
-        quark.delete(job_folder_id).await?;
+        quark.delete(&[job_folder_id]).await?;
 
         snapshot.stage = TaskStage::Done;
         snapshot.transferred_bytes = snapshot.size_bytes;

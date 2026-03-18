@@ -235,6 +235,14 @@ class AppStore with WidgetsBindingObserver, WindowListener {
     null,
     debugLabel: 'localeStatusMessage',
   );
+  final deviceMaintenanceBusy = signal<bool>(
+    false,
+    debugLabel: 'deviceMaintenanceBusy',
+  );
+  final deviceMaintenanceBusyMessage = signal<String?>(
+    null,
+    debugLabel: 'deviceMaintenanceBusyMessage',
+  );
 
   Locale get effectiveLocale {
     final option = appLocaleOptionFromCode(localePreferenceCode.value);
@@ -284,4 +292,14 @@ class AppStore with WidgetsBindingObserver, WindowListener {
     }
     return null;
   }, debugLabel: 'selectedPeerDevice');
+
+  late final hasActiveTransferJobs = computed<bool>(() {
+    for (final job in transferJobs.value) {
+      if (job.stage != TransferStage.completed &&
+          job.stage != TransferStage.failed) {
+        return true;
+      }
+    }
+    return false;
+  }, debugLabel: 'hasActiveTransferJobs');
 }

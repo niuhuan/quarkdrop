@@ -8,6 +8,39 @@
   "deviceNameFieldLabel": "デバイス名",
   "existingDevicesTitle": "既存のデバイス",
   "existingDevicesSubtitle": "クラウド内にデバイスフォルダが見つかりました。既存デバイスにバインドするか、新しいデバイスとして続行できます。",
+  "currentDeviceSubtitle": "現在のデバイスです。整理のみ可能で、削除はできません。",
+  "deviceMailboxManageEntry": "受信箱管理",
+  "garbageCleanupEntry": "不要データ回収",
+  "deviceMailboxManageTitle": "{device} の受信箱",
+  "@deviceMailboxManageTitle": {
+    "placeholders": {
+      "device": {}
+    }
+  },
+  "deviceMailboxManageHintTitle": "このデバイスの遠端受信箱を確認",
+  "deviceMailboxManageHintBody": "この画面では、遠端 mailbox の内容を完了タスク、未完了タスク、異常タスク、その他のファイルに分類して表示し、今後は項目ごとに削除できるようにします。",
+  "deviceMaintenanceActiveTransferTitle": "進行中の転送があります",
+  "deviceMaintenanceActiveTransferBody": "送信または受信タスクが進行中でないときに受信箱管理や不要データ回収を行うことをおすすめします。回収中はデバイス操作が一時的に無効になります。",
+  "deviceCleanupCategoryReadyTasks": "未受信タスク",
+  "deviceCleanupCategoryReadyTasksBody": "構造が完全で、このデバイスがまだ遠端から受信していないタスクがここに表示されます。",
+  "deviceCleanupCategoryIncompleteUploads": "未完了アップロードタスク",
+  "deviceCleanupCategoryIncompleteUploadsBody": "送信側の中断で残った不完全なアップロードタスクがここに表示され、削除前に確認が必要です。",
+  "deviceCleanupCategoryBrokenTasks": "異常タスク",
+  "deviceCleanupCategoryBrokenTasksBody": "タスクのように見えても解析失敗、検証失敗、内容不整合のある項目がここに表示されます。",
+  "deviceCleanupCategoryOtherFiles": "その他のファイル",
+  "deviceCleanupCategoryOtherFilesBody": "QuarkDrop プロトコルに属さない通常ファイル、フォルダ、残留物がここに表示されます。",
+  "deviceCleanupEmptyPreview": "スキャン結果はここに表示されます。",
+  "deviceMaintenanceBusyDeletingMailbox": "受信箱の項目を処理中です。しばらくお待ちください…",
+  "deviceMaintenanceBusyGarbageCleanup": "不要データをスキャンまたは整理中です。しばらくお待ちください…",
+  "garbageCleanupTitle": "不要データ回収",
+  "garbageCleanupHintBody": "この画面では、全デバイスの可整理項目を未受信タスク、未完了アップロードタスク、異常タスク、その他のファイルという同じ分類でまとめて表示します。第一版ではスキャン分類の骨組みを先に表示します。",
+  "cleanupSummaryLabel": "{count} 件 · {size}",
+  "@cleanupSummaryLabel": {
+    "placeholders": {
+      "count": {},
+      "size": {}
+    }
+  },
   "actionBind": "バインド",
   "actionContinueAsNewDevice": "新しいデバイスとして続行",
   "errorPasswordEmpty": "パスワードは空にできません。",
@@ -49,6 +82,7 @@
   "noPeerDevicesBody": "まだ他のデバイスが利用できません。別のデバイスで QuarkDrop を開いてサインインしてください。",
   "sendTargetLabel": "送信先",
   "actionSelect": "選択",
+  "actionRetry": "再試行",
   "noTransfersTitle": "転送がありません",
   "noTransfersBody": "このフィルターに一致するジョブがここに表示されます。",
   "noTransferHistoryTitle": "転送履歴がありません",
@@ -78,6 +112,12 @@
   "directionSend": "送信",
   "directionReceive": "受信",
   "accountLabel": "アカウント: {authSource}",
+  "deviceIdLabel": "デバイス ID: {deviceId}",
+  "@deviceIdLabel": {
+    "placeholders": {
+      "deviceId": {}
+    }
+  },
   "errorNewPasswordEmpty": "新しいパスワードは空にできません。",
   "cloudPasswordCardTitle": "クラウドパスワード",
   "cloudPasswordCardSubtitle": "クラウドパスワードを変更します。すべてのデバイス鍵が再暗号化されます。",

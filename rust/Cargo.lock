@@ -1282,9 +1282,9 @@ dependencies = [
 
 [[package]]
 name = "libquarkpan"
-version = "0.2.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "67b6163e7447c7efdfc1e6d4d12bad77dab9d83fac65c021f7173116e9eb31ad"
+checksum = "a6c59ed37af47c36f5ee71ecd35018c36615e31792b91e8c9c16183293beee11"
 dependencies = [
  "anyhow",
  "base64 0.22.1",

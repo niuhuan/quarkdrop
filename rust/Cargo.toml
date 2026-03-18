@@ -21,7 +21,7 @@ futures-util = "0.3.31"
 hkdf = "0.12.4"
 hex = "0.4.3"
 lazy_static = "1.5.0"
-libquarkpan = "0.2.0"
+libquarkpan = "0.3.0"
 md5 = "0.7.0"
 rand = "0.8.5"
 reqwest = { version = "0.12.24", default-features = false, features = ["rustls-tls", "rustls-tls-native-roots"] }

@@ -38,6 +38,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool dco_decode_bool(dynamic raw);
 
   @protected
+  CleanupCategory dco_decode_cleanup_category(dynamic raw);
+
+  @protected
+  CleanupItem dco_decode_cleanup_item(dynamic raw);
+
+  @protected
+  CleanupScanResult dco_decode_cleanup_scan_result(dynamic raw);
+
+  @protected
   DeviceSnapshot dco_decode_device_snapshot(dynamic raw);
 
   @protected
@@ -48,6 +57,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   InboxPreview dco_decode_inbox_preview(dynamic raw);
+
+  @protected
+  List<String> dco_decode_list_String(dynamic raw);
+
+  @protected
+  List<CleanupItem> dco_decode_list_cleanup_item(dynamic raw);
 
   @protected
   List<InboxPreview> dco_decode_list_inbox_preview(dynamic raw);
@@ -92,6 +107,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   int dco_decode_u_32(dynamic raw);
 
   @protected
+  BigInt dco_decode_u_64(dynamic raw);
+
+  @protected
   int dco_decode_u_8(dynamic raw);
 
   @protected
@@ -115,6 +133,17 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   bool sse_decode_bool(SseDeserializer deserializer);
 
   @protected
+  CleanupCategory sse_decode_cleanup_category(SseDeserializer deserializer);
+
+  @protected
+  CleanupItem sse_decode_cleanup_item(SseDeserializer deserializer);
+
+  @protected
+  CleanupScanResult sse_decode_cleanup_scan_result(
+    SseDeserializer deserializer,
+  );
+
+  @protected
   DeviceSnapshot sse_decode_device_snapshot(SseDeserializer deserializer);
 
   @protected
@@ -125,6 +154,12 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   InboxPreview sse_decode_inbox_preview(SseDeserializer deserializer);
+
+  @protected
+  List<String> sse_decode_list_String(SseDeserializer deserializer);
+
+  @protected
+  List<CleanupItem> sse_decode_list_cleanup_item(SseDeserializer deserializer);
 
   @protected
   List<InboxPreview> sse_decode_list_inbox_preview(
@@ -175,6 +210,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   int sse_decode_u_32(SseDeserializer deserializer);
 
   @protected
+  BigInt sse_decode_u_64(SseDeserializer deserializer);
+
+  @protected
   int sse_decode_u_8(SseDeserializer deserializer);
 
   @protected
@@ -202,6 +240,21 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
   void sse_encode_bool(bool self, SseSerializer serializer);
 
   @protected
+  void sse_encode_cleanup_category(
+    CleanupCategory self,
+    SseSerializer serializer,
+  );
+
+  @protected
+  void sse_encode_cleanup_item(CleanupItem self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_cleanup_scan_result(
+    CleanupScanResult self,
+    SseSerializer serializer,
+  );
+
+  @protected
   void sse_encode_device_snapshot(
     DeviceSnapshot self,
     SseSerializer serializer,
@@ -215,6 +268,15 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_inbox_preview(InboxPreview self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_String(List<String> self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_list_cleanup_item(
+    List<CleanupItem> self,
+    SseSerializer serializer,
+  );
 
   @protected
   void sse_encode_list_inbox_preview(
@@ -281,6 +343,9 @@ abstract class RustLibApiImplPlatform extends BaseApiImpl<RustLibWire> {
 
   @protected
   void sse_encode_u_32(int self, SseSerializer serializer);
+
+  @protected
+  void sse_encode_u_64(BigInt self, SseSerializer serializer);
 
   @protected
   void sse_encode_u_8(int self, SseSerializer serializer);

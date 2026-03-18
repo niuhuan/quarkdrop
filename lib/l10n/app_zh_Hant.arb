@@ -8,6 +8,39 @@
   "deviceNameFieldLabel": "裝置名稱",
   "existingDevicesTitle": "現有裝置",
   "existingDevicesSubtitle": "我們在你的雲端中找到裝置資料夾。你可以綁定現有裝置，或繼續建立新裝置。",
+  "currentDeviceSubtitle": "目前裝置，僅支援清理，不可刪除。",
+  "deviceMailboxManageEntry": "收件箱管理",
+  "garbageCleanupEntry": "髒資料回收",
+  "deviceMailboxManageTitle": "{device} 的收件箱",
+  "@deviceMailboxManageTitle": {
+    "placeholders": {
+      "device": {}
+    }
+  },
+  "deviceMailboxManageHintTitle": "按裝置查看遠端收件箱",
+  "deviceMailboxManageHintBody": "這裡會按已完成任務、未完成任務、異常任務和其他檔案分類顯示該裝置的 mailbox 內容，後續可逐項刪除。",
+  "deviceMaintenanceActiveTransferTitle": "目前存在進行中的傳輸任務",
+  "deviceMaintenanceActiveTransferBody": "建議在沒有進行中的傳送或接收任務時再執行收件箱管理或髒資料回收。回收期間會暫時停用裝置操作。",
+  "deviceCleanupCategoryReadyTasks": "待下載任務",
+  "deviceCleanupCategoryReadyTasksBody": "結構完整、目前仍在遠端等待本機下載的任務會顯示在這裡。",
+  "deviceCleanupCategoryIncompleteUploads": "未完成上傳任務",
+  "deviceCleanupCategoryIncompleteUploadsBody": "傳送端上傳中斷後留下的不完整任務會歸到這裡，刪除前應謹慎確認。",
+  "deviceCleanupCategoryBrokenTasks": "異常任務",
+  "deviceCleanupCategoryBrokenTasksBody": "目錄結構像任務，但解析失敗、校驗失敗或內容不完整的項目會歸到這裡。",
+  "deviceCleanupCategoryOtherFiles": "其他檔案",
+  "deviceCleanupCategoryOtherFilesBody": "不屬於 QuarkDrop 協議任務的普通檔案、目錄或雜項殘留會顯示在這裡。",
+  "deviceCleanupEmptyPreview": "掃描結果將顯示在這裡。",
+  "deviceMaintenanceBusyDeletingMailbox": "正在處理收件箱項目，請稍候…",
+  "deviceMaintenanceBusyGarbageCleanup": "正在掃描或清理髒資料，請稍候…",
+  "garbageCleanupTitle": "髒資料回收",
+  "garbageCleanupHintBody": "這個頁面會按待下載任務、未完成上傳任務、異常任務和其他檔案統一彙總各裝置中的可清理內容。第一版先提供掃描結果視圖。",
+  "cleanupSummaryLabel": "{count} 項 · {size}",
+  "@cleanupSummaryLabel": {
+    "placeholders": {
+      "count": {},
+      "size": {}
+    }
+  },
   "actionBind": "綁定",
   "actionContinueAsNewDevice": "作為新裝置繼續",
   "errorPasswordEmpty": "密碼不能為空。",
@@ -49,6 +82,7 @@
   "noPeerDevicesBody": "目前沒有其他裝置可用。請先在另一台裝置上開啟 QuarkDrop 並登入。",
   "sendTargetLabel": "傳送目標",
   "actionSelect": "選擇",
+  "actionRetry": "重試",
   "noTransfersTitle": "尚無傳輸",
   "noTransfersBody": "符合目前篩選條件的任務會顯示在這裡。",
   "noTransferHistoryTitle": "還沒有傳輸記錄",
@@ -78,6 +112,12 @@
   "directionSend": "傳送",
   "directionReceive": "接收",
   "accountLabel": "帳號：{authSource}",
+  "deviceIdLabel": "裝置 ID：{deviceId}",
+  "@deviceIdLabel": {
+    "placeholders": {
+      "deviceId": {}
+    }
+  },
   "errorNewPasswordEmpty": "新密碼不能為空。",
   "cloudPasswordCardTitle": "雲端密碼",
   "cloudPasswordCardSubtitle": "修改雲端密碼。所有裝置金鑰都會重新加密。",

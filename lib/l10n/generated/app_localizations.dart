@@ -152,6 +152,138 @@ abstract class AppLocalizations {
   /// **'We found device folders in your cloud. Bind to an existing one or continue as new.'**
   String get existingDevicesSubtitle;
 
+  /// No description provided for @currentDeviceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Current device. Cleanup is allowed, deletion is disabled.'**
+  String get currentDeviceSubtitle;
+
+  /// No description provided for @deviceMailboxManageEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Mailbox'**
+  String get deviceMailboxManageEntry;
+
+  /// No description provided for @garbageCleanupEntry.
+  ///
+  /// In en, this message translates to:
+  /// **'Cleanup'**
+  String get garbageCleanupEntry;
+
+  /// No description provided for @deviceMailboxManageTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{device} Mailbox'**
+  String deviceMailboxManageTitle(Object device);
+
+  /// No description provided for @deviceMailboxManageHintTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Review this device mailbox'**
+  String get deviceMailboxManageHintTitle;
+
+  /// No description provided for @deviceMailboxManageHintBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This screen will group the remote mailbox into completed jobs, incomplete jobs, broken jobs, and other files so each item can later be deleted safely.'**
+  String get deviceMailboxManageHintBody;
+
+  /// No description provided for @deviceMaintenanceActiveTransferTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Active transfers detected'**
+  String get deviceMaintenanceActiveTransferTitle;
+
+  /// No description provided for @deviceMaintenanceActiveTransferBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Try to run mailbox management and garbage cleanup when no send or receive task is still active. Device operations will be temporarily disabled during cleanup.'**
+  String get deviceMaintenanceActiveTransferBody;
+
+  /// No description provided for @deviceCleanupCategoryReadyTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Pending Download Tasks'**
+  String get deviceCleanupCategoryReadyTasks;
+
+  /// No description provided for @deviceCleanupCategoryReadyTasksBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Remote jobs that are complete and still waiting for this device to download them will appear here.'**
+  String get deviceCleanupCategoryReadyTasksBody;
+
+  /// No description provided for @deviceCleanupCategoryIncompleteUploads.
+  ///
+  /// In en, this message translates to:
+  /// **'Incomplete Upload Tasks'**
+  String get deviceCleanupCategoryIncompleteUploads;
+
+  /// No description provided for @deviceCleanupCategoryIncompleteUploadsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Partially uploaded tasks left behind by interrupted senders will appear here and should be reviewed before deletion.'**
+  String get deviceCleanupCategoryIncompleteUploadsBody;
+
+  /// No description provided for @deviceCleanupCategoryBrokenTasks.
+  ///
+  /// In en, this message translates to:
+  /// **'Broken Tasks'**
+  String get deviceCleanupCategoryBrokenTasks;
+
+  /// No description provided for @deviceCleanupCategoryBrokenTasksBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Items that look like jobs but fail parsing, validation, or integrity checks will appear here.'**
+  String get deviceCleanupCategoryBrokenTasksBody;
+
+  /// No description provided for @deviceCleanupCategoryOtherFiles.
+  ///
+  /// In en, this message translates to:
+  /// **'Other Files'**
+  String get deviceCleanupCategoryOtherFiles;
+
+  /// No description provided for @deviceCleanupCategoryOtherFilesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Regular files, folders, or leftovers that are not part of the QuarkDrop protocol will appear here.'**
+  String get deviceCleanupCategoryOtherFilesBody;
+
+  /// No description provided for @deviceCleanupEmptyPreview.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan results will be shown here.'**
+  String get deviceCleanupEmptyPreview;
+
+  /// No description provided for @deviceMaintenanceBusyDeletingMailbox.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing mailbox items. Please wait…'**
+  String get deviceMaintenanceBusyDeletingMailbox;
+
+  /// No description provided for @deviceMaintenanceBusyGarbageCleanup.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning or cleaning garbage data. Please wait…'**
+  String get deviceMaintenanceBusyGarbageCleanup;
+
+  /// No description provided for @garbageCleanupTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Garbage Cleanup'**
+  String get garbageCleanupTitle;
+
+  /// No description provided for @garbageCleanupHintBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This page will aggregate the same cleanup categories across all devices: pending download tasks, incomplete upload tasks, broken tasks, and other files. The first version shows the planned scan layout.'**
+  String get garbageCleanupHintBody;
+
+  /// No description provided for @cleanupSummaryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} items · {size}'**
+  String cleanupSummaryLabel(Object count, Object size);
+
   /// No description provided for @actionBind.
   ///
   /// In en, this message translates to:
@@ -398,6 +530,12 @@ abstract class AppLocalizations {
   /// **'Select'**
   String get actionSelect;
 
+  /// No description provided for @actionRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Retry'**
+  String get actionRetry;
+
   /// No description provided for @noTransfersTitle.
   ///
   /// In en, this message translates to:
@@ -571,6 +709,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Account: {authSource}'**
   String accountLabel(Object authSource);
+
+  /// No description provided for @deviceIdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Device ID: {deviceId}'**
+  String deviceIdLabel(Object deviceId);
 
   /// No description provided for @errorNewPasswordEmpty.
   ///

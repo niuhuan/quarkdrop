@@ -37,7 +37,7 @@ flutter_rust_bridge::frb_generated_boilerplate!(
     default_rust_auto_opaque = RustAutoOpaqueMoi,
 );
 pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_VERSION: &str = "2.11.1";
-pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = -1040591788;
+pub(crate) const FLUTTER_RUST_BRIDGE_CODEGEN_CONTENT_HASH: i32 = 1745842889;
 
 // Section: executor
 
@@ -365,6 +365,42 @@ fn wire__crate__api__app__create_cloud_password_impl(
                     (move || async move {
                         let output_ok =
                             crate::api::app::create_cloud_password(api_password).await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__app__delete_cleanup_items_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "delete_cleanup_items",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_item_ids = <Vec<String>>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::app::delete_cleanup_items(api_item_ids).await?;
                         Ok(output_ok)
                     })()
                     .await,
@@ -1289,6 +1325,84 @@ fn wire__crate__api__app__save_webview_cookie_string_impl(
         },
     )
 }
+fn wire__crate__api__app__scan_global_cleanup_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "scan_global_cleanup",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::app::scan_global_cleanup().await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
+fn wire__crate__api__app__scan_peer_cleanup_impl(
+    port_: flutter_rust_bridge::for_generated::MessagePort,
+    ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
+    rust_vec_len_: i32,
+    data_len_: i32,
+) {
+    FLUTTER_RUST_BRIDGE_HANDLER.wrap_async::<flutter_rust_bridge::for_generated::SseCodec, _, _, _>(
+        flutter_rust_bridge::for_generated::TaskInfo {
+            debug_name: "scan_peer_cleanup",
+            port: Some(port_),
+            mode: flutter_rust_bridge::for_generated::FfiCallMode::Normal,
+        },
+        move || {
+            let message = unsafe {
+                flutter_rust_bridge::for_generated::Dart2RustMessageSse::from_wire(
+                    ptr_,
+                    rust_vec_len_,
+                    data_len_,
+                )
+            };
+            let mut deserializer =
+                flutter_rust_bridge::for_generated::SseDeserializer::new(message);
+            let api_device_id = <String>::sse_decode(&mut deserializer);
+            let api_mailbox_folder_id = <String>::sse_decode(&mut deserializer);
+            let api_device_label = <String>::sse_decode(&mut deserializer);
+            deserializer.end();
+            move |context| async move {
+                transform_result_sse::<_, flutter_rust_bridge::for_generated::anyhow::Error>(
+                    (move || async move {
+                        let output_ok = crate::api::app::scan_peer_cleanup(
+                            api_device_id,
+                            api_mailbox_folder_id,
+                            api_device_label,
+                        )
+                        .await?;
+                        Ok(output_ok)
+                    })()
+                    .await,
+                )
+            }
+        },
+    )
+}
 fn wire__crate__api__app__send_local_path_impl(
     port_: flutter_rust_bridge::for_generated::MessagePort,
     ptr_: flutter_rust_bridge::for_generated::PlatformGeneralizedUint8ListPtr,
@@ -1881,11 +1995,70 @@ impl SseDecode for bool {
     }
 }
 
+impl SseDecode for crate::api::app::CleanupCategory {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut inner = <i32>::sse_decode(deserializer);
+        return match inner {
+            0 => crate::api::app::CleanupCategory::ReadyDownloadTask,
+            1 => crate::api::app::CleanupCategory::IncompleteUploadTask,
+            2 => crate::api::app::CleanupCategory::BrokenTask,
+            3 => crate::api::app::CleanupCategory::OtherFile,
+            _ => unreachable!("Invalid variant for CleanupCategory: {}", inner),
+        };
+    }
+}
+
+impl SseDecode for crate::api::app::CleanupItem {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_id = <String>::sse_decode(deserializer);
+        let mut var_deviceId = <String>::sse_decode(deserializer);
+        let mut var_deviceLabel = <String>::sse_decode(deserializer);
+        let mut var_mailboxFolderId = <String>::sse_decode(deserializer);
+        let mut var_title = <String>::sse_decode(deserializer);
+        let mut var_subtitle = <String>::sse_decode(deserializer);
+        let mut var_sizeBytes = <u64>::sse_decode(deserializer);
+        let mut var_sizeLabel = <String>::sse_decode(deserializer);
+        let mut var_updatedAtLabel = <String>::sse_decode(deserializer);
+        let mut var_category = <crate::api::app::CleanupCategory>::sse_decode(deserializer);
+        let mut var_canDelete = <bool>::sse_decode(deserializer);
+        return crate::api::app::CleanupItem {
+            id: var_id,
+            device_id: var_deviceId,
+            device_label: var_deviceLabel,
+            mailbox_folder_id: var_mailboxFolderId,
+            title: var_title,
+            subtitle: var_subtitle,
+            size_bytes: var_sizeBytes,
+            size_label: var_sizeLabel,
+            updated_at_label: var_updatedAtLabel,
+            category: var_category,
+            can_delete: var_canDelete,
+        };
+    }
+}
+
+impl SseDecode for crate::api::app::CleanupScanResult {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut var_totalCount = <i32>::sse_decode(deserializer);
+        let mut var_totalSizeLabel = <String>::sse_decode(deserializer);
+        let mut var_items = <Vec<crate::api::app::CleanupItem>>::sse_decode(deserializer);
+        return crate::api::app::CleanupScanResult {
+            total_count: var_totalCount,
+            total_size_label: var_totalSizeLabel,
+            items: var_items,
+        };
+    }
+}
+
 impl SseDecode for crate::api::app::DeviceSnapshot {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_deviceId = <String>::sse_decode(deserializer);
         let mut var_deviceName = <String>::sse_decode(deserializer);
+        let mut var_mailboxFolderId = <String>::sse_decode(deserializer);
         let mut var_authSource = <String>::sse_decode(deserializer);
         let mut var_mailboxStatusLabel = <String>::sse_decode(deserializer);
         let mut var_mailboxSummary = <String>::sse_decode(deserializer);
@@ -1893,6 +2066,7 @@ impl SseDecode for crate::api::app::DeviceSnapshot {
         return crate::api::app::DeviceSnapshot {
             device_id: var_deviceId,
             device_name: var_deviceName,
+            mailbox_folder_id: var_mailboxFolderId,
             auth_source: var_authSource,
             mailbox_status_label: var_mailboxStatusLabel,
             mailbox_summary: var_mailboxSummary,
@@ -1934,6 +2108,30 @@ impl SseDecode for crate::api::app::InboxPreview {
             received_at_label: var_receivedAtLabel,
             is_ready: var_isReady,
         };
+    }
+}
+
+impl SseDecode for Vec<String> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = vec![];
+        for idx_ in 0..len_ {
+            ans_.push(<String>::sse_decode(deserializer));
+        }
+        return ans_;
+    }
+}
+
+impl SseDecode for Vec<crate::api::app::CleanupItem> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        let mut len_ = <i32>::sse_decode(deserializer);
+        let mut ans_ = vec![];
+        for idx_ in 0..len_ {
+            ans_.push(<crate::api::app::CleanupItem>::sse_decode(deserializer));
+        }
+        return ans_;
     }
 }
 
@@ -2133,6 +2331,13 @@ impl SseDecode for u32 {
     }
 }
 
+impl SseDecode for u64 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
+        deserializer.cursor.read_u64::<NativeEndian>().unwrap()
+    }
+}
+
 impl SseDecode for u8 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
@@ -2156,31 +2361,34 @@ fn pde_ffi_dispatcher_primary_impl(
     match func_id {
         3 => wire__crate__api__app__change_cloud_password_impl(port, ptr, rust_vec_len, data_len),
         10 => wire__crate__api__app__create_cloud_password_impl(port, ptr, rust_vec_len, data_len),
-        11 => wire__crate__api__app__delete_transfer_impl(port, ptr, rust_vec_len, data_len),
-        13 => wire__crate__api__simple__init_app_impl(port, ptr, rust_vec_len, data_len),
-        14 => {
+        11 => wire__crate__api__app__delete_cleanup_items_impl(port, ptr, rust_vec_len, data_len),
+        12 => wire__crate__api__app__delete_transfer_impl(port, ptr, rust_vec_len, data_len),
+        14 => wire__crate__api__simple__init_app_impl(port, ptr, rust_vec_len, data_len),
+        15 => {
             wire__crate__api__simple__init_single_instance_impl(port, ptr, rust_vec_len, data_len)
         }
-        26 => wire__crate__api__app__receive_job_impl(port, ptr, rust_vec_len, data_len),
-        27 => wire__crate__api__single_instance_stream__register_si_listener_impl(
+        27 => wire__crate__api__app__receive_job_impl(port, ptr, rust_vec_len, data_len),
+        28 => wire__crate__api__single_instance_stream__register_si_listener_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        28 => wire__crate__api__app__reject_inbox_job_impl(port, ptr, rust_vec_len, data_len),
-        30 => wire__crate__api__app__remove_peer_device_impl(port, ptr, rust_vec_len, data_len),
-        32 => wire__crate__api__app__resume_task_impl(port, ptr, rust_vec_len, data_len),
-        39 => wire__crate__api__app__send_local_path_impl(port, ptr, rust_vec_len, data_len),
-        49 => wire__crate__api__app__shell_snapshot_impl(port, ptr, rust_vec_len, data_len),
-        50 => wire__crate__api__app__sign_out_impl(port, ptr, rust_vec_len, data_len),
-        52 => wire__crate__api__single_instance_stream__unregister_si_listener_impl(
+        29 => wire__crate__api__app__reject_inbox_job_impl(port, ptr, rust_vec_len, data_len),
+        31 => wire__crate__api__app__remove_peer_device_impl(port, ptr, rust_vec_len, data_len),
+        33 => wire__crate__api__app__resume_task_impl(port, ptr, rust_vec_len, data_len),
+        40 => wire__crate__api__app__scan_global_cleanup_impl(port, ptr, rust_vec_len, data_len),
+        41 => wire__crate__api__app__scan_peer_cleanup_impl(port, ptr, rust_vec_len, data_len),
+        42 => wire__crate__api__app__send_local_path_impl(port, ptr, rust_vec_len, data_len),
+        52 => wire__crate__api__app__shell_snapshot_impl(port, ptr, rust_vec_len, data_len),
+        53 => wire__crate__api__app__sign_out_impl(port, ptr, rust_vec_len, data_len),
+        55 => wire__crate__api__single_instance_stream__unregister_si_listener_impl(
             port,
             ptr,
             rust_vec_len,
             data_len,
         ),
-        54 => wire__crate__api__app__verify_cloud_password_impl(port, ptr, rust_vec_len, data_len),
+        57 => wire__crate__api__app__verify_cloud_password_impl(port, ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -2201,49 +2409,49 @@ fn pde_ffi_dispatcher_sync_impl(
         7 => wire__crate__api__app__clear_preferred_locale_impl(ptr, rust_vec_len, data_len),
         8 => wire__crate__api__app__clear_saved_key_impl(ptr, rust_vec_len, data_len),
         9 => wire__crate__api__simple__configure_app_impl(ptr, rust_vec_len, data_len),
-        12 => wire__crate__api__app__has_saved_key_impl(ptr, rust_vec_len, data_len),
-        15 => {
+        13 => wire__crate__api__app__has_saved_key_impl(ptr, rust_vec_len, data_len),
+        16 => {
             wire__crate__api__app__keep_screen_on_during_transfer_impl(ptr, rust_vec_len, data_len)
         }
-        16 => wire__crate__api__app__max_concurrent_downloads_impl(ptr, rust_vec_len, data_len),
-        17 => wire__crate__api__app__max_concurrent_uploads_impl(ptr, rust_vec_len, data_len),
-        18 => wire__crate__api__app__minimize_to_tray_impl(ptr, rust_vec_len, data_len),
-        19 => wire__crate__api__app__navigate_after_transfer_impl(ptr, rust_vec_len, data_len),
-        20 => wire__crate__api__app__open_data_folder_impl(ptr, rust_vec_len, data_len),
-        21 => {
+        17 => wire__crate__api__app__max_concurrent_downloads_impl(ptr, rust_vec_len, data_len),
+        18 => wire__crate__api__app__max_concurrent_uploads_impl(ptr, rust_vec_len, data_len),
+        19 => wire__crate__api__app__minimize_to_tray_impl(ptr, rust_vec_len, data_len),
+        20 => wire__crate__api__app__navigate_after_transfer_impl(ptr, rust_vec_len, data_len),
+        21 => wire__crate__api__app__open_data_folder_impl(ptr, rust_vec_len, data_len),
+        22 => {
             wire__crate__api__app__peer_discovery_interval_minutes_impl(ptr, rust_vec_len, data_len)
         }
-        22 => wire__crate__api__app__poll_interval_seconds_impl(ptr, rust_vec_len, data_len),
-        23 => wire__crate__api__app__preferred_download_dir_impl(ptr, rust_vec_len, data_len),
-        24 => wire__crate__api__app__preferred_locale_impl(ptr, rust_vec_len, data_len),
-        25 => wire__crate__api__app__quark_login_url_impl(ptr, rust_vec_len, data_len),
-        29 => wire__crate__api__app__remembered_devices_impl(ptr, rust_vec_len, data_len),
-        31 => wire__crate__api__app__restore_remembered_device_impl(ptr, rust_vec_len, data_len),
-        33 => wire__crate__api__app__save_auto_unlock_key_impl(ptr, rust_vec_len, data_len),
-        34 => wire__crate__api__app__save_cookie_string_impl(ptr, rust_vec_len, data_len),
-        35 => wire__crate__api__app__save_device_name_impl(ptr, rust_vec_len, data_len),
-        36 => wire__crate__api__app__save_preferred_download_dir_impl(ptr, rust_vec_len, data_len),
-        37 => wire__crate__api__app__save_preferred_locale_impl(ptr, rust_vec_len, data_len),
-        38 => wire__crate__api__app__save_webview_cookie_string_impl(ptr, rust_vec_len, data_len),
-        40 => wire__crate__api__app__set_auto_receive_enabled_impl(ptr, rust_vec_len, data_len),
-        41 => wire__crate__api__app__set_keep_screen_on_during_transfer_impl(
+        23 => wire__crate__api__app__poll_interval_seconds_impl(ptr, rust_vec_len, data_len),
+        24 => wire__crate__api__app__preferred_download_dir_impl(ptr, rust_vec_len, data_len),
+        25 => wire__crate__api__app__preferred_locale_impl(ptr, rust_vec_len, data_len),
+        26 => wire__crate__api__app__quark_login_url_impl(ptr, rust_vec_len, data_len),
+        30 => wire__crate__api__app__remembered_devices_impl(ptr, rust_vec_len, data_len),
+        32 => wire__crate__api__app__restore_remembered_device_impl(ptr, rust_vec_len, data_len),
+        34 => wire__crate__api__app__save_auto_unlock_key_impl(ptr, rust_vec_len, data_len),
+        35 => wire__crate__api__app__save_cookie_string_impl(ptr, rust_vec_len, data_len),
+        36 => wire__crate__api__app__save_device_name_impl(ptr, rust_vec_len, data_len),
+        37 => wire__crate__api__app__save_preferred_download_dir_impl(ptr, rust_vec_len, data_len),
+        38 => wire__crate__api__app__save_preferred_locale_impl(ptr, rust_vec_len, data_len),
+        39 => wire__crate__api__app__save_webview_cookie_string_impl(ptr, rust_vec_len, data_len),
+        43 => wire__crate__api__app__set_auto_receive_enabled_impl(ptr, rust_vec_len, data_len),
+        44 => wire__crate__api__app__set_keep_screen_on_during_transfer_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        42 => wire__crate__api__app__set_max_concurrent_downloads_impl(ptr, rust_vec_len, data_len),
-        43 => wire__crate__api__app__set_max_concurrent_uploads_impl(ptr, rust_vec_len, data_len),
-        44 => wire__crate__api__app__set_minimize_to_tray_impl(ptr, rust_vec_len, data_len),
-        45 => wire__crate__api__app__set_navigate_after_transfer_impl(ptr, rust_vec_len, data_len),
-        46 => wire__crate__api__app__set_peer_discovery_interval_minutes_impl(
+        45 => wire__crate__api__app__set_max_concurrent_downloads_impl(ptr, rust_vec_len, data_len),
+        46 => wire__crate__api__app__set_max_concurrent_uploads_impl(ptr, rust_vec_len, data_len),
+        47 => wire__crate__api__app__set_minimize_to_tray_impl(ptr, rust_vec_len, data_len),
+        48 => wire__crate__api__app__set_navigate_after_transfer_impl(ptr, rust_vec_len, data_len),
+        49 => wire__crate__api__app__set_peer_discovery_interval_minutes_impl(
             ptr,
             rust_vec_len,
             data_len,
         ),
-        47 => wire__crate__api__app__set_poll_interval_seconds_impl(ptr, rust_vec_len, data_len),
-        48 => wire__crate__api__app__set_theme_mode_impl(ptr, rust_vec_len, data_len),
-        51 => wire__crate__api__app__theme_mode_impl(ptr, rust_vec_len, data_len),
-        53 => wire__crate__api__app__validate_cookie_string_impl(ptr, rust_vec_len, data_len),
+        50 => wire__crate__api__app__set_poll_interval_seconds_impl(ptr, rust_vec_len, data_len),
+        51 => wire__crate__api__app__set_theme_mode_impl(ptr, rust_vec_len, data_len),
+        54 => wire__crate__api__app__theme_mode_impl(ptr, rust_vec_len, data_len),
+        56 => wire__crate__api__app__validate_cookie_string_impl(ptr, rust_vec_len, data_len),
         _ => unreachable!(),
     }
 }
@@ -2269,11 +2477,84 @@ impl flutter_rust_bridge::IntoIntoDart<crate::api::app::AuthState> for crate::ap
     }
 }
 // Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::app::CleanupCategory {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        match self {
+            Self::ReadyDownloadTask => 0.into_dart(),
+            Self::IncompleteUploadTask => 1.into_dart(),
+            Self::BrokenTask => 2.into_dart(),
+            Self::OtherFile => 3.into_dart(),
+            _ => unreachable!(),
+        }
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::app::CleanupCategory
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::app::CleanupCategory>
+    for crate::api::app::CleanupCategory
+{
+    fn into_into_dart(self) -> crate::api::app::CleanupCategory {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::app::CleanupItem {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.id.into_into_dart().into_dart(),
+            self.device_id.into_into_dart().into_dart(),
+            self.device_label.into_into_dart().into_dart(),
+            self.mailbox_folder_id.into_into_dart().into_dart(),
+            self.title.into_into_dart().into_dart(),
+            self.subtitle.into_into_dart().into_dart(),
+            self.size_bytes.into_into_dart().into_dart(),
+            self.size_label.into_into_dart().into_dart(),
+            self.updated_at_label.into_into_dart().into_dart(),
+            self.category.into_into_dart().into_dart(),
+            self.can_delete.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive for crate::api::app::CleanupItem {}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::app::CleanupItem>
+    for crate::api::app::CleanupItem
+{
+    fn into_into_dart(self) -> crate::api::app::CleanupItem {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
+impl flutter_rust_bridge::IntoDart for crate::api::app::CleanupScanResult {
+    fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
+        [
+            self.total_count.into_into_dart().into_dart(),
+            self.total_size_label.into_into_dart().into_dart(),
+            self.items.into_into_dart().into_dart(),
+        ]
+        .into_dart()
+    }
+}
+impl flutter_rust_bridge::for_generated::IntoDartExceptPrimitive
+    for crate::api::app::CleanupScanResult
+{
+}
+impl flutter_rust_bridge::IntoIntoDart<crate::api::app::CleanupScanResult>
+    for crate::api::app::CleanupScanResult
+{
+    fn into_into_dart(self) -> crate::api::app::CleanupScanResult {
+        self
+    }
+}
+// Codec=Dco (DartCObject based), see doc to use other codecs
 impl flutter_rust_bridge::IntoDart for crate::api::app::DeviceSnapshot {
     fn into_dart(self) -> flutter_rust_bridge::for_generated::DartAbi {
         [
             self.device_id.into_into_dart().into_dart(),
             self.device_name.into_into_dart().into_dart(),
+            self.mailbox_folder_id.into_into_dart().into_dart(),
             self.auth_source.into_into_dart().into_dart(),
             self.mailbox_status_label.into_into_dart().into_dart(),
             self.mailbox_summary.into_into_dart().into_dart(),
@@ -2526,11 +2807,56 @@ impl SseEncode for bool {
     }
 }
 
+impl SseEncode for crate::api::app::CleanupCategory {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(
+            match self {
+                crate::api::app::CleanupCategory::ReadyDownloadTask => 0,
+                crate::api::app::CleanupCategory::IncompleteUploadTask => 1,
+                crate::api::app::CleanupCategory::BrokenTask => 2,
+                crate::api::app::CleanupCategory::OtherFile => 3,
+                _ => {
+                    unimplemented!("");
+                }
+            },
+            serializer,
+        );
+    }
+}
+
+impl SseEncode for crate::api::app::CleanupItem {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <String>::sse_encode(self.id, serializer);
+        <String>::sse_encode(self.device_id, serializer);
+        <String>::sse_encode(self.device_label, serializer);
+        <String>::sse_encode(self.mailbox_folder_id, serializer);
+        <String>::sse_encode(self.title, serializer);
+        <String>::sse_encode(self.subtitle, serializer);
+        <u64>::sse_encode(self.size_bytes, serializer);
+        <String>::sse_encode(self.size_label, serializer);
+        <String>::sse_encode(self.updated_at_label, serializer);
+        <crate::api::app::CleanupCategory>::sse_encode(self.category, serializer);
+        <bool>::sse_encode(self.can_delete, serializer);
+    }
+}
+
+impl SseEncode for crate::api::app::CleanupScanResult {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.total_count, serializer);
+        <String>::sse_encode(self.total_size_label, serializer);
+        <Vec<crate::api::app::CleanupItem>>::sse_encode(self.items, serializer);
+    }
+}
+
 impl SseEncode for crate::api::app::DeviceSnapshot {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.device_id, serializer);
         <String>::sse_encode(self.device_name, serializer);
+        <String>::sse_encode(self.mailbox_folder_id, serializer);
         <String>::sse_encode(self.auth_source, serializer);
         <String>::sse_encode(self.mailbox_status_label, serializer);
         <String>::sse_encode(self.mailbox_summary, serializer);
@@ -2562,6 +2888,26 @@ impl SseEncode for crate::api::app::InboxPreview {
         <String>::sse_encode(self.size_label, serializer);
         <String>::sse_encode(self.received_at_label, serializer);
         <bool>::sse_encode(self.is_ready, serializer);
+    }
+}
+
+impl SseEncode for Vec<String> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <String>::sse_encode(item, serializer);
+        }
+    }
+}
+
+impl SseEncode for Vec<crate::api::app::CleanupItem> {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        <i32>::sse_encode(self.len() as _, serializer);
+        for item in self {
+            <crate::api::app::CleanupItem>::sse_encode(item, serializer);
+        }
     }
 }
 
@@ -2720,6 +3066,13 @@ impl SseEncode for u32 {
     // Codec=Sse (Serialization based), see doc to use other codecs
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         serializer.cursor.write_u32::<NativeEndian>(self).unwrap();
+    }
+}
+
+impl SseEncode for u64 {
+    // Codec=Sse (Serialization based), see doc to use other codecs
+    fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
+        serializer.cursor.write_u64::<NativeEndian>(self).unwrap();
     }
 }
 

@@ -8,6 +8,39 @@
   "deviceNameFieldLabel": "设备名称",
   "existingDevicesTitle": "已有设备",
   "existingDevicesSubtitle": "我们在你的网盘中找到了设备目录。你可以绑定已有设备，或继续创建新设备。",
+  "currentDeviceSubtitle": "当前设备，仅支持清理，不可删除。",
+  "deviceMailboxManageEntry": "收件箱管理",
+  "garbageCleanupEntry": "脏数据回收",
+  "deviceMailboxManageTitle": "{device} 的收件箱",
+  "@deviceMailboxManageTitle": {
+    "placeholders": {
+      "device": {}
+    }
+  },
+  "deviceMailboxManageHintTitle": "按设备查看远端收件箱",
+  "deviceMailboxManageHintBody": "这里会按已完成任务、未完成任务、异常任务和其他文件分类展示该设备的 mailbox 内容，后续可逐项删除。",
+  "deviceMaintenanceActiveTransferTitle": "当前存在进行中的传输任务",
+  "deviceMaintenanceActiveTransferBody": "建议在没有进行中的发送或接收任务时再执行收件箱管理或脏数据回收。回收期间会暂时禁用设备操作。",
+  "deviceCleanupCategoryReadyTasks": "待下载任务",
+  "deviceCleanupCategoryReadyTasksBody": "结构完整、当前仍在远端等待本机下载的任务会显示在这里。",
+  "deviceCleanupCategoryIncompleteUploads": "未完成上传任务",
+  "deviceCleanupCategoryIncompleteUploadsBody": "发送方上传中断后留下的不完整任务会归到这里，删除前应谨慎确认。",
+  "deviceCleanupCategoryBrokenTasks": "异常任务",
+  "deviceCleanupCategoryBrokenTasksBody": "目录结构像任务，但解析失败、校验失败或内容不完整的项目会归到这里。",
+  "deviceCleanupCategoryOtherFiles": "其他文件",
+  "deviceCleanupCategoryOtherFilesBody": "不属于 QuarkDrop 协议任务的普通文件、目录或杂项残留会显示在这里。",
+  "deviceCleanupEmptyPreview": "扫描结果将在这里显示。",
+  "deviceMaintenanceBusyDeletingMailbox": "正在处理收件箱项目，请稍候…",
+  "deviceMaintenanceBusyGarbageCleanup": "正在扫描或清理脏数据，请稍候…",
+  "garbageCleanupTitle": "脏数据回收",
+  "garbageCleanupHintBody": "这个页面会按待下载任务、未完成上传任务、异常任务和其他文件统一汇总各设备中的可清理内容。第一版先提供扫描结果视图。",
+  "cleanupSummaryLabel": "{count} 项 · {size}",
+  "@cleanupSummaryLabel": {
+    "placeholders": {
+      "count": {},
+      "size": {}
+    }
+  },
   "actionBind": "绑定",
   "actionContinueAsNewDevice": "作为新设备继续",
   "errorPasswordEmpty": "密码不能为空。",
@@ -49,6 +82,7 @@
   "noPeerDevicesBody": "目前没有其他设备可用。请先在另一台设备上打开 QuarkDrop 并登录。",
   "sendTargetLabel": "发送目标",
   "actionSelect": "选择",
+  "actionRetry": "重试",
   "noTransfersTitle": "暂无传输",
   "noTransfersBody": "符合当前筛选条件的任务会显示在这里。",
   "noTransferHistoryTitle": "还没有传输记录",
@@ -78,6 +112,12 @@
   "directionSend": "发送",
   "directionReceive": "接收",
   "accountLabel": "账号：{authSource}",
+  "deviceIdLabel": "设备 ID：{deviceId}",
+  "@deviceIdLabel": {
+    "placeholders": {
+      "deviceId": {}
+    }
+  },
   "errorNewPasswordEmpty": "新密码不能为空。",
   "cloudPasswordCardTitle": "云密码",
   "cloudPasswordCardSubtitle": "修改云密码。所有设备密钥都会重新加密。",

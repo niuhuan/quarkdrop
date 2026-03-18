@@ -6,8 +6,8 @@
 import '../frb_generated.dart';
 import 'package:flutter_rust_bridge/flutter_rust_bridge_for_generated.dart';
 
-// These functions are ignored because they are not marked as `pub`: `auth_source_label`, `load_transfer_previews`, `map_task_snapshot`, `size_label`, `store_validated_cookie`
-// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`
+// These functions are ignored because they are not marked as `pub`: `active_remote_job_ids`, `auth_source_label`, `build_cleanup_scan_result`, `classify_job_entry`, `cleanup_item_subtitle`, `cleanup_item_title`, `cleanup_updated_label`, `is_reserved_mailbox_entry`, `load_transfer_previews`, `map_task_snapshot`, `remote_entry_size_bytes`, `scan_mailbox_cleanup_items`, `size_label`, `store_validated_cookie`
+// These function are ignored because they are on traits that is not defined in current crate (put an empty `#[frb]` on it to unignore): `assert_receiver_is_total_eq`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `clone`, `cmp`, `eq`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `fmt`, `partial_cmp`
 
 Future<ShellSnapshot> shellSnapshot() =>
     RustLib.instance.api.crateApiAppShellSnapshot();
@@ -172,6 +172,22 @@ int clearCompletedTransfers() =>
 Future<void> deleteTransfer({required String jobId}) =>
     RustLib.instance.api.crateApiAppDeleteTransfer(jobId: jobId);
 
+Future<CleanupScanResult> scanPeerCleanup({
+  required String deviceId,
+  required String mailboxFolderId,
+  required String deviceLabel,
+}) => RustLib.instance.api.crateApiAppScanPeerCleanup(
+  deviceId: deviceId,
+  mailboxFolderId: mailboxFolderId,
+  deviceLabel: deviceLabel,
+);
+
+Future<CleanupScanResult> scanGlobalCleanup() =>
+    RustLib.instance.api.crateApiAppScanGlobalCleanup();
+
+Future<int> deleteCleanupItems({required List<String> itemIds}) =>
+    RustLib.instance.api.crateApiAppDeleteCleanupItems(itemIds: itemIds);
+
 Future<void> removePeerDevice({required String peerDeviceId}) => RustLib
     .instance
     .api
@@ -179,9 +195,101 @@ Future<void> removePeerDevice({required String peerDeviceId}) => RustLib
 
 enum AuthState { loginRequired, needCreatePassword, needVerifyPassword, ready }
 
+enum CleanupCategory {
+  readyDownloadTask,
+  incompleteUploadTask,
+  brokenTask,
+  otherFile,
+}
+
+class CleanupItem {
+  final String id;
+  final String deviceId;
+  final String deviceLabel;
+  final String mailboxFolderId;
+  final String title;
+  final String subtitle;
+  final BigInt sizeBytes;
+  final String sizeLabel;
+  final String updatedAtLabel;
+  final CleanupCategory category;
+  final bool canDelete;
+
+  const CleanupItem({
+    required this.id,
+    required this.deviceId,
+    required this.deviceLabel,
+    required this.mailboxFolderId,
+    required this.title,
+    required this.subtitle,
+    required this.sizeBytes,
+    required this.sizeLabel,
+    required this.updatedAtLabel,
+    required this.category,
+    required this.canDelete,
+  });
+
+  @override
+  int get hashCode =>
+      id.hashCode ^
+      deviceId.hashCode ^
+      deviceLabel.hashCode ^
+      mailboxFolderId.hashCode ^
+      title.hashCode ^
+      subtitle.hashCode ^
+      sizeBytes.hashCode ^
+      sizeLabel.hashCode ^
+      updatedAtLabel.hashCode ^
+      category.hashCode ^
+      canDelete.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CleanupItem &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          deviceId == other.deviceId &&
+          deviceLabel == other.deviceLabel &&
+          mailboxFolderId == other.mailboxFolderId &&
+          title == other.title &&
+          subtitle == other.subtitle &&
+          sizeBytes == other.sizeBytes &&
+          sizeLabel == other.sizeLabel &&
+          updatedAtLabel == other.updatedAtLabel &&
+          category == other.category &&
+          canDelete == other.canDelete;
+}
+
+class CleanupScanResult {
+  final int totalCount;
+  final String totalSizeLabel;
+  final List<CleanupItem> items;
+
+  const CleanupScanResult({
+    required this.totalCount,
+    required this.totalSizeLabel,
+    required this.items,
+  });
+
+  @override
+  int get hashCode =>
+      totalCount.hashCode ^ totalSizeLabel.hashCode ^ items.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CleanupScanResult &&
+          runtimeType == other.runtimeType &&
+          totalCount == other.totalCount &&
+          totalSizeLabel == other.totalSizeLabel &&
+          items == other.items;
+}
+
 class DeviceSnapshot {
   final String deviceId;
   final String deviceName;
+  final String mailboxFolderId;
   final String authSource;
   final String mailboxStatusLabel;
   final String mailboxSummary;
@@ -190,6 +298,7 @@ class DeviceSnapshot {
   const DeviceSnapshot({
     required this.deviceId,
     required this.deviceName,
+    required this.mailboxFolderId,
     required this.authSource,
     required this.mailboxStatusLabel,
     required this.mailboxSummary,
@@ -200,6 +309,7 @@ class DeviceSnapshot {
   int get hashCode =>
       deviceId.hashCode ^
       deviceName.hashCode ^
+      mailboxFolderId.hashCode ^
       authSource.hashCode ^
       mailboxStatusLabel.hashCode ^
       mailboxSummary.hashCode ^
@@ -212,6 +322,7 @@ class DeviceSnapshot {
           runtimeType == other.runtimeType &&
           deviceId == other.deviceId &&
           deviceName == other.deviceName &&
+          mailboxFolderId == other.mailboxFolderId &&
           authSource == other.authSource &&
           mailboxStatusLabel == other.mailboxStatusLabel &&
           mailboxSummary == other.mailboxSummary &&

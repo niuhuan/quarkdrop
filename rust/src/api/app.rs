@@ -10,7 +10,7 @@ use crate::task::store::{
     clear_completed_task_snapshots, find_task_snapshot, load_task_snapshots, remove_task_snapshot,
 };
 use flutter_rust_bridge::for_generated::anyhow;
-use libquarkpan::QuarkPan;
+use libquarkpan::{QuarkEntry, QuarkPan};
 
 #[derive(Clone, Debug)]
 pub enum AuthState {
@@ -49,6 +49,7 @@ pub struct ProtocolNames {
 pub struct DeviceSnapshot {
     pub device_id: String,
     pub device_name: String,
+    pub mailbox_folder_id: String,
     pub auth_source: String,
     pub mailbox_status_label: String,
     pub mailbox_summary: String,
@@ -92,6 +93,36 @@ pub struct TransferPreview {
     pub direction: TransferDirection,
 }
 
+#[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
+pub enum CleanupCategory {
+    ReadyDownloadTask,
+    IncompleteUploadTask,
+    BrokenTask,
+    OtherFile,
+}
+
+#[derive(Clone, Debug)]
+pub struct CleanupItem {
+    pub id: String,
+    pub device_id: String,
+    pub device_label: String,
+    pub mailbox_folder_id: String,
+    pub title: String,
+    pub subtitle: String,
+    pub size_bytes: u64,
+    pub size_label: String,
+    pub updated_at_label: String,
+    pub category: CleanupCategory,
+    pub can_delete: bool,
+}
+
+#[derive(Clone, Debug)]
+pub struct CleanupScanResult {
+    pub total_count: i32,
+    pub total_size_label: String,
+    pub items: Vec<CleanupItem>,
+}
+
 #[derive(Clone, Debug)]
 pub struct ShellSnapshot {
     pub auth_state: AuthState,
@@ -113,6 +144,7 @@ pub async fn shell_snapshot() -> anyhow::Result<ShellSnapshot> {
     let mut device_snapshot = DeviceSnapshot {
         device_id: local_device.device_id.clone(),
         device_name: local_device.device_name.clone(),
+        mailbox_folder_id: String::new(),
         auth_source: auth_source_label(cookie_session.source).to_string(),
         mailbox_status_label: "Login required".to_string(),
         mailbox_summary: "Authenticate with Quark to prepare this device mailbox.".to_string(),
@@ -212,6 +244,7 @@ pub async fn shell_snapshot() -> anyhow::Result<ShellSnapshot> {
             });
         }
     };
+    device_snapshot.mailbox_folder_id = mailbox_state.mailbox_folder_id.clone();
     device_snapshot.mailbox_status_label = mailbox_state.mailbox_status_label;
     device_snapshot.mailbox_summary = mailbox_state.mailbox_summary;
     device_snapshot.inbox_job_count = mailbox_state.inbox_job_count;
@@ -555,7 +588,7 @@ pub async fn reject_inbox_job(job_folder_id: String) -> anyhow::Result<()> {
     let quark = QuarkPan::builder()
         .cookie(cookie_session.raw_cookie)
         .prepare()?;
-    match quark.delete(&job_folder_id).await {
+    match quark.delete(&[&job_folder_id]).await {
         Ok(()) => Ok(()),
         Err(libquarkpan::QuarkPanError::Api { status, .. }) if status == 404 => Ok(()),
         Err(error) => Err(error.into()),
@@ -606,7 +639,7 @@ pub async fn delete_transfer(job_id: String) -> anyhow::Result<()> {
         let quark = QuarkPan::builder()
             .cookie(cookie_session.raw_cookie)
             .prepare()?;
-        match quark.delete(&task.remote_job_folder_id).await {
+        match quark.delete(&[&task.remote_job_folder_id]).await {
             Ok(()) => {}
             Err(libquarkpan::QuarkPanError::Api { status, .. }) if status == 404 => {}
             Err(error) => return Err(error.into()),
@@ -615,6 +648,83 @@ pub async fn delete_transfer(job_id: String) -> anyhow::Result<()> {
 
     remove_task_snapshot(&job_id)?;
     Ok(())
+}
+
+pub async fn scan_peer_cleanup(
+    device_id: String,
+    mailbox_folder_id: String,
+    device_label: String,
+) -> anyhow::Result<CleanupScanResult> {
+    let cookie_session = session::current_session();
+    anyhow::ensure!(
+        cookie_session.is_configured(),
+        "Authenticate with Quark before scanning device cleanup items.",
+    );
+    let quark = QuarkPan::builder()
+        .cookie(cookie_session.raw_cookie)
+        .prepare()?;
+    scan_mailbox_cleanup_items(&quark, &device_id, &mailbox_folder_id, &device_label).await
+}
+
+pub async fn scan_global_cleanup() -> anyhow::Result<CleanupScanResult> {
+    let cookie_session = session::current_session();
+    anyhow::ensure!(
+        cookie_session.is_configured(),
+        "Authenticate with Quark before scanning cleanup items.",
+    );
+    let quark = QuarkPan::builder()
+        .cookie(cookie_session.raw_cookie)
+        .prepare()?;
+    let local_device = device::load_or_create_local_device()?;
+    let mailbox_state =
+        device::ensure_mailbox_state(&quark, MANIFEST_FILE_NAME, COMMIT_FILE_NAME, &local_device)
+            .await?;
+    let mut items = Vec::new();
+    let mut current_scan = scan_mailbox_cleanup_items(
+        &quark,
+        &local_device.device_id,
+        &mailbox_state.mailbox_folder_id,
+        &local_device.device_name,
+    )
+    .await?;
+    items.append(&mut current_scan.items);
+    for peer in mailbox_state.peer_devices {
+        let mut scan = scan_mailbox_cleanup_items(
+            &quark,
+            &peer.device_id,
+            &peer.mailbox_folder_id,
+            &peer.label,
+        )
+        .await?;
+        items.append(&mut scan.items);
+    }
+    Ok(build_cleanup_scan_result(items))
+}
+
+pub async fn delete_cleanup_items(item_ids: Vec<String>) -> anyhow::Result<i32> {
+    let cookie_session = session::current_session();
+    anyhow::ensure!(
+        cookie_session.is_configured(),
+        "Authenticate with Quark before deleting cleanup items.",
+    );
+    let active_remote_job_ids = active_remote_job_ids();
+    for item_id in &item_ids {
+        anyhow::ensure!(
+            !active_remote_job_ids.contains(item_id),
+            "Cannot delete a remote task that is currently active."
+        );
+    }
+    let quark = QuarkPan::builder()
+        .cookie(cookie_session.raw_cookie)
+        .prepare()?;
+    if item_ids.is_empty() {
+        return Ok(0);
+    }
+    match quark.delete(&item_ids).await {
+        Ok(()) => Ok(i32::try_from(item_ids.len()).unwrap_or(i32::MAX)),
+        Err(libquarkpan::QuarkPanError::Api { status, .. }) if status == 404 => Ok(0),
+        Err(error) => Err(error.into()),
+    }
 }
 
 fn auth_source_label(source: CookieSource) -> &'static str {
@@ -730,6 +840,7 @@ fn size_label(size_bytes: u64) -> String {
         format!("{value:.1} {}", UNITS[unit_index])
     }
 }
+
 pub async fn remove_peer_device(peer_device_id: String) -> anyhow::Result<()> {
     let cookie_session = session::current_session();
     let quark = QuarkPan::builder()
@@ -737,4 +848,164 @@ pub async fn remove_peer_device(peer_device_id: String) -> anyhow::Result<()> {
         .prepare()?;
 
     device::remove_peer_mailbox(&quark, &peer_device_id).await
+}
+
+async fn scan_mailbox_cleanup_items(
+    quark: &QuarkPan,
+    device_id: &str,
+    mailbox_folder_id: &str,
+    device_label: &str,
+) -> anyhow::Result<CleanupScanResult> {
+    let active_remote_job_ids = active_remote_job_ids();
+    let mut items = Vec::new();
+    for entry in device::list_all_entries(quark, mailbox_folder_id).await? {
+        if is_reserved_mailbox_entry(&entry) {
+            continue;
+        }
+        let category = if entry.dir && entry.file_name.starts_with("job_") {
+            classify_job_entry(quark, &entry).await?
+        } else {
+            CleanupCategory::OtherFile
+        };
+        let size_bytes = remote_entry_size_bytes(quark, &entry).await?;
+        let is_active = active_remote_job_ids.contains(&entry.fid);
+        items.push(CleanupItem {
+            id: entry.fid.clone(),
+            device_id: device_id.to_string(),
+            device_label: device_label.to_string(),
+            mailbox_folder_id: mailbox_folder_id.to_string(),
+            title: cleanup_item_title(&entry, &category),
+            subtitle: cleanup_item_subtitle(device_label, &entry, &category, is_active),
+            size_bytes,
+            size_label: size_label(size_bytes),
+            updated_at_label: cleanup_updated_label(entry.updated_at),
+            category,
+            can_delete: !is_active,
+        });
+    }
+    Ok(build_cleanup_scan_result(items))
+}
+
+async fn classify_job_entry(
+    quark: &QuarkPan,
+    entry: &QuarkEntry,
+) -> anyhow::Result<CleanupCategory> {
+    let children = device::list_all_entries(quark, &entry.fid).await?;
+    let has_manifest = children
+        .iter()
+        .any(|child| child.file && child.file_name == MANIFEST_FILE_NAME);
+    let has_commit = children
+        .iter()
+        .any(|child| child.file && child.file_name == COMMIT_FILE_NAME);
+    let has_blobs_dir = children
+        .iter()
+        .any(|child| child.dir && child.file_name == "blobs");
+    Ok(if has_manifest && has_commit && has_blobs_dir {
+        CleanupCategory::ReadyDownloadTask
+    } else if has_manifest || has_commit || has_blobs_dir {
+        if has_manifest && has_commit {
+            CleanupCategory::BrokenTask
+        } else {
+            CleanupCategory::IncompleteUploadTask
+        }
+    } else {
+        CleanupCategory::IncompleteUploadTask
+    })
+}
+
+fn build_cleanup_scan_result(mut items: Vec<CleanupItem>) -> CleanupScanResult {
+    items.sort_by(|left, right| {
+        left.category
+            .cmp(&right.category)
+            .then_with(|| right.size_bytes.cmp(&left.size_bytes))
+            .then_with(|| left.title.cmp(&right.title))
+    });
+    let total_size = items.iter().map(|item| item.size_bytes).sum::<u64>();
+    CleanupScanResult {
+        total_count: i32::try_from(items.len()).unwrap_or(i32::MAX),
+        total_size_label: size_label(total_size),
+        items,
+    }
+}
+
+fn active_remote_job_ids() -> std::collections::HashSet<String> {
+    load_task_snapshots()
+        .unwrap_or_default()
+        .into_iter()
+        .filter(|task| {
+            task.stage != TaskStage::Done
+                && task.stage != TaskStage::Failed
+                && !task.remote_job_folder_id.trim().is_empty()
+        })
+        .map(|task| task.remote_job_folder_id)
+        .collect()
+}
+
+fn is_reserved_mailbox_entry(entry: &QuarkEntry) -> bool {
+    entry.file_name == "device.json" || entry.file_name == "device.bak.json"
+}
+
+fn cleanup_item_title(entry: &QuarkEntry, category: &CleanupCategory) -> String {
+    match category {
+        CleanupCategory::ReadyDownloadTask
+        | CleanupCategory::IncompleteUploadTask
+        | CleanupCategory::BrokenTask => entry
+            .file_name
+            .strip_prefix("job_")
+            .map(str::to_string)
+            .filter(|value| !value.is_empty())
+            .unwrap_or_else(|| entry.file_name.clone()),
+        CleanupCategory::OtherFile => entry.file_name.clone(),
+    }
+}
+
+fn cleanup_item_subtitle(
+    device_label: &str,
+    entry: &QuarkEntry,
+    category: &CleanupCategory,
+    is_active: bool,
+) -> String {
+    if is_active {
+        return "This remote task is currently active on this device and cannot be deleted."
+            .to_string();
+    }
+    match category {
+        CleanupCategory::ReadyDownloadTask => {
+            format!("Ready download task still waiting inside {}.", device_label)
+        }
+        CleanupCategory::IncompleteUploadTask => format!(
+            "Upload to {} did not finish and left `{}` behind.",
+            device_label, entry.file_name
+        ),
+        CleanupCategory::BrokenTask => format!(
+            "Remote task structure inside {} looks broken or incomplete.",
+            device_label
+        ),
+        CleanupCategory::OtherFile => format!(
+            "Non-task file or folder found inside {} mailbox.",
+            device_label
+        ),
+    }
+}
+
+fn cleanup_updated_label(updated_at_unix_ms: u64) -> String {
+    format!("Updated {}", updated_at_unix_ms)
+}
+
+async fn remote_entry_size_bytes(quark: &QuarkPan, entry: &QuarkEntry) -> anyhow::Result<u64> {
+    if entry.file {
+        return Ok(entry.size);
+    }
+    let mut total = 0u64;
+    let mut stack = vec![entry.fid.clone()];
+    while let Some(folder_id) = stack.pop() {
+        for child in device::list_all_entries(quark, &folder_id).await? {
+            if child.file {
+                total = total.saturating_add(child.size);
+            } else if child.dir {
+                stack.push(child.fid);
+            }
+        }
+    }
+    Ok(total)
 }

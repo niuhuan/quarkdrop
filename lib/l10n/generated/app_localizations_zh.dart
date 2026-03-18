@@ -33,6 +33,83 @@ class AppLocalizationsZh extends AppLocalizations {
   String get existingDevicesSubtitle => '我们在你的网盘中找到了设备目录。你可以绑定已有设备，或继续创建新设备。';
 
   @override
+  String get currentDeviceSubtitle => '当前设备，仅支持清理，不可删除。';
+
+  @override
+  String get deviceMailboxManageEntry => '收件箱管理';
+
+  @override
+  String get garbageCleanupEntry => '脏数据回收';
+
+  @override
+  String deviceMailboxManageTitle(Object device) {
+    return '$device 的收件箱';
+  }
+
+  @override
+  String get deviceMailboxManageHintTitle => '按设备查看远端收件箱';
+
+  @override
+  String get deviceMailboxManageHintBody =>
+      '这里会按已完成任务、未完成任务、异常任务和其他文件分类展示该设备的 mailbox 内容，后续可逐项删除。';
+
+  @override
+  String get deviceMaintenanceActiveTransferTitle => '当前存在进行中的传输任务';
+
+  @override
+  String get deviceMaintenanceActiveTransferBody =>
+      '建议在没有进行中的发送或接收任务时再执行收件箱管理或脏数据回收。回收期间会暂时禁用设备操作。';
+
+  @override
+  String get deviceCleanupCategoryReadyTasks => '待下载任务';
+
+  @override
+  String get deviceCleanupCategoryReadyTasksBody =>
+      '结构完整、当前仍在远端等待本机下载的任务会显示在这里。';
+
+  @override
+  String get deviceCleanupCategoryIncompleteUploads => '未完成上传任务';
+
+  @override
+  String get deviceCleanupCategoryIncompleteUploadsBody =>
+      '发送方上传中断后留下的不完整任务会归到这里，删除前应谨慎确认。';
+
+  @override
+  String get deviceCleanupCategoryBrokenTasks => '异常任务';
+
+  @override
+  String get deviceCleanupCategoryBrokenTasksBody =>
+      '目录结构像任务，但解析失败、校验失败或内容不完整的项目会归到这里。';
+
+  @override
+  String get deviceCleanupCategoryOtherFiles => '其他文件';
+
+  @override
+  String get deviceCleanupCategoryOtherFilesBody =>
+      '不属于 QuarkDrop 协议任务的普通文件、目录或杂项残留会显示在这里。';
+
+  @override
+  String get deviceCleanupEmptyPreview => '扫描结果将在这里显示。';
+
+  @override
+  String get deviceMaintenanceBusyDeletingMailbox => '正在处理收件箱项目，请稍候…';
+
+  @override
+  String get deviceMaintenanceBusyGarbageCleanup => '正在扫描或清理脏数据，请稍候…';
+
+  @override
+  String get garbageCleanupTitle => '脏数据回收';
+
+  @override
+  String get garbageCleanupHintBody =>
+      '这个页面会按待下载任务、未完成上传任务、异常任务和其他文件统一汇总各设备中的可清理内容。第一版先提供扫描结果视图。';
+
+  @override
+  String cleanupSummaryLabel(Object count, Object size) {
+    return '$count 项 · $size';
+  }
+
+  @override
   String get actionBind => '绑定';
 
   @override
@@ -162,6 +239,9 @@ class AppLocalizationsZh extends AppLocalizations {
   String get actionSelect => '选择';
 
   @override
+  String get actionRetry => '重试';
+
+  @override
   String get noTransfersTitle => '暂无传输';
 
   @override
@@ -258,6 +338,11 @@ class AppLocalizationsZh extends AppLocalizations {
   @override
   String accountLabel(Object authSource) {
     return '账号：$authSource';
+  }
+
+  @override
+  String deviceIdLabel(Object deviceId) {
+    return '设备 ID：$deviceId';
   }
 
   @override
@@ -747,6 +832,83 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get existingDevicesSubtitle => '我们在你的网盘中找到了设备目录。你可以绑定已有设备，或继续创建新设备。';
 
   @override
+  String get currentDeviceSubtitle => '当前设备，仅支持清理，不可删除。';
+
+  @override
+  String get deviceMailboxManageEntry => '收件箱管理';
+
+  @override
+  String get garbageCleanupEntry => '脏数据回收';
+
+  @override
+  String deviceMailboxManageTitle(Object device) {
+    return '$device 的收件箱';
+  }
+
+  @override
+  String get deviceMailboxManageHintTitle => '按设备查看远端收件箱';
+
+  @override
+  String get deviceMailboxManageHintBody =>
+      '这里会按已完成任务、未完成任务、异常任务和其他文件分类展示该设备的 mailbox 内容，后续可逐项删除。';
+
+  @override
+  String get deviceMaintenanceActiveTransferTitle => '当前存在进行中的传输任务';
+
+  @override
+  String get deviceMaintenanceActiveTransferBody =>
+      '建议在没有进行中的发送或接收任务时再执行收件箱管理或脏数据回收。回收期间会暂时禁用设备操作。';
+
+  @override
+  String get deviceCleanupCategoryReadyTasks => '待下载任务';
+
+  @override
+  String get deviceCleanupCategoryReadyTasksBody =>
+      '结构完整、当前仍在远端等待本机下载的任务会显示在这里。';
+
+  @override
+  String get deviceCleanupCategoryIncompleteUploads => '未完成上传任务';
+
+  @override
+  String get deviceCleanupCategoryIncompleteUploadsBody =>
+      '发送方上传中断后留下的不完整任务会归到这里，删除前应谨慎确认。';
+
+  @override
+  String get deviceCleanupCategoryBrokenTasks => '异常任务';
+
+  @override
+  String get deviceCleanupCategoryBrokenTasksBody =>
+      '目录结构像任务，但解析失败、校验失败或内容不完整的项目会归到这里。';
+
+  @override
+  String get deviceCleanupCategoryOtherFiles => '其他文件';
+
+  @override
+  String get deviceCleanupCategoryOtherFilesBody =>
+      '不属于 QuarkDrop 协议任务的普通文件、目录或杂项残留会显示在这里。';
+
+  @override
+  String get deviceCleanupEmptyPreview => '扫描结果将在这里显示。';
+
+  @override
+  String get deviceMaintenanceBusyDeletingMailbox => '正在处理收件箱项目，请稍候…';
+
+  @override
+  String get deviceMaintenanceBusyGarbageCleanup => '正在扫描或清理脏数据，请稍候…';
+
+  @override
+  String get garbageCleanupTitle => '脏数据回收';
+
+  @override
+  String get garbageCleanupHintBody =>
+      '这个页面会按待下载任务、未完成上传任务、异常任务和其他文件统一汇总各设备中的可清理内容。第一版先提供扫描结果视图。';
+
+  @override
+  String cleanupSummaryLabel(Object count, Object size) {
+    return '$count 项 · $size';
+  }
+
+  @override
   String get actionBind => '绑定';
 
   @override
@@ -876,6 +1038,9 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get actionSelect => '选择';
 
   @override
+  String get actionRetry => '重试';
+
+  @override
   String get noTransfersTitle => '暂无传输';
 
   @override
@@ -972,6 +1137,11 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   @override
   String accountLabel(Object authSource) {
     return '账号：$authSource';
+  }
+
+  @override
+  String deviceIdLabel(Object deviceId) {
+    return '设备 ID：$deviceId';
   }
 
   @override
@@ -1461,6 +1631,83 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get existingDevicesSubtitle => '我們在你的雲端中找到裝置資料夾。你可以綁定現有裝置，或繼續建立新裝置。';
 
   @override
+  String get currentDeviceSubtitle => '目前裝置，僅支援清理，不可刪除。';
+
+  @override
+  String get deviceMailboxManageEntry => '收件箱管理';
+
+  @override
+  String get garbageCleanupEntry => '髒資料回收';
+
+  @override
+  String deviceMailboxManageTitle(Object device) {
+    return '$device 的收件箱';
+  }
+
+  @override
+  String get deviceMailboxManageHintTitle => '按裝置查看遠端收件箱';
+
+  @override
+  String get deviceMailboxManageHintBody =>
+      '這裡會按已完成任務、未完成任務、異常任務和其他檔案分類顯示該裝置的 mailbox 內容，後續可逐項刪除。';
+
+  @override
+  String get deviceMaintenanceActiveTransferTitle => '目前存在進行中的傳輸任務';
+
+  @override
+  String get deviceMaintenanceActiveTransferBody =>
+      '建議在沒有進行中的傳送或接收任務時再執行收件箱管理或髒資料回收。回收期間會暫時停用裝置操作。';
+
+  @override
+  String get deviceCleanupCategoryReadyTasks => '待下載任務';
+
+  @override
+  String get deviceCleanupCategoryReadyTasksBody =>
+      '結構完整、目前仍在遠端等待本機下載的任務會顯示在這裡。';
+
+  @override
+  String get deviceCleanupCategoryIncompleteUploads => '未完成上傳任務';
+
+  @override
+  String get deviceCleanupCategoryIncompleteUploadsBody =>
+      '傳送端上傳中斷後留下的不完整任務會歸到這裡，刪除前應謹慎確認。';
+
+  @override
+  String get deviceCleanupCategoryBrokenTasks => '異常任務';
+
+  @override
+  String get deviceCleanupCategoryBrokenTasksBody =>
+      '目錄結構像任務，但解析失敗、校驗失敗或內容不完整的項目會歸到這裡。';
+
+  @override
+  String get deviceCleanupCategoryOtherFiles => '其他檔案';
+
+  @override
+  String get deviceCleanupCategoryOtherFilesBody =>
+      '不屬於 QuarkDrop 協議任務的普通檔案、目錄或雜項殘留會顯示在這裡。';
+
+  @override
+  String get deviceCleanupEmptyPreview => '掃描結果將顯示在這裡。';
+
+  @override
+  String get deviceMaintenanceBusyDeletingMailbox => '正在處理收件箱項目，請稍候…';
+
+  @override
+  String get deviceMaintenanceBusyGarbageCleanup => '正在掃描或清理髒資料，請稍候…';
+
+  @override
+  String get garbageCleanupTitle => '髒資料回收';
+
+  @override
+  String get garbageCleanupHintBody =>
+      '這個頁面會按待下載任務、未完成上傳任務、異常任務和其他檔案統一彙總各裝置中的可清理內容。第一版先提供掃描結果視圖。';
+
+  @override
+  String cleanupSummaryLabel(Object count, Object size) {
+    return '$count 項 · $size';
+  }
+
+  @override
   String get actionBind => '綁定';
 
   @override
@@ -1590,6 +1837,9 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get actionSelect => '選擇';
 
   @override
+  String get actionRetry => '重試';
+
+  @override
   String get noTransfersTitle => '尚無傳輸';
 
   @override
@@ -1686,6 +1936,11 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   @override
   String accountLabel(Object authSource) {
     return '帳號：$authSource';
+  }
+
+  @override
+  String deviceIdLabel(Object deviceId) {
+    return '裝置 ID：$deviceId';
   }
 
   @override

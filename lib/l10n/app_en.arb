@@ -8,6 +8,39 @@
   "deviceNameFieldLabel": "Device name",
   "existingDevicesTitle": "Existing Devices",
   "existingDevicesSubtitle": "We found device folders in your cloud. Bind to an existing one or continue as new.",
+  "currentDeviceSubtitle": "Current device. Cleanup is allowed, deletion is disabled.",
+  "deviceMailboxManageEntry": "Mailbox",
+  "garbageCleanupEntry": "Cleanup",
+  "deviceMailboxManageTitle": "{device} Mailbox",
+  "@deviceMailboxManageTitle": {
+    "placeholders": {
+      "device": {}
+    }
+  },
+  "deviceMailboxManageHintTitle": "Review this device mailbox",
+  "deviceMailboxManageHintBody": "This screen will group the remote mailbox into completed jobs, incomplete jobs, broken jobs, and other files so each item can later be deleted safely.",
+  "deviceMaintenanceActiveTransferTitle": "Active transfers detected",
+  "deviceMaintenanceActiveTransferBody": "Try to run mailbox management and garbage cleanup when no send or receive task is still active. Device operations will be temporarily disabled during cleanup.",
+  "deviceCleanupCategoryReadyTasks": "Pending Download Tasks",
+  "deviceCleanupCategoryReadyTasksBody": "Remote jobs that are complete and still waiting for this device to download them will appear here.",
+  "deviceCleanupCategoryIncompleteUploads": "Incomplete Upload Tasks",
+  "deviceCleanupCategoryIncompleteUploadsBody": "Partially uploaded tasks left behind by interrupted senders will appear here and should be reviewed before deletion.",
+  "deviceCleanupCategoryBrokenTasks": "Broken Tasks",
+  "deviceCleanupCategoryBrokenTasksBody": "Items that look like jobs but fail parsing, validation, or integrity checks will appear here.",
+  "deviceCleanupCategoryOtherFiles": "Other Files",
+  "deviceCleanupCategoryOtherFilesBody": "Regular files, folders, or leftovers that are not part of the QuarkDrop protocol will appear here.",
+  "deviceCleanupEmptyPreview": "Scan results will be shown here.",
+  "deviceMaintenanceBusyDeletingMailbox": "Processing mailbox items. Please wait…",
+  "deviceMaintenanceBusyGarbageCleanup": "Scanning or cleaning garbage data. Please wait…",
+  "garbageCleanupTitle": "Garbage Cleanup",
+  "garbageCleanupHintBody": "This page will aggregate the same cleanup categories across all devices: pending download tasks, incomplete upload tasks, broken tasks, and other files. The first version shows the planned scan layout.",
+  "cleanupSummaryLabel": "{count} items · {size}",
+  "@cleanupSummaryLabel": {
+    "placeholders": {
+      "count": {},
+      "size": {}
+    }
+  },
   "actionBind": "Bind",
   "actionContinueAsNewDevice": "Continue as New Device",
   "errorPasswordEmpty": "Password cannot be empty.",
@@ -49,6 +82,7 @@
   "noPeerDevicesBody": "No other device is available yet. Open QuarkDrop on another device and sign in first.",
   "sendTargetLabel": "Send Target",
   "actionSelect": "Select",
+  "actionRetry": "Retry",
   "noTransfersTitle": "No transfers",
   "noTransfersBody": "Jobs matching this filter will appear here.",
   "noTransferHistoryTitle": "No transfer history yet",
@@ -78,6 +112,12 @@
   "directionSend": "Send",
   "directionReceive": "Receive",
   "accountLabel": "Account: {authSource}",
+  "deviceIdLabel": "Device ID: {deviceId}",
+  "@deviceIdLabel": {
+    "placeholders": {
+      "deviceId": {}
+    }
+  },
   "errorNewPasswordEmpty": "New password cannot be empty.",
   "cloudPasswordCardTitle": "Cloud Password",
   "cloudPasswordCardSubtitle": "Change your cloud password. All device keys will be re-encrypted.",
