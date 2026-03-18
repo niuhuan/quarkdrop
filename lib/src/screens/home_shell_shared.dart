@@ -16,7 +16,13 @@ class _PaneTitle extends StatelessWidget {
           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
         ),
         if (subtitle != null) const SizedBox(height: 6),
-        if (subtitle != null) Text(subtitle!, style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant)),
+        if (subtitle != null)
+          Text(
+            subtitle!,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
+          ),
       ],
     );
   }
@@ -163,7 +169,10 @@ class _EmptyPaneMessage extends StatelessWidget {
             Text(
               body,
               textAlign: TextAlign.center,
-              style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant, height: 1.5),
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                height: 1.5,
+              ),
             ),
           ],
         ),

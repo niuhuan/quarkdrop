@@ -1,14 +1,13 @@
 part of 'app_store.dart';
 
 extension AppStoreIntents on AppStore {
-  void initIntentListeners() {
-  }
+  void initIntentListeners() {}
 
   void addIncomingSharedFilePaths(List<String> paths) {
     if (paths.isEmpty) return;
-    
+
     final items = <PendingSendItem>[];
-    
+
     // Filter nested paths
     paths.sort((a, b) => a.length.compareTo(b.length));
     final filteredPaths = <String>[];
@@ -31,13 +30,17 @@ extension AppStoreIntents on AppStore {
         path = Uri.parse(path).toFilePath();
       }
       final isDir = FileSystemEntity.isDirectorySync(path);
-      final name =
-          path.split(Platform.pathSeparator).where((e) => e.isNotEmpty).last;
-      items.add(PendingSendItem(
-        path: path,
-        name: name,
-        kind: isDir ? PendingSendKind.directory : PendingSendKind.file,
-      ));
+      final name = path
+          .split(Platform.pathSeparator)
+          .where((e) => e.isNotEmpty)
+          .last;
+      items.add(
+        PendingSendItem(
+          path: path,
+          name: name,
+          kind: isDir ? PendingSendKind.directory : PendingSendKind.file,
+        ),
+      );
     }
     if (items.isNotEmpty) {
       _mergePendingSendItems(items);

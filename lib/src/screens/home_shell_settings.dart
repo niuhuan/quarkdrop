@@ -20,9 +20,7 @@ class _SettingsPane extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
-            child: _PaneTitle(
-              title: l10n.settingsTitle,
-            ),
+            child: _PaneTitle(title: l10n.settingsTitle),
           ),
           const SizedBox(height: 20),
           Expanded(
@@ -35,6 +33,8 @@ class _SettingsPane extends StatelessWidget {
                     deviceName: device.deviceName,
                     authSource: device.authSource,
                   ),
+                  const SizedBox(height: 14),
+                  ManageDevicesCard(store: store),
                   const SizedBox(height: 14),
                 ],
                 if (!Platform.isIOS)
@@ -1680,7 +1680,9 @@ class _PeerDiscoveryCardState extends State<_PeerDiscoveryCard> {
                           Text(
                             l10n.settingPeerDiscoveryDescription,
                             style: TextStyle(
-                              color: Theme.of(context).colorScheme.onSurfaceVariant,
+                              color: Theme.of(
+                                context,
+                              ).colorScheme.onSurfaceVariant,
                               fontSize: 13,
                             ),
                           ),
@@ -1715,7 +1717,9 @@ class _PeerDiscoveryCardState extends State<_PeerDiscoveryCard> {
                             max: 60,
                             divisions: 59,
                             onChanged: (v) {
-                              widget.store.setPeerDiscoveryIntervalMinutes(v.round());
+                              widget.store.setPeerDiscoveryIntervalMinutes(
+                                v.round(),
+                              );
                             },
                           ),
                         ),

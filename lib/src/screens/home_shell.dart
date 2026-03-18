@@ -11,6 +11,7 @@ import 'package:quarkdrop/src/models/pending_send_item.dart';
 import 'package:quarkdrop/src/models/transfer_job.dart';
 import 'package:quarkdrop/src/rust/api/app.dart' as rust_api;
 import 'package:quarkdrop/src/state/app_store.dart';
+import "manage_devices_card.dart";
 import 'package:signals_flutter/signals_flutter.dart';
 
 part 'home_shell_scaffold.dart';

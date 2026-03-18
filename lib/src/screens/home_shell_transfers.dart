@@ -139,11 +139,7 @@ class _TransfersPaneState extends State<_TransfersPane>
             padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
             child: Row(
               children: [
-                Expanded(
-                  child: _PaneTitle(
-                    title: context.l10n.transfersTitle,
-                  ),
-                ),
+                Expanded(child: _PaneTitle(title: context.l10n.transfersTitle)),
                 OutlinedButton.icon(
                   onPressed: transferActionInProgress || !hasCompletedJobs
                       ? null
@@ -200,9 +196,13 @@ class _TransferListTile extends StatelessWidget {
         padding: const EdgeInsets.all(18),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(22),
-          color: selected ? Theme.of(context).colorScheme.surfaceContainerHighest : Theme.of(context).colorScheme.surface,
+          color: selected
+              ? Theme.of(context).colorScheme.surfaceContainerHighest
+              : Theme.of(context).colorScheme.surface,
           border: Border.all(
-            color: selected ? Theme.of(context).colorScheme.primary : Theme.of(context).colorScheme.outlineVariant,
+            color: selected
+                ? Theme.of(context).colorScheme.primary
+                : Theme.of(context).colorScheme.outlineVariant,
           ),
         ),
         child: Column(
@@ -217,10 +217,7 @@ class _TransferListTile extends StatelessWidget {
                     job.title,
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
-                    style: TextStyle(
-                      fontSize: 17,
-                      fontWeight: FontWeight.w800,
-                    ),
+                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
                   ),
                 ),
                 _StatusBadge(
@@ -240,7 +237,9 @@ class _TransferListTile extends StatelessWidget {
                 valueColor: AlwaysStoppedAnimation<Color>(
                   _stageColor(job.stage),
                 ),
-                backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+                backgroundColor: Theme.of(
+                  context,
+                ).colorScheme.surfaceContainerHighest,
               ),
             ),
             const SizedBox(height: 8),
@@ -249,7 +248,9 @@ class _TransferListTile extends StatelessWidget {
                 Expanded(
                   child: Text(
                     _progressLabel(context, job),
-                    style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
+                    style: TextStyle(
+                      color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    ),
                   ),
                 ),
                 if (job.sizeLabel.isNotEmpty)
@@ -294,7 +295,9 @@ class _TransferDetailCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: Theme.of(context).colorScheme.surfaceContainerLow,
           borderRadius: BorderRadius.circular(24),
-          border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+          border: Border.all(
+            color: Theme.of(context).colorScheme.outlineVariant,
+          ),
         ),
         child: _EmptyPaneMessage(
           title: l10n.selectTransferTitle,
@@ -327,10 +330,7 @@ class _TransferDetailCard extends StatelessWidget {
                   job!.title,
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    fontSize: 22,
-                    fontWeight: FontWeight.w800,
-                  ),
+                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
                 ),
               ),
               _StatusBadge(
@@ -342,7 +342,10 @@ class _TransferDetailCard extends StatelessWidget {
           const SizedBox(height: 14),
           Text(
             job!.subtitle,
-            style: TextStyle(height: 1.5, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            style: TextStyle(
+              height: 1.5,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 18),
           ClipRRect(
@@ -353,13 +356,18 @@ class _TransferDetailCard extends StatelessWidget {
               valueColor: AlwaysStoppedAnimation<Color>(
                 _stageColor(job!.stage),
               ),
-              backgroundColor: Theme.of(context).colorScheme.surfaceContainerHighest,
+              backgroundColor: Theme.of(
+                context,
+              ).colorScheme.surfaceContainerHighest,
             ),
           ),
           const SizedBox(height: 10),
           Text(
             _progressLabel(context, job!),
-            style: TextStyle(fontSize: 15, color: Theme.of(context).colorScheme.onSurfaceVariant),
+            style: TextStyle(
+              fontSize: 15,
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+            ),
           ),
           const SizedBox(height: 18),
           Wrap(
@@ -439,7 +447,11 @@ class _DetailMetaChip extends StatelessWidget {
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, size: 18, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          Icon(
+            icon,
+            size: 18,
+            color: Theme.of(context).colorScheme.onSurfaceVariant,
+          ),
           const SizedBox(width: 8),
           Text(label),
         ],

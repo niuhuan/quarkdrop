@@ -1,32 +1,5 @@
 part of 'home_shell.dart';
 
-Future<void> _confirmDeletePeer(
-    BuildContext context, AppStore store, rust_api.PeerDevice peer) async {
-  final l10n = context.l10n;
-  final confirmed = await showDialog<bool>(
-    context: context,
-    builder: (context) {
-      return AlertDialog(
-        title: Text(l10n.actionDeleteDevice),
-        content: Text(l10n.actionDeleteDeviceHint),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: Text(l10n.actionCancel),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            child: Text(l10n.actionDeleteDevice),
-          ),
-        ],
-      );
-    },
-  );
-  if (confirmed == true) {
-    store.removePeerDevice(peer.deviceId);
-  }
-}
-
 class _SendPane extends StatelessWidget {
   const _SendPane({required this.store});
 
@@ -81,7 +54,11 @@ class _SendPane extends StatelessWidget {
                     padding: const EdgeInsets.all(16),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(16),
-                      color: selected ? Theme.of(context).colorScheme.surfaceContainerHighest : Theme.of(context).colorScheme.surface,
+                      color: selected
+                          ? Theme.of(
+                              context,
+                            ).colorScheme.surfaceContainerHighest
+                          : Theme.of(context).colorScheme.surface,
                       border: Border.all(
                         color: selected
                             ? Theme.of(context).colorScheme.primary
@@ -105,17 +82,14 @@ class _SendPane extends StatelessWidget {
                               Text(
                                 peer.subtitle,
                                 style: TextStyle(
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.onSurfaceVariant,
                                   fontSize: 13,
                                 ),
                               ),
                             ],
                           ),
-                        ),
-                        IconButton(
-                          icon: const Icon(Icons.delete_outline),
-                          onPressed: () => _confirmDeletePeer(context, store, peer),
-                          color: Theme.of(context).colorScheme.error,
                         ),
                         if (selected)
                           _StatusBadge(
