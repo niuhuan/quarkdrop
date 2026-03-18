@@ -141,11 +141,33 @@ jobs:
         env:
           ANDROID_JKS_BASE64: ${{ secrets.ANDROID_JKS_BASE64 }}
           ANDROID_JKS_PASSWORD: ${{ secrets.ANDROID_JKS_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
         run: |
           if [ -n "$ANDROID_JKS_BASE64" ]; then
-            echo $ANDROID_JKS_BASE64 > key.jks.base64
+            if [ -z "$ANDROID_JKS_PASSWORD" ]; then
+              echo "ANDROID_JKS_PASSWORD is empty or unavailable to this workflow." >&2
+              exit 1
+            fi
+
+            echo "$ANDROID_JKS_BASE64" > key.jks.base64
             base64 -d key.jks.base64 > key.jks
-            echo $ANDROID_JKS_PASSWORD | $ANDROID_HOME/build-tools/35.0.0/apksigner sign --ks key.jks build/app/outputs/flutter-apk/app-release.apk
+            SIGN_ARGS=(
+              sign
+              --ks key.jks
+              --ks-pass "pass:$ANDROID_JKS_PASSWORD"
+            )
+
+            if [ -n "$ANDROID_KEY_ALIAS" ]; then
+              SIGN_ARGS+=(--ks-key-alias "$ANDROID_KEY_ALIAS")
+            fi
+
+            if [ -n "$ANDROID_KEY_PASSWORD" ]; then
+              SIGN_ARGS+=(--key-pass "pass:$ANDROID_KEY_PASSWORD")
+            fi
+
+            SIGN_ARGS+=(build/app/outputs/flutter-apk/app-release.apk)
+            "$ANDROID_HOME/build-tools/35.0.0/apksigner" "${SIGN_ARGS[@]}"
           fi
           mv build/app/outputs/flutter-apk/app-release.apk quarkdrop-${{ needs.check-version.outputs.version }}-android-arm64.apk
 
