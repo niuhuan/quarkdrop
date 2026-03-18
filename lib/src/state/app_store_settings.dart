@@ -143,6 +143,10 @@ extension AppStoreSettings on AppStore {
     try {
       rust_api.setMinimizeToTray(enabled: enabled);
       minimizeToTray.value = enabled;
+      if (!enabled && autoMinimizeOnStart.value) {
+        rust_api.setAutoMinimizeOnStart(enabled: false);
+        autoMinimizeOnStart.value = false;
+      }
     } catch (error) {
       lastErrorMessage.value = error.toString();
     }
@@ -152,6 +156,10 @@ extension AppStoreSettings on AppStore {
     try {
       rust_api.setAutoMinimizeOnStart(enabled: enabled);
       autoMinimizeOnStart.value = enabled;
+      if (enabled && !minimizeToTray.value) {
+        rust_api.setMinimizeToTray(enabled: true);
+        minimizeToTray.value = true;
+      }
     } catch (error) {
       lastErrorMessage.value = error.toString();
     }
