@@ -189,23 +189,28 @@ class AppLocalizationsJa extends AppLocalizations {
   String get actionClearCompleted => '完了済みを削除';
 
   @override
-  String tabPending(Object count) {
+  String tabUnfinished(Object count) {
     return '未完了 ($count)';
   }
 
   @override
-  String tabSendQueuePending(Object count) {
-    return '送信 ($count)';
+  String tabSending(Object count) {
+    return '送信中 ($count)';
   }
 
   @override
-  String tabReceiveQueueCompleted(Object count) {
-    return '受信済み ($count)';
+  String tabReceiving(Object count) {
+    return '受信中 ($count)';
   }
 
   @override
   String tabCompleted(Object count) {
     return '完了 ($count)';
+  }
+
+  @override
+  String tabAll(Object count) {
+    return 'すべて ($count)';
   }
 
   @override

@@ -183,23 +183,28 @@ class AppLocalizationsZh extends AppLocalizations {
   String get actionClearCompleted => '清除已完成';
 
   @override
-  String tabPending(Object count) {
+  String tabUnfinished(Object count) {
     return '未完成（$count）';
   }
 
   @override
-  String tabSendQueuePending(Object count) {
-    return '发送（$count）';
+  String tabSending(Object count) {
+    return '发送中（$count）';
   }
 
   @override
-  String tabReceiveQueueCompleted(Object count) {
-    return '已接收（$count）';
+  String tabReceiving(Object count) {
+    return '接收中（$count）';
   }
 
   @override
   String tabCompleted(Object count) {
     return '已完成（$count）';
+  }
+
+  @override
+  String tabAll(Object count) {
+    return '全部（$count）';
   }
 
   @override
@@ -892,23 +897,28 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get actionClearCompleted => '清除已完成';
 
   @override
-  String tabPending(Object count) {
+  String tabUnfinished(Object count) {
     return '未完成（$count）';
   }
 
   @override
-  String tabSendQueuePending(Object count) {
-    return '发送（$count）';
+  String tabSending(Object count) {
+    return '发送中（$count）';
   }
 
   @override
-  String tabReceiveQueueCompleted(Object count) {
-    return '已接收（$count）';
+  String tabReceiving(Object count) {
+    return '接收中（$count）';
   }
 
   @override
   String tabCompleted(Object count) {
     return '已完成（$count）';
+  }
+
+  @override
+  String tabAll(Object count) {
+    return '全部（$count）';
   }
 
   @override
@@ -1601,23 +1611,28 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get actionClearCompleted => '清除已完成';
 
   @override
-  String tabPending(Object count) {
+  String tabUnfinished(Object count) {
     return '未完成（$count）';
   }
 
   @override
-  String tabSendQueuePending(Object count) {
-    return '傳送（$count）';
+  String tabSending(Object count) {
+    return '傳送中（$count）';
   }
 
   @override
-  String tabReceiveQueueCompleted(Object count) {
-    return '已接收（$count）';
+  String tabReceiving(Object count) {
+    return '接收中（$count）';
   }
 
   @override
   String tabCompleted(Object count) {
     return '已完成（$count）';
+  }
+
+  @override
+  String tabAll(Object count) {
+    return '全部（$count）';
   }
 
   @override

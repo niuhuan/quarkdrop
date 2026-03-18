@@ -195,23 +195,28 @@ class AppLocalizationsEn extends AppLocalizations {
   String get actionClearCompleted => 'Clear Completed';
 
   @override
-  String tabPending(Object count) {
-    return 'Pending ($count)';
+  String tabUnfinished(Object count) {
+    return 'Unfinished ($count)';
   }
 
   @override
-  String tabSendQueuePending(Object count) {
-    return 'Send ($count)';
+  String tabSending(Object count) {
+    return 'Sending ($count)';
   }
 
   @override
-  String tabReceiveQueueCompleted(Object count) {
-    return 'Received ($count)';
+  String tabReceiving(Object count) {
+    return 'Receiving ($count)';
   }
 
   @override
   String tabCompleted(Object count) {
     return 'Done ($count)';
+  }
+
+  @override
+  String tabAll(Object count) {
+    return 'All ($count)';
   }
 
   @override

@@ -19,9 +19,11 @@ use std::collections::VecDeque;
 use std::fs;
 use std::io::{Read, SeekFrom};
 use std::path::{Path, PathBuf};
+use std::pin::Pin;
+use std::sync::{Arc, Mutex};
 use std::time::{SystemTime, UNIX_EPOCH};
 use tokio::io::{AsyncReadExt, AsyncSeekExt};
-use tokio_util::io::ReaderStream;
+use tokio::sync::mpsc::{unbounded_channel, UnboundedSender};
 use uuid::Uuid;
 
 const BLOBS_FOLDER_NAME: &str = "blobs";
@@ -105,6 +107,42 @@ struct PlannedBlob {
     md5: String,
     sha1: String,
     sha256_cipher: String,
+}
+
+struct ProgressReporter {
+    template: TaskSnapshot,
+    persisted_bytes: u64,
+    last_persisted_at_unix_ms: u64,
+}
+
+impl ProgressReporter {
+    fn new(template: &TaskSnapshot) -> Self {
+        Self {
+            template: template.clone(),
+            persisted_bytes: template.transferred_bytes,
+            last_persisted_at_unix_ms: now_unix_ms(),
+        }
+    }
+
+    fn report(&mut self, transferred_bytes: u64) -> anyhow::Result<()> {
+        let transferred_bytes = transferred_bytes.min(self.template.size_bytes);
+        let now = now_unix_ms();
+        let delta_bytes = transferred_bytes.saturating_sub(self.persisted_bytes);
+        let delta_time = now.saturating_sub(self.last_persisted_at_unix_ms);
+        if transferred_bytes < self.template.size_bytes
+            && delta_bytes < 512 * 1024
+            && delta_time < 500
+        {
+            return Ok(());
+        }
+        self.persisted_bytes = transferred_bytes;
+        self.last_persisted_at_unix_ms = now;
+        let mut snapshot = self.template.clone();
+        snapshot.transferred_bytes = transferred_bytes;
+        snapshot.updated_at_unix_ms = now;
+        persist_snapshot(&snapshot)?;
+        Ok(())
+    }
 }
 
 pub async fn send_local_path(
@@ -196,6 +234,9 @@ async fn send_local_path_impl(
         counterpart_device_id: peer_device_id.to_string(),
         counterpart_label: peer_label.to_string(),
         size_bytes: payload.total_size,
+        transferred_bytes: existing_task
+            .map(|task| task.transferred_bytes.min(payload.total_size))
+            .unwrap_or(0),
         protocol_name: payload_cipher.manifest_name().to_string(),
         manifest_created_at_unix_ms: manifest_created_at,
         content_key_seed_hex: if payload_cipher == PayloadCipher::EncryptedSizedV1 {
@@ -240,6 +281,8 @@ async fn send_local_path_impl(
         snapshot.last_error_message.clear();
         snapshot.updated_at_unix_ms = now_unix_ms();
         persist_snapshot(&snapshot)?;
+        let progress = Arc::new(Mutex::new(ProgressReporter::new(&snapshot)));
+        let mut completed_plain_bytes = snapshot.transferred_bytes.min(snapshot.size_bytes);
 
         let mut manifest_entries = Vec::with_capacity(payload.entries.len());
         for entry in &payload.entries {
@@ -278,6 +321,12 @@ async fn send_local_path_impl(
                             .iter()
                             .find(|candidate| candidate.file_name == blob.name)
                         {
+                            completed_plain_bytes =
+                                completed_plain_bytes.saturating_add(blob.plain_size);
+                            progress
+                                .lock()
+                                .expect("upload progress lock poisoned")
+                                .report(completed_plain_bytes)?;
                             existing.fid.clone()
                         } else {
                             let uploaded = upload_file_chunk(
@@ -288,8 +337,16 @@ async fn send_local_path_impl(
                                 payload_cipher,
                                 &content_key_seed,
                                 blob,
+                                Arc::clone(&progress),
+                                completed_plain_bytes,
                             )
                             .await?;
+                            completed_plain_bytes =
+                                completed_plain_bytes.saturating_add(blob.plain_size);
+                            progress
+                                .lock()
+                                .expect("upload progress lock poisoned")
+                                .report(completed_plain_bytes)?;
                             existing_blob_entries.push(QuarkEntry {
                                 fid: uploaded.clone(),
                                 file_name: blob.name.clone(),
@@ -345,6 +402,7 @@ async fn send_local_path_impl(
         };
 
         snapshot.stage = TaskStage::UploadingManifest;
+        snapshot.transferred_bytes = snapshot.size_bytes;
         snapshot.last_error_message.clear();
         snapshot.updated_at_unix_ms = now_unix_ms();
         persist_snapshot(&snapshot)?;
@@ -387,6 +445,7 @@ async fn send_local_path_impl(
         };
 
         snapshot.stage = TaskStage::UploadingCommit;
+        snapshot.transferred_bytes = snapshot.size_bytes;
         snapshot.last_error_message.clear();
         snapshot.updated_at_unix_ms = now_unix_ms();
         persist_snapshot(&snapshot)?;
@@ -398,6 +457,7 @@ async fn send_local_path_impl(
         }
 
         snapshot.stage = TaskStage::Done;
+        snapshot.transferred_bytes = snapshot.size_bytes;
         snapshot.last_error_message.clear();
         snapshot.updated_at_unix_ms = now_unix_ms();
         persist_snapshot(&snapshot)?;
@@ -740,6 +800,8 @@ async fn upload_file_chunk(
     payload_cipher: PayloadCipher,
     content_key_seed: &[u8; 32],
     blob: &PlannedBlob,
+    progress: Arc<Mutex<ProgressReporter>>,
+    completed_before_blob: u64,
 ) -> anyhow::Result<String> {
     match quark
         .upload()
@@ -754,34 +816,102 @@ async fn upload_file_chunk(
         UploadPrepareResult::RapidUploaded { fid } => Ok(fid),
         UploadPrepareResult::NeedUpload(session) => match payload_cipher {
             PayloadCipher::PlainV0 => {
-                let mut file = tokio::fs::File::open(source_path).await?;
-                file.seek(SeekFrom::Start(blob.offset)).await?;
-                let stream = ReaderStream::new(file.take(blob.size));
-                Ok(session.upload_stream(stream).await?.fid)
+                let (progress_tx, mut progress_rx) = unbounded_channel::<u64>();
+                let progress_state = Arc::clone(&progress);
+                let progress_task = tokio::spawn(async move {
+                    while let Some(transferred_bytes) = progress_rx.recv().await {
+                        let _ = progress_state
+                            .lock()
+                            .expect("upload progress lock poisoned")
+                            .report(transferred_bytes);
+                    }
+                });
+                let stream = plain_blob_stream(
+                    source_path.to_path_buf(),
+                    blob.offset,
+                    blob.size,
+                    progress_tx,
+                    completed_before_blob,
+                )
+                .await?;
+                let fid = session.upload_stream(stream).await?.fid;
+                let _ = progress_task.await;
+                Ok(fid)
             }
             PayloadCipher::EncryptedSizedV1 => {
-                let stream =
-                    encrypted_blob_stream(source_path, entry_id, content_key_seed, blob).await?;
-                Ok(session.upload_stream(stream).await?.fid)
+                let (progress_tx, mut progress_rx) = unbounded_channel::<u64>();
+                let progress_state = Arc::clone(&progress);
+                let progress_task = tokio::spawn(async move {
+                    while let Some(transferred_bytes) = progress_rx.recv().await {
+                        let _ = progress_state
+                            .lock()
+                            .expect("upload progress lock poisoned")
+                            .report(transferred_bytes);
+                    }
+                });
+                let stream = encrypted_blob_stream(
+                    source_path.to_path_buf(),
+                    entry_id.to_string(),
+                    content_key_seed,
+                    blob.offset,
+                    blob.plain_size,
+                    blob.blob_index,
+                    progress_tx,
+                    completed_before_blob,
+                )
+                .await?;
+                let fid = session.upload_stream(stream).await?.fid;
+                let _ = progress_task.await;
+                Ok(fid)
             }
         },
     }
 }
 
-async fn encrypted_blob_stream(
-    source_path: &Path,
-    entry_id: &str,
-    content_key_seed: &[u8; 32],
-    blob: &PlannedBlob,
-) -> anyhow::Result<impl futures_util::Stream<Item = Result<Bytes, std::io::Error>>> {
+async fn plain_blob_stream(
+    source_path: PathBuf,
+    blob_offset: u64,
+    blob_size: u64,
+    progress_tx: UnboundedSender<u64>,
+    completed_before_blob: u64,
+) -> anyhow::Result<Pin<Box<dyn futures_util::Stream<Item = Result<Bytes, std::io::Error>> + Send>>>
+{
     let mut file = tokio::fs::File::open(source_path).await?;
-    file.seek(SeekFrom::Start(blob.offset)).await?;
-    let file_key = derive_file_key(content_key_seed, entry_id)
+    file.seek(SeekFrom::Start(blob_offset)).await?;
+    let mut plain_uploaded_in_blob = 0u64;
+    Ok(Box::pin(try_stream! {
+        let mut reader = file.take(blob_size);
+        let mut buffer = vec![0u8; SCAN_BUFFER_BYTES];
+        loop {
+            let read = reader.read(&mut buffer).await?;
+            if read == 0 {
+                break;
+            }
+            plain_uploaded_in_blob += read as u64;
+            let _ = progress_tx.send(completed_before_blob.saturating_add(plain_uploaded_in_blob));
+            yield Bytes::copy_from_slice(&buffer[..read]);
+        }
+    }))
+}
+
+async fn encrypted_blob_stream(
+    source_path: PathBuf,
+    entry_id: String,
+    content_key_seed: &[u8; 32],
+    blob_offset: u64,
+    blob_plain_size: u64,
+    blob_index: usize,
+    progress_tx: UnboundedSender<u64>,
+    completed_before_blob: u64,
+) -> anyhow::Result<Pin<Box<dyn futures_util::Stream<Item = Result<Bytes, std::io::Error>> + Send>>>
+{
+    let mut file = tokio::fs::File::open(source_path).await?;
+    file.seek(SeekFrom::Start(blob_offset)).await?;
+    let file_key = derive_file_key(content_key_seed, &entry_id)
         .map_err(|error| std::io::Error::other(error.to_string()))?;
-    let entry_id = entry_id.to_string();
-    let blob_index = blob.blob_index;
-    let plain_remaining = blob.plain_size;
-    Ok(try_stream! {
+    let plain_remaining = blob_plain_size;
+    let mut plain_uploaded_in_blob = 0u64;
+    Ok(Box::pin(try_stream! {
         let mut reader = file.take(plain_remaining);
         let mut buffer = vec![0u8; BLOB_FRAME_PLAIN_BYTES];
         let mut frame_index = 0u64;
@@ -795,10 +925,12 @@ async fn encrypted_blob_stream(
             let mut framed = Vec::with_capacity(4 + encrypted.len());
             framed.extend_from_slice(&(read as u32).to_le_bytes());
             framed.extend_from_slice(&encrypted);
+            plain_uploaded_in_blob += read as u64;
+            let _ = progress_tx.send(completed_before_blob.saturating_add(plain_uploaded_in_blob));
             frame_index += 1;
             yield Bytes::from(framed);
         }
-    })
+    }))
 }
 
 async fn upload_bytes(
@@ -965,6 +1097,25 @@ pub(crate) async fn stage_partial_send_for_test(
         payload_cipher,
         &content_key_seed,
         first_blob,
+        Arc::new(Mutex::new(ProgressReporter::new(&TaskSnapshot {
+            job_id: job_id.clone(),
+            stage: TaskStage::UploadingBlobs,
+            direction: TaskDirection::Send,
+            local_path: source.to_string_lossy().into_owned(),
+            remote_job_folder_id: remote_job_folder_id.clone(),
+            remote_mailbox_folder_id: peer_mailbox_folder_id.to_string(),
+            display_name: payload.root_name.clone(),
+            counterpart_device_id: peer_device_id.to_string(),
+            counterpart_label: peer_label.to_string(),
+            size_bytes: payload.total_size,
+            transferred_bytes: 0,
+            protocol_name: payload_cipher.manifest_name().to_string(),
+            manifest_created_at_unix_ms: manifest_created_at,
+            content_key_seed_hex: hex::encode(content_key_seed),
+            last_error_message: String::new(),
+            updated_at_unix_ms: now_unix_ms(),
+        }))),
+        0,
     )
     .await?;
 
@@ -979,6 +1130,7 @@ pub(crate) async fn stage_partial_send_for_test(
         counterpart_device_id: peer_device_id.to_string(),
         counterpart_label: peer_label.to_string(),
         size_bytes: payload.total_size,
+        transferred_bytes: first_blob.plain_size.min(payload.total_size),
         protocol_name: payload_cipher.manifest_name().to_string(),
         manifest_created_at_unix_ms: manifest_created_at,
         content_key_seed_hex: hex::encode(content_key_seed),

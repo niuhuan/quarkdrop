@@ -190,23 +190,28 @@ class AppLocalizationsKo extends AppLocalizations {
   String get actionClearCompleted => '완료 항목 지우기';
 
   @override
-  String tabPending(Object count) {
+  String tabUnfinished(Object count) {
     return '미완료 ($count)';
   }
 
   @override
-  String tabSendQueuePending(Object count) {
-    return '전송 ($count)';
+  String tabSending(Object count) {
+    return '전송 중 ($count)';
   }
 
   @override
-  String tabReceiveQueueCompleted(Object count) {
-    return '수신 완료 ($count)';
+  String tabReceiving(Object count) {
+    return '수신 중 ($count)';
   }
 
   @override
   String tabCompleted(Object count) {
     return '완료 ($count)';
+  }
+
+  @override
+  String tabAll(Object count) {
+    return '전체 ($count)';
   }
 
   @override

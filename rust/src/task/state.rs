@@ -36,6 +36,8 @@ pub struct TaskSnapshot {
     pub counterpart_label: String,
     pub size_bytes: u64,
     #[serde(default)]
+    pub transferred_bytes: u64,
+    #[serde(default)]
     pub protocol_name: String,
     #[serde(default)]
     pub manifest_created_at_unix_ms: u64,

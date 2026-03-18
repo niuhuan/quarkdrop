@@ -685,6 +685,13 @@ fn map_task_snapshot(task: TaskSnapshot) -> TransferPreview {
         format!("{base_subtitle} Saved in the local JSON task file for recovery.")
     };
 
+    let byte_progress = if task.size_bytes > 0 {
+        (task.transferred_bytes.min(task.size_bytes) as f64 / task.size_bytes as f64)
+            .clamp(0.0, 1.0)
+    } else {
+        0.0
+    };
+
     TransferPreview {
         id: task.job_id,
         title: task.display_name,
@@ -695,13 +702,11 @@ fn map_task_snapshot(task: TaskSnapshot) -> TransferPreview {
             String::new()
         },
         progress: match task.stage {
-            TaskStage::Scanning => 0.1,
-            TaskStage::UploadingBlobs => 0.55,
-            TaskStage::UploadingManifest => 0.8,
-            TaskStage::UploadingCommit => 0.95,
-            TaskStage::DownloadingBlobs => 0.45,
-            TaskStage::Verifying => 0.9,
-            TaskStage::CleanupRemote => 0.98,
+            TaskStage::Scanning => 0.0,
+            TaskStage::UploadingBlobs | TaskStage::DownloadingBlobs => byte_progress,
+            TaskStage::UploadingManifest => byte_progress.max(0.97),
+            TaskStage::UploadingCommit | TaskStage::Verifying => byte_progress.max(0.99),
+            TaskStage::CleanupRemote => 0.995,
             TaskStage::Failed => 0.0,
             TaskStage::Done => 1.0,
         },

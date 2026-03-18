@@ -440,29 +440,35 @@ abstract class AppLocalizations {
   /// **'Clear Completed'**
   String get actionClearCompleted;
 
-  /// No description provided for @tabPending.
+  /// No description provided for @tabUnfinished.
   ///
   /// In en, this message translates to:
-  /// **'Pending ({count})'**
-  String tabPending(Object count);
+  /// **'Unfinished ({count})'**
+  String tabUnfinished(Object count);
 
-  /// No description provided for @tabSendQueuePending.
+  /// No description provided for @tabSending.
   ///
   /// In en, this message translates to:
-  /// **'Send ({count})'**
-  String tabSendQueuePending(Object count);
+  /// **'Sending ({count})'**
+  String tabSending(Object count);
 
-  /// No description provided for @tabReceiveQueueCompleted.
+  /// No description provided for @tabReceiving.
   ///
   /// In en, this message translates to:
-  /// **'Received ({count})'**
-  String tabReceiveQueueCompleted(Object count);
+  /// **'Receiving ({count})'**
+  String tabReceiving(Object count);
 
   /// No description provided for @tabCompleted.
   ///
   /// In en, this message translates to:
   /// **'Done ({count})'**
   String tabCompleted(Object count);
+
+  /// No description provided for @tabAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All ({count})'**
+  String tabAll(Object count);
 
   /// No description provided for @selectTransferTitle.
   ///

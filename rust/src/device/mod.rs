@@ -11,6 +11,7 @@ use rand::RngCore;
 use serde::{Deserialize, Serialize};
 use sha1::{Digest as Sha1Digest, Sha1};
 use sha2::Sha256;
+use std::collections::{HashMap, HashSet};
 use std::env;
 use std::fs;
 use std::sync::{OnceLock, RwLock};
@@ -74,6 +75,15 @@ struct DeviceMetadata {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     encrypted_key: Option<EncryptedPrivateKey>,
     updated_at: u64,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+struct CachedPeerMetadata {
+    device_id: String,
+    mailbox_folder_id: String,
+    label: String,
+    subtitle: String,
+    fetched_at_unix_ms: u64,
 }
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
@@ -712,6 +722,13 @@ async fn discover_peer_devices(
     current_device_id: &str,
 ) -> anyhow::Result<Vec<DiscoveredPeerDevice>> {
     let excluded_ids = load_excluded_device_ids().unwrap_or_default();
+    let refresh_interval_ms =
+        u64::from(crate::preferences::peer_discovery_interval_minutes().unwrap_or(10))
+            .saturating_mul(60_000);
+    let now = now_unix_ms();
+    let mut cached_metadata = load_cached_peer_metadata().unwrap_or_default();
+    let mut cache_changed = false;
+    let mut seen_device_ids = HashSet::new();
     let mut peers = Vec::new();
     for entry in list_all_entries(quark, root_id).await? {
         if !(entry.dir && entry.file_name.starts_with("device_")) {
@@ -726,21 +743,95 @@ async fn discover_peer_devices(
         if excluded_ids.contains(&device_id) {
             continue;
         }
-        let metadata = read_device_metadata(quark, &entry.fid).await.ok().flatten();
+        seen_device_ids.insert(device_id.clone());
+        let cached = cached_metadata.get(&device_id).cloned();
+        let metadata = if let Some(cached) = cached.as_ref() {
+            let still_fresh = cached.mailbox_folder_id == entry.fid
+                && now.saturating_sub(cached.fetched_at_unix_ms) < refresh_interval_ms;
+            if still_fresh {
+                None
+            } else {
+                match read_device_metadata(quark, &entry.fid).await {
+                    Ok(metadata) => {
+                        if let Some(metadata) = metadata.as_ref() {
+                            cached_metadata.insert(
+                                device_id.clone(),
+                                CachedPeerMetadata {
+                                    device_id: device_id.clone(),
+                                    mailbox_folder_id: entry.fid.clone(),
+                                    label: if metadata.device_name.trim().is_empty() {
+                                        format!("Device {}", short_device_label(&device_id))
+                                    } else {
+                                        metadata.device_name.trim().to_string()
+                                    },
+                                    subtitle: format!(
+                                        "Mailbox discovered for `{}`.",
+                                        metadata.device_id
+                                    ),
+                                    fetched_at_unix_ms: now,
+                                },
+                            );
+                            cache_changed = true;
+                        }
+                        metadata
+                    }
+                    Err(_) => None,
+                }
+            }
+        } else {
+            match read_device_metadata(quark, &entry.fid).await {
+                Ok(metadata) => {
+                    if let Some(metadata) = metadata.as_ref() {
+                        cached_metadata.insert(
+                            device_id.clone(),
+                            CachedPeerMetadata {
+                                device_id: device_id.clone(),
+                                mailbox_folder_id: entry.fid.clone(),
+                                label: if metadata.device_name.trim().is_empty() {
+                                    format!("Device {}", short_device_label(&device_id))
+                                } else {
+                                    metadata.device_name.trim().to_string()
+                                },
+                                subtitle: format!(
+                                    "Mailbox discovered for `{}`.",
+                                    metadata.device_id
+                                ),
+                                fetched_at_unix_ms: now,
+                            },
+                        );
+                        cache_changed = true;
+                    }
+                    metadata
+                }
+                Err(_) => None,
+            }
+        };
+        let cached = cached_metadata.get(&device_id);
         peers.push(DiscoveredPeerDevice {
             label: metadata
                 .as_ref()
                 .map(|meta| meta.device_name.clone())
                 .filter(|value| !value.is_empty())
+                .or_else(|| cached.map(|value| value.label.clone()))
                 .unwrap_or_else(|| format!("Device {}", short_device_label(&device_id))),
             subtitle: metadata
                 .map(|meta| format!("Mailbox discovered for `{}`.", meta.device_id))
+                .or_else(|| cached.map(|value| value.subtitle.clone()))
                 .unwrap_or_else(|| {
                     "Mailbox discovered inside the shared QuarkDrop relay root.".to_string()
                 }),
             mailbox_folder_id: entry.fid,
             device_id,
         });
+    }
+
+    let original_len = cached_metadata.len();
+    cached_metadata.retain(|device_id, _| seen_device_ids.contains(device_id));
+    if cached_metadata.len() != original_len {
+        cache_changed = true;
+    }
+    if cache_changed {
+        save_cached_peer_metadata(&cached_metadata)?;
     }
 
     peers.sort_by(|left, right| left.device_id.cmp(&right.device_id));
@@ -884,6 +975,13 @@ fn observed_label(updated_at: u64) -> String {
     format!("Updated {}", updated_at)
 }
 
+fn now_unix_ms() -> u64 {
+    SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map(|duration| duration.as_millis() as u64)
+        .unwrap_or(0)
+}
+
 fn default_device_name() -> String {
     env::var("DEVICE_NAME")
         .or_else(|_| env::var("HOSTNAME"))
@@ -991,6 +1089,34 @@ fn short_device_label(device_id: &str) -> &str {
         .map(|(index, _)| index)
         .unwrap_or(device_id.len());
     &device_id[..end]
+}
+
+fn load_cached_peer_metadata() -> anyhow::Result<HashMap<String, CachedPeerMetadata>> {
+    let paths = app_paths()?;
+    if !paths.peer_metadata_cache_file.exists() {
+        return Ok(HashMap::new());
+    }
+    let raw = fs::read_to_string(&paths.peer_metadata_cache_file)?;
+    if raw.trim().is_empty() {
+        return Ok(HashMap::new());
+    }
+    let entries: Vec<CachedPeerMetadata> = serde_json::from_str(&raw)?;
+    Ok(entries
+        .into_iter()
+        .map(|entry| (entry.device_id.clone(), entry))
+        .collect())
+}
+
+fn save_cached_peer_metadata(cache: &HashMap<String, CachedPeerMetadata>) -> anyhow::Result<()> {
+    let paths = app_paths()?;
+    fs::create_dir_all(&paths.config_dir)?;
+    let mut entries = cache.values().cloned().collect::<Vec<_>>();
+    entries.sort_by(|left, right| left.device_id.cmp(&right.device_id));
+    fs::write(
+        &paths.peer_metadata_cache_file,
+        serde_json::to_vec_pretty(&entries)?,
+    )?;
+    Ok(())
 }
 
 async fn publish_device_metadata(
@@ -1209,10 +1335,7 @@ fn decrypt_private_key_blob(
         .map_err(|_| anyhow::anyhow!("Incorrect password or corrupted key file."))
 }
 
-pub async fn remove_peer_mailbox(
-    quark: &QuarkPan,
-    peer_device_id: &str,
-) -> anyhow::Result<()> {
+pub async fn remove_peer_mailbox(quark: &QuarkPan, peer_device_id: &str) -> anyhow::Result<()> {
     let root_entries = list_all_entries(quark, "0").await?;
     let Some(root) = root_entries
         .iter()

@@ -17,7 +17,7 @@ class _TransfersPaneState extends State<_TransfersPane>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 4, vsync: this);
+    _tabController = TabController(length: 5, vsync: this);
     _refreshTimer = Timer.periodic(const Duration(seconds: 3), (_) {
       widget.store.refresh();
     });
@@ -40,27 +40,27 @@ class _TransfersPaneState extends State<_TransfersPane>
       final hasCompletedJobs = jobs.any(
         (job) => job.stage == TransferStage.completed,
       );
-      // Tab filters
-      final pendingJobs = jobs
+      final unfinishedJobs = jobs
           .where((job) => job.stage != TransferStage.completed)
           .toList(growable: false);
-      final sendPendingJobs = jobs
+      final sendingJobs = jobs
           .where(
             (job) =>
                 job.direction == TransferDirection.send &&
                 job.stage != TransferStage.completed,
           )
           .toList(growable: false);
-      final receiveCompletedJobs = jobs
+      final receivingJobs = jobs
           .where(
             (job) =>
                 job.direction == TransferDirection.receive &&
-                job.stage == TransferStage.completed,
+                job.stage != TransferStage.completed,
           )
           .toList(growable: false);
       final completedJobs = jobs
           .where((job) => job.stage == TransferStage.completed)
           .toList(growable: false);
+      final allJobs = jobs.toList(growable: false);
 
       Widget buildJobList(List<TransferJob> filtered) {
         if (filtered.isEmpty) {
@@ -95,10 +95,11 @@ class _TransfersPaneState extends State<_TransfersPane>
             final tabs = TabBarView(
               controller: _tabController,
               children: [
-                buildJobList(pendingJobs),
-                buildJobList(sendPendingJobs),
-                buildJobList(receiveCompletedJobs),
+                buildJobList(unfinishedJobs),
+                buildJobList(sendingJobs),
+                buildJobList(receivingJobs),
                 buildJobList(completedJobs),
+                buildJobList(allJobs),
               ],
             );
             if (!wideLayout) {
@@ -157,18 +158,19 @@ class _TransfersPaneState extends State<_TransfersPane>
               isScrollable: true,
               tabAlignment: TabAlignment.start,
               tabs: [
-                Tab(text: context.l10n.tabPending(pendingJobs.length)),
+                Tab(text: context.l10n.tabUnfinished(unfinishedJobs.length)),
                 Tab(
-                  text: context.l10n.tabSendQueuePending(
-                    sendPendingJobs.length,
+                  text: context.l10n.tabSending(
+                    sendingJobs.length,
                   ),
                 ),
                 Tab(
-                  text: context.l10n.tabReceiveQueueCompleted(
-                    receiveCompletedJobs.length,
+                  text: context.l10n.tabReceiving(
+                    receivingJobs.length,
                   ),
                 ),
                 Tab(text: context.l10n.tabCompleted(completedJobs.length)),
+                Tab(text: context.l10n.tabAll(allJobs.length)),
               ],
             ),
           ),

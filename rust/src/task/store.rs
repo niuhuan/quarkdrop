@@ -128,6 +128,7 @@ fn migrate_legacy_sqlite_to_json() -> io::Result<()> {
                 counterpart_device_id: row.get(6)?,
                 counterpart_label: row.get(7)?,
                 size_bytes: row.get::<_, i64>(8)? as u64,
+                transferred_bytes: 0,
                 protocol_name: String::new(),
                 manifest_created_at_unix_ms: 0,
                 content_key_seed_hex: String::new(),

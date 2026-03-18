@@ -83,6 +83,7 @@ async fn receive_job_impl(
             manifest.sender_device_name.clone()
         },
         size_bytes: manifest.entries.iter().map(|entry| entry.size).sum(),
+        transferred_bytes: 0,
         protocol_name: if commit.protocol_version >= 2 {
             "encrypted-sized-v1".to_string()
         } else {
@@ -116,6 +117,7 @@ async fn receive_job_impl(
             Some(decode_content_key_seed(&manifest.content_key_seed_hex)?)
         };
 
+        let mut completed_before_entry = 0u64;
         for entry in &manifest.entries {
             let relative = safe_relative_path(&entry.path)?;
             match entry.kind {
@@ -133,6 +135,7 @@ async fn receive_job_impl(
                     }
                     let temp = destination.with_extension("quarkdrop.part");
                     if file_matches_digest(&destination, &entry.sha256_plain).await? {
+                        completed_before_entry = completed_before_entry.saturating_add(entry.size);
                         continue;
                     }
 
@@ -188,6 +191,11 @@ async fn receive_job_impl(
                             });
                         if resumed_bytes >= completed_before_blob + blob_plain_size {
                             completed_before_blob += blob_plain_size;
+                            snapshot.transferred_bytes = snapshot.transferred_bytes.max(
+                                completed_before_entry
+                                    .saturating_add(completed_before_blob)
+                                    .min(snapshot.size_bytes),
+                            );
                             continue;
                         }
                         if let Some(file_key) = file_key.as_ref() {
@@ -220,11 +228,23 @@ async fn receive_job_impl(
                             }
                         }
                         completed_before_blob += blob_plain_size;
+                        snapshot.transferred_bytes = snapshot.transferred_bytes.max(
+                            completed_before_entry
+                                .saturating_add(completed_before_blob)
+                                .min(snapshot.size_bytes),
+                        );
+                        snapshot.updated_at_unix_ms = now_unix_ms();
+                        persist_snapshot(&snapshot)?;
                     }
                     writer.flush().await?;
                     drop(writer);
 
                     snapshot.stage = TaskStage::Verifying;
+                    snapshot.transferred_bytes = snapshot.transferred_bytes.max(
+                        completed_before_entry
+                            .saturating_add(entry.size)
+                            .min(snapshot.size_bytes),
+                    );
                     snapshot.last_error_message.clear();
                     snapshot.updated_at_unix_ms = now_unix_ms();
                     persist_snapshot(&snapshot)?;
@@ -237,20 +257,28 @@ async fn receive_job_impl(
                     );
                     fs::rename(&temp, &destination).await?;
                     snapshot.stage = TaskStage::DownloadingBlobs;
+                    snapshot.transferred_bytes = snapshot.transferred_bytes.max(
+                        completed_before_entry
+                            .saturating_add(entry.size)
+                            .min(snapshot.size_bytes),
+                    );
                     snapshot.last_error_message.clear();
                     snapshot.updated_at_unix_ms = now_unix_ms();
                     persist_snapshot(&snapshot)?;
+                    completed_before_entry = completed_before_entry.saturating_add(entry.size);
                 }
             }
         }
 
         snapshot.stage = TaskStage::CleanupRemote;
+        snapshot.transferred_bytes = snapshot.size_bytes;
         snapshot.last_error_message.clear();
         snapshot.updated_at_unix_ms = now_unix_ms();
         persist_snapshot(&snapshot)?;
         quark.delete(job_folder_id).await?;
 
         snapshot.stage = TaskStage::Done;
+        snapshot.transferred_bytes = snapshot.size_bytes;
         snapshot.last_error_message.clear();
         snapshot.updated_at_unix_ms = now_unix_ms();
         persist_snapshot(&snapshot)?;
