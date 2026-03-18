@@ -863,4 +863,32 @@ class AppLocalizationsEn extends AppLocalizations {
   String cleanupDeleteConfirmBody(Object count) {
     return 'Please confirm you have reviewed the $count selected item(s). Deleted data cannot be recovered.';
   }
+
+  @override
+  String get settingAutoMinimizeTitle => 'Minimize to tray on startup';
+
+  @override
+  String get settingAutoMinimizeSubtitleOff => 'Disabled';
+
+  @override
+  String get settingAutoMinimizeSubtitleImmediate => 'Immediately';
+
+  @override
+  String settingAutoMinimizeSubtitleDelay(Object seconds) {
+    return 'After ${seconds}s';
+  }
+
+  @override
+  String get settingAutoMinimizeEnabled => 'Minimize to tray on startup';
+
+  @override
+  String get settingAutoMinimizeDelay => 'Delay';
+
+  @override
+  String autoMinimizeOverlayCountdown(Object seconds) {
+    return 'Minimizing to tray in ${seconds}s';
+  }
+
+  @override
+  String get autoMinimizeOverlayCancel => 'Tap anywhere to cancel';
 }

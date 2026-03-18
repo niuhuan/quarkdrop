@@ -256,5 +256,23 @@
     "placeholders": {
       "count": {}
     }
-  }
+  },
+  "settingAutoMinimizeTitle": "시작 시 트레이로 최소화",
+  "settingAutoMinimizeSubtitleOff": "비활성화",
+  "settingAutoMinimizeSubtitleImmediate": "즉시",
+  "settingAutoMinimizeSubtitleDelay": "{seconds}초 후",
+  "@settingAutoMinimizeSubtitleDelay": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "settingAutoMinimizeEnabled": "시작 시 트레이로 최소화",
+  "settingAutoMinimizeDelay": "지연",
+  "autoMinimizeOverlayCountdown": "{seconds}초 후 트레이로 최소화",
+  "@autoMinimizeOverlayCountdown": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "autoMinimizeOverlayCancel": "아무 곳이나 탭하여 취소"
 }

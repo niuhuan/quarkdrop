@@ -256,5 +256,23 @@
     "placeholders": {
       "count": {}
     }
-  }
+  },
+  "settingAutoMinimizeTitle": "啟動後自動最小化到托盤",
+  "settingAutoMinimizeSubtitleOff": "已關閉",
+  "settingAutoMinimizeSubtitleImmediate": "立即",
+  "settingAutoMinimizeSubtitleDelay": "{seconds}秒後",
+  "@settingAutoMinimizeSubtitleDelay": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "settingAutoMinimizeEnabled": "啟動後自動最小化到托盤",
+  "settingAutoMinimizeDelay": "時間",
+  "autoMinimizeOverlayCountdown": "{seconds}秒後最小化到托盤",
+  "@autoMinimizeOverlayCountdown": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "autoMinimizeOverlayCancel": "隨意點擊遮罩任意位置取消"
 }

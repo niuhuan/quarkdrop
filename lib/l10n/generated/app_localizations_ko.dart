@@ -825,4 +825,32 @@ class AppLocalizationsKo extends AppLocalizations {
   String cleanupDeleteConfirmBody(Object count) {
     return '선택한 $count개 항목을 확인했는지 확인해 주세요. 삭제된 데이터는 복구할 수 없습니다.';
   }
+
+  @override
+  String get settingAutoMinimizeTitle => '시작 시 트레이로 최소화';
+
+  @override
+  String get settingAutoMinimizeSubtitleOff => '비활성화';
+
+  @override
+  String get settingAutoMinimizeSubtitleImmediate => '즉시';
+
+  @override
+  String settingAutoMinimizeSubtitleDelay(Object seconds) {
+    return '$seconds초 후';
+  }
+
+  @override
+  String get settingAutoMinimizeEnabled => '시작 시 트레이로 최소화';
+
+  @override
+  String get settingAutoMinimizeDelay => '지연';
+
+  @override
+  String autoMinimizeOverlayCountdown(Object seconds) {
+    return '$seconds초 후 트레이로 최소화';
+  }
+
+  @override
+  String get autoMinimizeOverlayCancel => '아무 곳이나 탭하여 취소';
 }

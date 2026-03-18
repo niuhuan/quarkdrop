@@ -812,6 +812,34 @@ class AppLocalizationsZh extends AppLocalizations {
   String cleanupDeleteConfirmBody(Object count) {
     return '请确认你已经检查过选中的 $count 项数据。清理后数据将无法恢复。';
   }
+
+  @override
+  String get settingAutoMinimizeTitle => '启动后自动最小化到托盘';
+
+  @override
+  String get settingAutoMinimizeSubtitleOff => '已关闭';
+
+  @override
+  String get settingAutoMinimizeSubtitleImmediate => '立即';
+
+  @override
+  String settingAutoMinimizeSubtitleDelay(Object seconds) {
+    return '$seconds秒后';
+  }
+
+  @override
+  String get settingAutoMinimizeEnabled => '启动后自动最小化到托盘';
+
+  @override
+  String get settingAutoMinimizeDelay => '时间';
+
+  @override
+  String autoMinimizeOverlayCountdown(Object seconds) {
+    return '$seconds秒后最小化到托盘';
+  }
+
+  @override
+  String get autoMinimizeOverlayCancel => '随意点击遮罩任意位置取消';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1622,6 +1650,34 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String cleanupDeleteConfirmBody(Object count) {
     return '请确认你已经检查过选中的 $count 项数据。清理后数据将无法恢复。';
   }
+
+  @override
+  String get settingAutoMinimizeTitle => '启动后自动最小化到托盘';
+
+  @override
+  String get settingAutoMinimizeSubtitleOff => '已关闭';
+
+  @override
+  String get settingAutoMinimizeSubtitleImmediate => '立即';
+
+  @override
+  String settingAutoMinimizeSubtitleDelay(Object seconds) {
+    return '$seconds秒后';
+  }
+
+  @override
+  String get settingAutoMinimizeEnabled => '启动后自动最小化到托盘';
+
+  @override
+  String get settingAutoMinimizeDelay => '时间';
+
+  @override
+  String autoMinimizeOverlayCountdown(Object seconds) {
+    return '$seconds秒后最小化到托盘';
+  }
+
+  @override
+  String get autoMinimizeOverlayCancel => '随意点击遮罩任意位置取消';
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2432,4 +2488,32 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String cleanupDeleteConfirmBody(Object count) {
     return '請確認你已經檢查過選中的 $count 項資料。清理後資料將無法恢復。';
   }
+
+  @override
+  String get settingAutoMinimizeTitle => '啟動後自動最小化到托盤';
+
+  @override
+  String get settingAutoMinimizeSubtitleOff => '已關閉';
+
+  @override
+  String get settingAutoMinimizeSubtitleImmediate => '立即';
+
+  @override
+  String settingAutoMinimizeSubtitleDelay(Object seconds) {
+    return '$seconds秒後';
+  }
+
+  @override
+  String get settingAutoMinimizeEnabled => '啟動後自動最小化到托盤';
+
+  @override
+  String get settingAutoMinimizeDelay => '時間';
+
+  @override
+  String autoMinimizeOverlayCountdown(Object seconds) {
+    return '$seconds秒後最小化到托盤';
+  }
+
+  @override
+  String get autoMinimizeOverlayCancel => '隨意點擊遮罩任意位置取消';
 }

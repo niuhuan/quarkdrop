@@ -1519,6 +1519,54 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Please confirm you have reviewed the {count} selected item(s). Deleted data cannot be recovered.'**
   String cleanupDeleteConfirmBody(Object count);
+
+  /// No description provided for @settingAutoMinimizeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimize to tray on startup'**
+  String get settingAutoMinimizeTitle;
+
+  /// No description provided for @settingAutoMinimizeSubtitleOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Disabled'**
+  String get settingAutoMinimizeSubtitleOff;
+
+  /// No description provided for @settingAutoMinimizeSubtitleImmediate.
+  ///
+  /// In en, this message translates to:
+  /// **'Immediately'**
+  String get settingAutoMinimizeSubtitleImmediate;
+
+  /// No description provided for @settingAutoMinimizeSubtitleDelay.
+  ///
+  /// In en, this message translates to:
+  /// **'After {seconds}s'**
+  String settingAutoMinimizeSubtitleDelay(Object seconds);
+
+  /// No description provided for @settingAutoMinimizeEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimize to tray on startup'**
+  String get settingAutoMinimizeEnabled;
+
+  /// No description provided for @settingAutoMinimizeDelay.
+  ///
+  /// In en, this message translates to:
+  /// **'Delay'**
+  String get settingAutoMinimizeDelay;
+
+  /// No description provided for @autoMinimizeOverlayCountdown.
+  ///
+  /// In en, this message translates to:
+  /// **'Minimizing to tray in {seconds}s'**
+  String autoMinimizeOverlayCountdown(Object seconds);
+
+  /// No description provided for @autoMinimizeOverlayCancel.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap anywhere to cancel'**
+  String get autoMinimizeOverlayCancel;
 }
 
 class _AppLocalizationsDelegate

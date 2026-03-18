@@ -471,6 +471,26 @@ pub fn set_minimize_to_tray(enabled: bool) -> anyhow::Result<bool> {
 }
 
 #[flutter_rust_bridge::frb(sync)]
+pub fn auto_minimize_on_start() -> anyhow::Result<bool> {
+    preferences::auto_minimize_on_start()
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn set_auto_minimize_on_start(enabled: bool) -> anyhow::Result<bool> {
+    preferences::set_auto_minimize_on_start(enabled)
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn auto_minimize_delay_seconds() -> anyhow::Result<u32> {
+    preferences::auto_minimize_delay_seconds()
+}
+
+#[flutter_rust_bridge::frb(sync)]
+pub fn set_auto_minimize_delay_seconds(seconds: u32) -> anyhow::Result<u32> {
+    preferences::set_auto_minimize_delay_seconds(seconds)
+}
+
+#[flutter_rust_bridge::frb(sync)]
 pub fn peer_discovery_interval_minutes() -> anyhow::Result<u32> {
     preferences::peer_discovery_interval_minutes()
 }

@@ -108,6 +108,18 @@ bool minimizeToTray() => RustLib.instance.api.crateApiAppMinimizeToTray();
 bool setMinimizeToTray({required bool enabled}) =>
     RustLib.instance.api.crateApiAppSetMinimizeToTray(enabled: enabled);
 
+bool autoMinimizeOnStart() =>
+    RustLib.instance.api.crateApiAppAutoMinimizeOnStart();
+
+bool setAutoMinimizeOnStart({required bool enabled}) =>
+    RustLib.instance.api.crateApiAppSetAutoMinimizeOnStart(enabled: enabled);
+
+int autoMinimizeDelaySeconds() =>
+    RustLib.instance.api.crateApiAppAutoMinimizeDelaySeconds();
+
+int setAutoMinimizeDelaySeconds({required int seconds}) => RustLib.instance.api
+    .crateApiAppSetAutoMinimizeDelaySeconds(seconds: seconds);
+
 int peerDiscoveryIntervalMinutes() =>
     RustLib.instance.api.crateApiAppPeerDiscoveryIntervalMinutes();
 

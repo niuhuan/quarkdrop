@@ -148,6 +148,24 @@ extension AppStoreSettings on AppStore {
     }
   }
 
+  void toggleAutoMinimizeOnStart(bool enabled) {
+    try {
+      rust_api.setAutoMinimizeOnStart(enabled: enabled);
+      autoMinimizeOnStart.value = enabled;
+    } catch (error) {
+      lastErrorMessage.value = error.toString();
+    }
+  }
+
+  void setAutoMinimizeDelay(int seconds) {
+    try {
+      final saved = rust_api.setAutoMinimizeDelaySeconds(seconds: seconds);
+      autoMinimizeDelaySeconds.value = saved;
+    } catch (error) {
+      lastErrorMessage.value = error.toString();
+    }
+  }
+
   void setPeerDiscoveryIntervalMinutes(int minutes) {
     try {
       final saved = rust_api.setPeerDiscoveryIntervalMinutes(minutes: minutes);

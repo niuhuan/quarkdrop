@@ -24,6 +24,10 @@ struct AppSettings {
     keep_screen_on_during_transfer: bool,
     #[serde(default)]
     minimize_to_tray: bool,
+    #[serde(default)]
+    auto_minimize_on_start: bool,
+    #[serde(default = "default_auto_minimize_delay")]
+    auto_minimize_delay_seconds: u32,
     #[serde(default = "default_peer_discovery_interval")]
     peer_discovery_interval_minutes: u32,
     #[serde(default = "default_theme_mode")]
@@ -50,6 +54,10 @@ fn default_peer_discovery_interval() -> u32 {
     10
 }
 
+fn default_auto_minimize_delay() -> u32 {
+    3
+}
+
 impl Default for AppSettings {
     fn default() -> Self {
         Self {
@@ -62,6 +70,8 @@ impl Default for AppSettings {
             max_concurrent_downloads: 2,
             keep_screen_on_during_transfer: true,
             minimize_to_tray: false,
+            auto_minimize_on_start: false,
+            auto_minimize_delay_seconds: 3,
             peer_discovery_interval_minutes: 10,
             theme_mode: "system".to_string(),
         }
@@ -210,6 +220,29 @@ pub fn set_minimize_to_tray(enabled: bool) -> anyhow::Result<bool> {
     settings.minimize_to_tray = enabled;
     save_settings(&settings)?;
     Ok(enabled)
+}
+
+pub fn auto_minimize_on_start() -> anyhow::Result<bool> {
+    Ok(load_settings()?.auto_minimize_on_start)
+}
+
+pub fn set_auto_minimize_on_start(enabled: bool) -> anyhow::Result<bool> {
+    let mut settings = load_settings()?;
+    settings.auto_minimize_on_start = enabled;
+    save_settings(&settings)?;
+    Ok(enabled)
+}
+
+pub fn auto_minimize_delay_seconds() -> anyhow::Result<u32> {
+    Ok(load_settings()?.auto_minimize_delay_seconds.min(10))
+}
+
+pub fn set_auto_minimize_delay_seconds(seconds: u32) -> anyhow::Result<u32> {
+    let clamped = seconds.min(10);
+    let mut settings = load_settings()?;
+    settings.auto_minimize_delay_seconds = clamped;
+    save_settings(&settings)?;
+    Ok(clamped)
 }
 
 pub fn peer_discovery_interval_minutes() -> anyhow::Result<u32> {

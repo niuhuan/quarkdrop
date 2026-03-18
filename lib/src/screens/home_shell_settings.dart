@@ -59,6 +59,8 @@ class _SettingsPane extends StatelessWidget {
                 if (!Platform.isAndroid && !Platform.isIOS) ...[
                   _MinimizeToTrayCard(store: store),
                   const SizedBox(height: 14),
+                  _AutoMinimizeCard(store: store),
+                  const SizedBox(height: 14),
                 ],
                 if (Platform.isAndroid || Platform.isIOS) ...[
                   _KeepScreenOnCard(store: store),
@@ -1637,6 +1639,97 @@ class _PeerDiscoveryCard extends StatefulWidget {
 
   @override
   State<_PeerDiscoveryCard> createState() => _PeerDiscoveryCardState();
+}
+
+class _AutoMinimizeCard extends StatelessWidget {
+  const _AutoMinimizeCard({required this.store});
+
+  final AppStore store;
+
+  @override
+  Widget build(BuildContext context) {
+    return Watch((context) {
+      final l10n = context.l10n;
+      final enabled = store.autoMinimizeOnStart.value;
+      final delay = store.autoMinimizeDelaySeconds.value;
+
+      final subtitle = !enabled
+          ? l10n.settingAutoMinimizeSubtitleOff
+          : delay == 0
+              ? l10n.settingAutoMinimizeSubtitleImmediate
+              : l10n.settingAutoMinimizeSubtitleDelay(delay);
+
+      return Card(
+        elevation: 0,
+        margin: EdgeInsets.zero,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+          side: BorderSide(
+            color: Theme.of(
+              context,
+            ).colorScheme.outlineVariant.withValues(alpha: 0.5),
+          ),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: ExpansionTile(
+          title: Text(
+            l10n.settingAutoMinimizeTitle,
+            style: const TextStyle(fontWeight: FontWeight.w600, fontSize: 15),
+          ),
+          subtitle: Text(subtitle, style: const TextStyle(fontSize: 13)),
+          shape: const Border(),
+          collapsedShape: const Border(),
+          children: [
+            SwitchListTile(
+              value: enabled,
+              onChanged: store.toggleAutoMinimizeOnStart,
+              title: Text(
+                l10n.settingAutoMinimizeEnabled,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14,
+                ),
+              ),
+            ),
+            if (enabled)
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
+                child: Row(
+                  children: [
+                    Text(
+                      l10n.settingAutoMinimizeDelay,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Text('${delay}s'),
+                    Expanded(
+                      child: Slider(
+                        value: delay.toDouble(),
+                        min: 0,
+                        max: 10,
+                        divisions: 10,
+                        label: delay == 0
+                            ? l10n.settingAutoMinimizeSubtitleImmediate
+                            : '${delay}s',
+                        onChanged: (value) {
+                          store.setAutoMinimizeDelay(value.round());
+                        },
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+          ],
+        ),
+      );
+    });
+  }
 }
 
 class _PeerDiscoveryCardState extends State<_PeerDiscoveryCard> {

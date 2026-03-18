@@ -823,4 +823,32 @@ class AppLocalizationsJa extends AppLocalizations {
   String cleanupDeleteConfirmBody(Object count) {
     return '選択した $count 件のデータを確認済みであることを確認してください。削除後は復元できません。';
   }
+
+  @override
+  String get settingAutoMinimizeTitle => '起動時にトレイへ最小化';
+
+  @override
+  String get settingAutoMinimizeSubtitleOff => '無効';
+
+  @override
+  String get settingAutoMinimizeSubtitleImmediate => '即時';
+
+  @override
+  String settingAutoMinimizeSubtitleDelay(Object seconds) {
+    return '$seconds秒後';
+  }
+
+  @override
+  String get settingAutoMinimizeEnabled => '起動時にトレイへ最小化';
+
+  @override
+  String get settingAutoMinimizeDelay => '遅延';
+
+  @override
+  String autoMinimizeOverlayCountdown(Object seconds) {
+    return '$seconds秒後にトレイへ最小化';
+  }
+
+  @override
+  String get autoMinimizeOverlayCancel => '任意の場所をタップしてキャンセル';
 }

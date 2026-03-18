@@ -256,5 +256,23 @@
     "placeholders": {
       "count": {}
     }
-  }
+  },
+  "settingAutoMinimizeTitle": "启动后自动最小化到托盘",
+  "settingAutoMinimizeSubtitleOff": "已关闭",
+  "settingAutoMinimizeSubtitleImmediate": "立即",
+  "settingAutoMinimizeSubtitleDelay": "{seconds}秒后",
+  "@settingAutoMinimizeSubtitleDelay": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "settingAutoMinimizeEnabled": "启动后自动最小化到托盘",
+  "settingAutoMinimizeDelay": "时间",
+  "autoMinimizeOverlayCountdown": "{seconds}秒后最小化到托盘",
+  "@autoMinimizeOverlayCountdown": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "autoMinimizeOverlayCancel": "随意点击遮罩任意位置取消"
 }

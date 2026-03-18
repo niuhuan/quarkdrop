@@ -1,10 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/material.dart';
 import 'package:quarkdrop/src/rust/api/app.dart' as rust_api;
 import 'package:quarkdrop/src/l10n/l10n.dart';
+import 'package:quarkdrop/src/screens/auto_minimize_overlay.dart';
 import 'package:quarkdrop/src/screens/home_shell.dart';
 import 'package:quarkdrop/src/screens/login_screen.dart';
 import 'package:quarkdrop/src/state/app_store.dart';
 import 'package:signals_flutter/signals_flutter.dart';
+
+bool get _isDesktop =>
+    Platform.isMacOS || Platform.isWindows || Platform.isLinux;
 
 class RootScreen extends StatelessWidget {
   const RootScreen({super.key, required this.store});
@@ -24,7 +30,10 @@ class RootScreen extends StatelessWidget {
         case BootstrapPhase.cloudDeviceSelection:
           return _CloudDeviceSelectionScreen(store: store);
         case BootstrapPhase.ready:
-          return HomeShell(store: store);
+          final home = HomeShell(store: store);
+          return _isDesktop
+              ? AutoMinimizeOverlay(store: store, child: home)
+              : home;
       }
     });
   }

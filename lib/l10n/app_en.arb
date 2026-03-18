@@ -256,5 +256,23 @@
     "placeholders": {
       "count": {}
     }
-  }
+  },
+  "settingAutoMinimizeTitle": "Minimize to tray on startup",
+  "settingAutoMinimizeSubtitleOff": "Disabled",
+  "settingAutoMinimizeSubtitleImmediate": "Immediately",
+  "settingAutoMinimizeSubtitleDelay": "After {seconds}s",
+  "@settingAutoMinimizeSubtitleDelay": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "settingAutoMinimizeEnabled": "Minimize to tray on startup",
+  "settingAutoMinimizeDelay": "Delay",
+  "autoMinimizeOverlayCountdown": "Minimizing to tray in {seconds}s",
+  "@autoMinimizeOverlayCountdown": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "autoMinimizeOverlayCancel": "Tap anywhere to cancel"
 }

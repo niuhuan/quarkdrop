@@ -256,5 +256,23 @@
     "placeholders": {
       "count": {}
     }
-  }
+  },
+  "settingAutoMinimizeTitle": "起動時にトレイへ最小化",
+  "settingAutoMinimizeSubtitleOff": "無効",
+  "settingAutoMinimizeSubtitleImmediate": "即時",
+  "settingAutoMinimizeSubtitleDelay": "{seconds}秒後",
+  "@settingAutoMinimizeSubtitleDelay": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "settingAutoMinimizeEnabled": "起動時にトレイへ最小化",
+  "settingAutoMinimizeDelay": "遅延",
+  "autoMinimizeOverlayCountdown": "{seconds}秒後にトレイへ最小化",
+  "@autoMinimizeOverlayCountdown": {
+    "placeholders": {
+      "seconds": {}
+    }
+  },
+  "autoMinimizeOverlayCancel": "任意の場所をタップしてキャンセル"
 }

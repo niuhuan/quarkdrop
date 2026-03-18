@@ -199,6 +199,14 @@ class AppStore with WidgetsBindingObserver, WindowListener {
     debugLabel: 'keepScreenOnDuringTransfer',
   );
   final minimizeToTray = signal<bool>(false, debugLabel: 'minimizeToTray');
+  final autoMinimizeOnStart = signal<bool>(
+    false,
+    debugLabel: 'autoMinimizeOnStart',
+  );
+  final autoMinimizeDelaySeconds = signal<int>(
+    3,
+    debugLabel: 'autoMinimizeDelaySeconds',
+  );
   final peerDiscoveryIntervalMinutes = signal<int>(
     10,
     debugLabel: 'peerDiscoveryIntervalMinutes',

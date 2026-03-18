@@ -204,6 +204,12 @@ extension AppStoreBootstrap on AppStore {
         minimizeToTray.value = rust_api.minimizeToTray();
       } catch (_) {}
       try {
+        autoMinimizeOnStart.value = rust_api.autoMinimizeOnStart();
+      } catch (_) {}
+      try {
+        autoMinimizeDelaySeconds.value = rust_api.autoMinimizeDelaySeconds();
+      } catch (_) {}
+      try {
         peerDiscoveryIntervalMinutes.value = rust_api
             .peerDiscoveryIntervalMinutes();
       } catch (_) {}
