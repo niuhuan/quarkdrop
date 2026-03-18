@@ -1501,6 +1501,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Interval for refreshing cloud device names (Minutes)'**
   String get settingPeerDiscoveryDescription;
+
+  /// No description provided for @actionSelectAll.
+  ///
+  /// In en, this message translates to:
+  /// **'Select All'**
+  String get actionSelectAll;
+
+  /// No description provided for @cleanupDeleteConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Confirm Cleanup'**
+  String get cleanupDeleteConfirmTitle;
+
+  /// No description provided for @cleanupDeleteConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Please confirm you have reviewed the {count} selected item(s). Deleted data cannot be recovered.'**
+  String cleanupDeleteConfirmBody(Object count);
 }
 
 class _AppLocalizationsDelegate

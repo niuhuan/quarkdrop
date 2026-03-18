@@ -801,6 +801,17 @@ class AppLocalizationsZh extends AppLocalizations {
 
   @override
   String get settingPeerDiscoveryDescription => '刷新云端设备名称的间隔(分钟)';
+
+  @override
+  String get actionSelectAll => '全选';
+
+  @override
+  String get cleanupDeleteConfirmTitle => '确认清理';
+
+  @override
+  String cleanupDeleteConfirmBody(Object count) {
+    return '请确认你已经检查过选中的 $count 项数据。清理后数据将无法恢复。';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hans`).
@@ -1600,6 +1611,17 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
 
   @override
   String get settingPeerDiscoveryDescription => '刷新云端设备名称的间隔(分钟)';
+
+  @override
+  String get actionSelectAll => '全选';
+
+  @override
+  String get cleanupDeleteConfirmTitle => '确认清理';
+
+  @override
+  String cleanupDeleteConfirmBody(Object count) {
+    return '请确认你已经检查过选中的 $count 项数据。清理后数据将无法恢复。';
+  }
 }
 
 /// The translations for Chinese, using the Han script (`zh_Hant`).
@@ -2399,4 +2421,15 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
 
   @override
   String get settingPeerDiscoveryDescription => '刷新雲端設備名稱的間隔(分鐘)';
+
+  @override
+  String get actionSelectAll => '全選';
+
+  @override
+  String get cleanupDeleteConfirmTitle => '確認清理';
+
+  @override
+  String cleanupDeleteConfirmBody(Object count) {
+    return '請確認你已經檢查過選中的 $count 項資料。清理後資料將無法恢復。';
+  }
 }

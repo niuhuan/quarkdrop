@@ -248,5 +248,13 @@
   "settingMinimizeToTrayTitle": "Minimize to tray on close",
   "settingMinimizeToTrayDescription": "Minimize to Tray",
   "settingPeerDiscoveryTitle": "Peer Discovery Interval",
-  "settingPeerDiscoveryDescription": "Interval for refreshing cloud device names (Minutes)"
+  "settingPeerDiscoveryDescription": "Interval for refreshing cloud device names (Minutes)",
+  "actionSelectAll": "Select All",
+  "cleanupDeleteConfirmTitle": "Confirm Cleanup",
+  "cleanupDeleteConfirmBody": "Please confirm you have reviewed the {count} selected item(s). Deleted data cannot be recovered.",
+  "@cleanupDeleteConfirmBody": {
+    "placeholders": {
+      "count": {}
+    }
+  }
 }

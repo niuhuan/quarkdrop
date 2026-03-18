@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:quarkdrop/src/l10n/l10n.dart';
 import 'package:quarkdrop/src/rust/api/app.dart' as rust_api;
@@ -50,12 +51,24 @@ class _DeviceMailboxManageScreenState extends State<DeviceMailboxManageScreen> {
     if (_selectedIds.isEmpty) {
       return;
     }
+    final deletedIds = _selectedIds.toSet();
     widget.store.deviceMaintenanceBusy.value = true;
     widget.store.deviceMaintenanceBusyMessage.value =
         widget.store.l10n.deviceMaintenanceBusyDeletingMailbox;
     try {
-      await rust_api.deleteCleanupItems(itemIds: _selectedIds.toList());
-      await _reload();
+      await rust_api.deleteCleanupItems(itemIds: deletedIds.toList());
+      final oldResult = await _scanFuture;
+      final remaining = oldResult.items
+          .where((item) => !deletedIds.contains(item.id))
+          .toList(growable: false);
+      setState(() {
+        _selectedIds.clear();
+        _scanFuture = SynchronousFuture(rust_api.CleanupScanResult(
+          totalCount: remaining.length,
+          totalSizeLabel: oldResult.totalSizeLabel,
+          items: remaining,
+        ));
+      });
     } catch (error) {
       widget.store.lastErrorMessage.value = error.toString();
       if (mounted) {
@@ -67,6 +80,53 @@ class _DeviceMailboxManageScreenState extends State<DeviceMailboxManageScreen> {
       widget.store.deviceMaintenanceBusy.value = false;
       widget.store.deviceMaintenanceBusyMessage.value = null;
     }
+  }
+
+  Future<void> _confirmAndDelete() async {
+    if (_selectedIds.isEmpty) return;
+    final l10n = widget.store.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(l10n.cleanupDeleteConfirmTitle),
+          content: Text(l10n.cleanupDeleteConfirmBody(_selectedIds.length)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(l10n.actionCancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(l10n.cleanupDeleteConfirmTitle),
+            ),
+          ],
+        );
+      },
+    );
+    if (confirmed == true) {
+      await _deleteSelected();
+    }
+  }
+
+  void _selectAll() async {
+    try {
+      final result = await _scanFuture;
+      if (!mounted) return;
+      final deletableItems = result.items.where((item) => item.canDelete);
+      final allSelected =
+          deletableItems.isNotEmpty &&
+          deletableItems.every((item) => _selectedIds.contains(item.id));
+      setState(() {
+        if (allSelected) {
+          _selectedIds.clear();
+        } else {
+          for (final item in deletableItems) {
+            _selectedIds.add(item.id);
+          }
+        }
+      });
+    } catch (_) {}
   }
 
   void _toggleSelection(rust_api.CleanupItem item, bool selected) {
@@ -111,7 +171,13 @@ class _DeviceMailboxManageScreenState extends State<DeviceMailboxManageScreen> {
               icon: const Icon(Icons.refresh_rounded),
             ),
             IconButton(
-              onPressed: busy || _selectedIds.isEmpty ? null : _deleteSelected,
+              tooltip: l10n.actionSelectAll,
+              onPressed: busy ? null : _selectAll,
+              icon: const Icon(Icons.select_all_rounded),
+            ),
+            IconButton(
+              onPressed:
+                  busy || _selectedIds.isEmpty ? null : _confirmAndDelete,
               color: Theme.of(context).colorScheme.error,
               icon: const Icon(Icons.delete_sweep_outlined),
             ),

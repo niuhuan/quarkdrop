@@ -812,4 +812,15 @@ class AppLocalizationsJa extends AppLocalizations {
 
   @override
   String get settingPeerDiscoveryDescription => 'クラウド上のデバイス名を更新する間隔（分）';
+
+  @override
+  String get actionSelectAll => 'すべて選択';
+
+  @override
+  String get cleanupDeleteConfirmTitle => 'クリーンアップの確認';
+
+  @override
+  String cleanupDeleteConfirmBody(Object count) {
+    return '選択した $count 件のデータを確認済みであることを確認してください。削除後は復元できません。';
+  }
 }

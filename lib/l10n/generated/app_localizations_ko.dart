@@ -814,4 +814,15 @@ class AppLocalizationsKo extends AppLocalizations {
 
   @override
   String get settingPeerDiscoveryDescription => '클라우드 기기 이름을 새로 고치는 간격(분)';
+
+  @override
+  String get actionSelectAll => '전체 선택';
+
+  @override
+  String get cleanupDeleteConfirmTitle => '정리 확인';
+
+  @override
+  String cleanupDeleteConfirmBody(Object count) {
+    return '선택한 $count개 항목을 확인했는지 확인해 주세요. 삭제된 데이터는 복구할 수 없습니다.';
+  }
 }

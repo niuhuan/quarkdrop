@@ -248,5 +248,13 @@
   "settingMinimizeToTrayTitle": "最小化到托盘",
   "settingMinimizeToTrayDescription": "关闭时最小化到系统托盘",
   "settingPeerDiscoveryTitle": "设备发现间隔",
-  "settingPeerDiscoveryDescription": "刷新云端设备名称的间隔(分钟)"
+  "settingPeerDiscoveryDescription": "刷新云端设备名称的间隔(分钟)",
+  "actionSelectAll": "全选",
+  "cleanupDeleteConfirmTitle": "确认清理",
+  "cleanupDeleteConfirmBody": "请确认你已经检查过选中的 {count} 项数据。清理后数据将无法恢复。",
+  "@cleanupDeleteConfirmBody": {
+    "placeholders": {
+      "count": {}
+    }
+  }
 }

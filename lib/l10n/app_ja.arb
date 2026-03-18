@@ -248,5 +248,13 @@
   "settingMinimizeToTrayTitle": "閉じる時にトレイへ最小化",
   "settingMinimizeToTrayDescription": "トレイに最小化",
   "settingPeerDiscoveryTitle": "ピア探索間隔",
-  "settingPeerDiscoveryDescription": "クラウド上のデバイス名を更新する間隔（分）"
+  "settingPeerDiscoveryDescription": "クラウド上のデバイス名を更新する間隔（分）",
+  "actionSelectAll": "すべて選択",
+  "cleanupDeleteConfirmTitle": "クリーンアップの確認",
+  "cleanupDeleteConfirmBody": "選択した {count} 件のデータを確認済みであることを確認してください。削除後は復元できません。",
+  "@cleanupDeleteConfirmBody": {
+    "placeholders": {
+      "count": {}
+    }
+  }
 }

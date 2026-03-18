@@ -248,5 +248,13 @@
   "settingMinimizeToTrayTitle": "最小化到托盤",
   "settingMinimizeToTrayDescription": "關閉時最小化到系統托盤",
   "settingPeerDiscoveryTitle": "設備發現間隔",
-  "settingPeerDiscoveryDescription": "刷新雲端設備名稱的間隔(分鐘)"
+  "settingPeerDiscoveryDescription": "刷新雲端設備名稱的間隔(分鐘)",
+  "actionSelectAll": "全選",
+  "cleanupDeleteConfirmTitle": "確認清理",
+  "cleanupDeleteConfirmBody": "請確認你已經檢查過選中的 {count} 項資料。清理後資料將無法恢復。",
+  "@cleanupDeleteConfirmBody": {
+    "placeholders": {
+      "count": {}
+    }
+  }
 }

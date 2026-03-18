@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:quarkdrop/src/l10n/l10n.dart';
 import 'package:quarkdrop/src/rust/api/app.dart' as rust_api;
@@ -40,12 +41,24 @@ class _GarbageCleanupScreenState extends State<GarbageCleanupScreen> {
     if (_selectedIds.isEmpty) {
       return;
     }
+    final deletedIds = _selectedIds.toSet();
     widget.store.deviceMaintenanceBusy.value = true;
     widget.store.deviceMaintenanceBusyMessage.value =
         widget.store.l10n.deviceMaintenanceBusyGarbageCleanup;
     try {
-      await rust_api.deleteCleanupItems(itemIds: _selectedIds.toList());
-      await _reload();
+      await rust_api.deleteCleanupItems(itemIds: deletedIds.toList());
+      final oldResult = await _scanFuture;
+      final remaining = oldResult.items
+          .where((item) => !deletedIds.contains(item.id))
+          .toList(growable: false);
+      setState(() {
+        _selectedIds.clear();
+        _scanFuture = SynchronousFuture(rust_api.CleanupScanResult(
+          totalCount: remaining.length,
+          totalSizeLabel: oldResult.totalSizeLabel,
+          items: remaining,
+        ));
+      });
     } catch (error) {
       widget.store.lastErrorMessage.value = error.toString();
       if (mounted) {
@@ -59,12 +72,75 @@ class _GarbageCleanupScreenState extends State<GarbageCleanupScreen> {
     }
   }
 
+  Future<void> _confirmAndDelete() async {
+    if (_selectedIds.isEmpty) return;
+    final l10n = widget.store.l10n;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(l10n.cleanupDeleteConfirmTitle),
+          content: Text(l10n.cleanupDeleteConfirmBody(_selectedIds.length)),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(l10n.actionCancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(l10n.cleanupDeleteConfirmTitle),
+            ),
+          ],
+        );
+      },
+    );
+    if (confirmed == true) {
+      await _deleteSelected();
+    }
+  }
+
+  void _selectAll() async {
+    try {
+      final result = await _scanFuture;
+      if (!mounted) return;
+      final deletableItems = result.items.where((item) => item.canDelete);
+      final allSelected =
+          deletableItems.isNotEmpty &&
+          deletableItems.every((item) => _selectedIds.contains(item.id));
+      setState(() {
+        if (allSelected) {
+          _selectedIds.clear();
+        } else {
+          for (final item in deletableItems) {
+            _selectedIds.add(item.id);
+          }
+        }
+      });
+    } catch (_) {}
+  }
+
   void _toggleSelection(rust_api.CleanupItem item, bool selected) {
     setState(() {
       if (selected) {
         _selectedIds.add(item.id);
       } else {
         _selectedIds.remove(item.id);
+      }
+    });
+  }
+
+  void _toggleCategorySelection(
+    List<rust_api.CleanupItem> items,
+    bool selected,
+  ) {
+    setState(() {
+      for (final item in items) {
+        if (!item.canDelete) continue;
+        if (selected) {
+          _selectedIds.add(item.id);
+        } else {
+          _selectedIds.remove(item.id);
+        }
       }
     });
   }
@@ -86,7 +162,13 @@ class _GarbageCleanupScreenState extends State<GarbageCleanupScreen> {
               icon: const Icon(Icons.refresh_rounded),
             ),
             IconButton(
-              onPressed: busy || _selectedIds.isEmpty ? null : _deleteSelected,
+              tooltip: l10n.actionSelectAll,
+              onPressed: busy ? null : _selectAll,
+              icon: const Icon(Icons.select_all_rounded),
+            ),
+            IconButton(
+              onPressed:
+                  busy || _selectedIds.isEmpty ? null : _confirmAndDelete,
               color: Theme.of(context).colorScheme.error,
               icon: const Icon(Icons.delete_sweep_outlined),
             ),
@@ -134,6 +216,7 @@ class _GarbageCleanupScreenState extends State<GarbageCleanupScreen> {
                             .toList(growable: false),
                         selectedIds: _selectedIds,
                         onToggle: _toggleSelection,
+                        onToggleAll: _toggleCategorySelection,
                       ),
                       const SizedBox(height: 12),
                       _CategoryCard(
@@ -148,6 +231,7 @@ class _GarbageCleanupScreenState extends State<GarbageCleanupScreen> {
                             .toList(growable: false),
                         selectedIds: _selectedIds,
                         onToggle: _toggleSelection,
+                        onToggleAll: _toggleCategorySelection,
                       ),
                       const SizedBox(height: 12),
                       _CategoryCard(
@@ -162,6 +246,7 @@ class _GarbageCleanupScreenState extends State<GarbageCleanupScreen> {
                             .toList(growable: false),
                         selectedIds: _selectedIds,
                         onToggle: _toggleSelection,
+                        onToggleAll: _toggleCategorySelection,
                       ),
                       const SizedBox(height: 12),
                       _CategoryCard(
@@ -176,6 +261,7 @@ class _GarbageCleanupScreenState extends State<GarbageCleanupScreen> {
                             .toList(growable: false),
                         selectedIds: _selectedIds,
                         onToggle: _toggleSelection,
+                        onToggleAll: _toggleCategorySelection,
                       ),
                     ],
                   );
@@ -267,6 +353,7 @@ class _CategoryCard extends StatelessWidget {
     required this.items,
     required this.selectedIds,
     required this.onToggle,
+    required this.onToggleAll,
   });
 
   final String title;
@@ -274,9 +361,16 @@ class _CategoryCard extends StatelessWidget {
   final List<rust_api.CleanupItem> items;
   final Set<String> selectedIds;
   final void Function(rust_api.CleanupItem item, bool selected) onToggle;
+  final void Function(List<rust_api.CleanupItem> items, bool selected) onToggleAll;
 
   @override
   Widget build(BuildContext context) {
+    final deletableItems =
+        items.where((item) => item.canDelete).toList(growable: false);
+    final selectedCount =
+        deletableItems.where((item) => selectedIds.contains(item.id)).length;
+    final allSelected =
+        deletableItems.isNotEmpty && selectedCount == deletableItems.length;
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -289,9 +383,24 @@ class _CategoryCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            '$title (${items.length})',
-            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+          Row(
+            children: [
+              Expanded(
+                child: Text(
+                  '$title (${items.length})',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                  ),
+                ),
+              ),
+              if (deletableItems.isNotEmpty)
+                Checkbox(
+                  value: allSelected,
+                  onChanged: (value) =>
+                      onToggleAll(deletableItems, value ?? false),
+                ),
+            ],
           ),
           const SizedBox(height: 14),
           if (items.isEmpty)

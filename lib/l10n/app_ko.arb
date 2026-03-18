@@ -248,5 +248,13 @@
   "settingMinimizeToTrayTitle": "닫을 때 트레이로 최소화",
   "settingMinimizeToTrayDescription": "트레이로 최소화",
   "settingPeerDiscoveryTitle": "피어 검색 주기",
-  "settingPeerDiscoveryDescription": "클라우드 기기 이름을 새로 고치는 간격(분)"
+  "settingPeerDiscoveryDescription": "클라우드 기기 이름을 새로 고치는 간격(분)",
+  "actionSelectAll": "전체 선택",
+  "cleanupDeleteConfirmTitle": "정리 확인",
+  "cleanupDeleteConfirmBody": "선택한 {count}개 항목을 확인했는지 확인해 주세요. 삭제된 데이터는 복구할 수 없습니다.",
+  "@cleanupDeleteConfirmBody": {
+    "placeholders": {
+      "count": {}
+    }
+  }
 }

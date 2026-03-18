@@ -852,4 +852,15 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get settingPeerDiscoveryDescription =>
       'Interval for refreshing cloud device names (Minutes)';
+
+  @override
+  String get actionSelectAll => 'Select All';
+
+  @override
+  String get cleanupDeleteConfirmTitle => 'Confirm Cleanup';
+
+  @override
+  String cleanupDeleteConfirmBody(Object count) {
+    return 'Please confirm you have reviewed the $count selected item(s). Deleted data cannot be recovered.';
+  }
 }
