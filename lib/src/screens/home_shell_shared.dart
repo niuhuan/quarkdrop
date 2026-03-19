@@ -1,10 +1,9 @@
 part of 'home_shell.dart';
 
 class _PaneTitle extends StatelessWidget {
-  const _PaneTitle({required this.title, this.subtitle});
+  const _PaneTitle({required this.title});
 
   final String title;
-  final String? subtitle;
 
   @override
   Widget build(BuildContext context) {
@@ -15,14 +14,6 @@ class _PaneTitle extends StatelessWidget {
           title,
           style: const TextStyle(fontSize: 24, fontWeight: FontWeight.w800),
         ),
-        if (subtitle != null) const SizedBox(height: 6),
-        if (subtitle != null)
-          Text(
-            subtitle!,
-            style: TextStyle(
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
       ],
     );
   }
@@ -45,37 +36,6 @@ class _StatusBadge extends StatelessWidget {
       child: Text(
         label,
         style: TextStyle(color: color, fontWeight: FontWeight.w700),
-      ),
-    );
-  }
-}
-
-class _DirectionChip extends StatelessWidget {
-  const _DirectionChip({required this.direction});
-
-  final TransferDirection direction;
-
-  @override
-  Widget build(BuildContext context) {
-    final label = direction == TransferDirection.send
-        ? context.l10n.directionSend
-        : context.l10n.directionReceive;
-    final icon = direction == TransferDirection.send
-        ? Icons.north_east_rounded
-        : Icons.south_west_rounded;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.secondaryContainer,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, size: 16),
-          const SizedBox(width: 6),
-          Text(label, style: const TextStyle(fontWeight: FontWeight.w700)),
-        ],
       ),
     );
   }
@@ -224,22 +184,20 @@ Color _stageColor(TransferStage stage) {
 
 String _progressLabel(BuildContext context, TransferJob job) {
   final l10n = context.l10n;
+  final direction = _transferDirectionLabel(context, job);
   if (job.stage == TransferStage.failed) {
-    return l10n.transferFailedWaitingRecovery;
+    return '$direction · ${l10n.transferWaitingRecovery}';
   }
   if (job.stage == TransferStage.completed) {
-    return l10n.transferCompletedSuccessfully;
+    return direction;
   }
-  return l10n.transferPercentComplete((job.progress * 100).round());
+  return '$direction · ${l10n.transferPercentComplete((job.progress * 100).round())}';
 }
 
-String _detailStateLabel(BuildContext context, TransferJob job) {
+String _transferDirectionLabel(BuildContext context, TransferJob job) {
   final l10n = context.l10n;
-  if (job.stage == TransferStage.failed) {
-    return l10n.transferNeedsAttention;
+  if (job.direction == TransferDirection.send) {
+    return l10n.transferSendingTo(job.counterpartLabel);
   }
-  if (job.stage == TransferStage.completed) {
-    return l10n.transferCompleted;
-  }
-  return l10n.transferActive;
+  return l10n.transferReceivingAt(job.counterpartLabel);
 }

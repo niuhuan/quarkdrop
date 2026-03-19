@@ -89,18 +89,13 @@
   "noTransferHistoryBody": "ファイル送信またはメールボックス受信を行うと、転送キューがここに表示されます。",
   "transfersTitle": "転送",
   "transfersSubtitle": "アップロードとダウンロードの履歴。",
-  "actionClearCompleted": "完了済みを削除",
+  "actionClearCompleted": "完了済みを整理",
+  "actionCleanupAllDevices": "すべてのデバイスを整理",
   "tabUnfinished": "未完了 ({count})",
   "tabSending": "送信中 ({count})",
   "tabReceiving": "受信中 ({count})",
   "tabCompleted": "完了 ({count})",
   "tabAll": "すべて ({count})",
-  "selectTransferTitle": "転送を選択",
-  "selectTransferBody": "キューから行を選択すると、状態と利用可能な操作を確認できます。",
-  "selectedTransferTitle": "選択中の転送",
-  "selectedTransferSubtitle": "現在の状態、方向、回復操作。",
-  "sendJobLabel": "送信ジョブ",
-  "receiveJobLabel": "受信ジョブ",
   "actionResumeTransfer": "転送を再開",
   "actionDeleteDevice": "Delete Device",
   "actionDeleteDeviceHint": "Are you sure you want to delete this device and its mailbox?",
@@ -109,8 +104,18 @@
   "settingsSubtitle": "デバイス、保存先、サインアウト。",
   "downloadFolderChooseBeforeReceiving": "受信前にフォルダを選択してください",
   "latestErrorTitle": "最新のエラー",
-  "directionSend": "送信",
-  "directionReceive": "受信",
+  "transferSendingTo": "{device} に送信",
+  "@transferSendingTo": {
+    "placeholders": {
+      "device": {}
+    }
+  },
+  "transferReceivingAt": "{device} で受信",
+  "@transferReceivingAt": {
+    "placeholders": {
+      "device": {}
+    }
+  },
   "accountLabel": "アカウント: {authSource}",
   "deviceIdLabel": "デバイス ID: {deviceId}",
   "@deviceIdLabel": {
@@ -174,12 +179,8 @@
   "stageCleanup": "クリーンアップ",
   "stageFailed": "失敗",
   "stageDone": "完了",
-  "transferFailedWaitingRecovery": "転送に失敗し、回復待ちです。",
-  "transferCompletedSuccessfully": "転送が正常に完了しました。",
-  "transferPercentComplete": "{percent}% 完了",
-  "transferNeedsAttention": "要対応",
-  "transferCompleted": "完了",
-  "transferActive": "進行中",
+  "transferPercentComplete": "{percent}%",
+  "transferWaitingRecovery": "回復待ち",
   "mailboxPollIntervalTitle": "メールボックス確認間隔",
   "mailboxPollIntervalSubtitle": "{seconds} 秒ごとに新しいファイルを確認します。",
   "secondsShort": "{seconds} 秒",

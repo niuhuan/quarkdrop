@@ -502,8 +502,9 @@ enum TransferDirection { send, receive }
 class TransferPreview {
   final String id;
   final String title;
-  final String subtitle;
+  final String counterpartLabel;
   final String sizeLabel;
+  final String transferredSizeLabel;
   final double progress;
   final TransferStage stage;
   final TransferDirection direction;
@@ -511,8 +512,9 @@ class TransferPreview {
   const TransferPreview({
     required this.id,
     required this.title,
-    required this.subtitle,
+    required this.counterpartLabel,
     required this.sizeLabel,
+    required this.transferredSizeLabel,
     required this.progress,
     required this.stage,
     required this.direction,
@@ -522,8 +524,9 @@ class TransferPreview {
   int get hashCode =>
       id.hashCode ^
       title.hashCode ^
-      subtitle.hashCode ^
+      counterpartLabel.hashCode ^
       sizeLabel.hashCode ^
+      transferredSizeLabel.hashCode ^
       progress.hashCode ^
       stage.hashCode ^
       direction.hashCode;
@@ -535,8 +538,9 @@ class TransferPreview {
           runtimeType == other.runtimeType &&
           id == other.id &&
           title == other.title &&
-          subtitle == other.subtitle &&
+          counterpartLabel == other.counterpartLabel &&
           sizeLabel == other.sizeLabel &&
+          transferredSizeLabel == other.transferredSizeLabel &&
           progress == other.progress &&
           stage == other.stage &&
           direction == other.direction;

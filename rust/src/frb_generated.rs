@@ -2414,16 +2414,18 @@ impl SseDecode for crate::api::app::TransferPreview {
     fn sse_decode(deserializer: &mut flutter_rust_bridge::for_generated::SseDeserializer) -> Self {
         let mut var_id = <String>::sse_decode(deserializer);
         let mut var_title = <String>::sse_decode(deserializer);
-        let mut var_subtitle = <String>::sse_decode(deserializer);
+        let mut var_counterpartLabel = <String>::sse_decode(deserializer);
         let mut var_sizeLabel = <String>::sse_decode(deserializer);
+        let mut var_transferredSizeLabel = <String>::sse_decode(deserializer);
         let mut var_progress = <f64>::sse_decode(deserializer);
         let mut var_stage = <crate::api::app::TransferStage>::sse_decode(deserializer);
         let mut var_direction = <crate::api::app::TransferDirection>::sse_decode(deserializer);
         return crate::api::app::TransferPreview {
             id: var_id,
             title: var_title,
-            subtitle: var_subtitle,
+            counterpart_label: var_counterpartLabel,
             size_label: var_sizeLabel,
+            transferred_size_label: var_transferredSizeLabel,
             progress: var_progress,
             stage: var_stage,
             direction: var_direction,
@@ -2844,8 +2846,9 @@ impl flutter_rust_bridge::IntoDart for crate::api::app::TransferPreview {
         [
             self.id.into_into_dart().into_dart(),
             self.title.into_into_dart().into_dart(),
-            self.subtitle.into_into_dart().into_dart(),
+            self.counterpart_label.into_into_dart().into_dart(),
             self.size_label.into_into_dart().into_dart(),
+            self.transferred_size_label.into_into_dart().into_dart(),
             self.progress.into_into_dart().into_dart(),
             self.stage.into_into_dart().into_dart(),
             self.direction.into_into_dart().into_dart(),
@@ -3163,8 +3166,9 @@ impl SseEncode for crate::api::app::TransferPreview {
     fn sse_encode(self, serializer: &mut flutter_rust_bridge::for_generated::SseSerializer) {
         <String>::sse_encode(self.id, serializer);
         <String>::sse_encode(self.title, serializer);
-        <String>::sse_encode(self.subtitle, serializer);
+        <String>::sse_encode(self.counterpart_label, serializer);
         <String>::sse_encode(self.size_label, serializer);
+        <String>::sse_encode(self.transferred_size_label, serializer);
         <f64>::sse_encode(self.progress, serializer);
         <crate::api::app::TransferStage>::sse_encode(self.stage, serializer);
         <crate::api::app::TransferDirection>::sse_encode(self.direction, serializer);

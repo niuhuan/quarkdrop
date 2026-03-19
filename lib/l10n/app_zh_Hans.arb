@@ -89,18 +89,13 @@
   "noTransferHistoryBody": "发送文件或接收中转任务后，传输队列会显示在这里。",
   "transfersTitle": "传输",
   "transfersSubtitle": "上传和下载历史。",
-  "actionClearCompleted": "清除已完成",
+  "actionClearCompleted": "清理已完成",
+  "actionCleanupAllDevices": "清理所有设备",
   "tabUnfinished": "未完成（{count}）",
   "tabSending": "发送中（{count}）",
   "tabReceiving": "接收中（{count}）",
   "tabCompleted": "已完成（{count}）",
   "tabAll": "全部（{count}）",
-  "selectTransferTitle": "选择一个传输",
-  "selectTransferBody": "从队列中选择一项，以查看其状态和可用操作。",
-  "selectedTransferTitle": "已选传输",
-  "selectedTransferSubtitle": "当前状态、方向和恢复操作。",
-  "sendJobLabel": "发送任务",
-  "receiveJobLabel": "接收任务",
   "actionResumeTransfer": "恢复传输",
   "actionDeleteDevice": "删除设备",
   "actionDeleteDeviceHint": "确定要删除此设备吗？",
@@ -109,8 +104,18 @@
   "settingsSubtitle": "设备、存储和退出登录。",
   "downloadFolderChooseBeforeReceiving": "接收前先选择一个文件夹",
   "latestErrorTitle": "最近错误",
-  "directionSend": "发送",
-  "directionReceive": "接收",
+  "transferSendingTo": "发送到 {device}",
+  "@transferSendingTo": {
+    "placeholders": {
+      "device": {}
+    }
+  },
+  "transferReceivingAt": "接收于 {device}",
+  "@transferReceivingAt": {
+    "placeholders": {
+      "device": {}
+    }
+  },
   "accountLabel": "账号：{authSource}",
   "deviceIdLabel": "设备 ID：{deviceId}",
   "@deviceIdLabel": {
@@ -174,12 +179,8 @@
   "stageCleanup": "清理中",
   "stageFailed": "失败",
   "stageDone": "完成",
-  "transferFailedWaitingRecovery": "传输失败，等待恢复。",
-  "transferCompletedSuccessfully": "传输已成功完成。",
-  "transferPercentComplete": "已完成 {percent}%",
-  "transferNeedsAttention": "需要处理",
-  "transferCompleted": "已完成",
-  "transferActive": "进行中",
+  "transferPercentComplete": "{percent}%",
+  "transferWaitingRecovery": "等待恢复",
   "mailboxPollIntervalTitle": "收件箱轮询间隔",
   "mailboxPollIntervalSubtitle": "{seconds} 秒检查一次新文件。",
   "secondsShort": "{seconds} 秒",

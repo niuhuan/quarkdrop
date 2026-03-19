@@ -277,7 +277,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get transfersSubtitle => 'Upload and download history.';
 
   @override
-  String get actionClearCompleted => 'Clear Completed';
+  String get actionClearCompleted => 'Clean Completed';
+
+  @override
+  String get actionCleanupAllDevices => 'Clean All Devices';
 
   @override
   String tabUnfinished(Object count) {
@@ -303,26 +306,6 @@ class AppLocalizationsEn extends AppLocalizations {
   String tabAll(Object count) {
     return 'All ($count)';
   }
-
-  @override
-  String get selectTransferTitle => 'Select a transfer';
-
-  @override
-  String get selectTransferBody =>
-      'Choose a row from the queue to inspect its state and available actions.';
-
-  @override
-  String get selectedTransferTitle => 'Selected Transfer';
-
-  @override
-  String get selectedTransferSubtitle =>
-      'Current status, direction, and recovery actions.';
-
-  @override
-  String get sendJobLabel => 'Send job';
-
-  @override
-  String get receiveJobLabel => 'Receive job';
 
   @override
   String get actionResumeTransfer => 'Resume Transfer';
@@ -351,10 +334,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get latestErrorTitle => 'Latest Error';
 
   @override
-  String get directionSend => 'Send';
+  String transferSendingTo(Object device) {
+    return 'Send to $device';
+  }
 
   @override
-  String get directionReceive => 'Receive';
+  String transferReceivingAt(Object device) {
+    return 'Receive at $device';
+  }
 
   @override
   String accountLabel(Object authSource) {
@@ -552,26 +539,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get stageDone => 'Done';
 
   @override
-  String get transferFailedWaitingRecovery =>
-      'Transfer failed and is waiting for recovery.';
-
-  @override
-  String get transferCompletedSuccessfully =>
-      'Transfer completed successfully.';
-
-  @override
   String transferPercentComplete(Object percent) {
-    return '$percent% complete';
+    return '$percent%';
   }
 
   @override
-  String get transferNeedsAttention => 'Needs attention';
-
-  @override
-  String get transferCompleted => 'Completed';
-
-  @override
-  String get transferActive => 'Active';
+  String get transferWaitingRecovery => 'Waiting for recovery';
 
   @override
   String get mailboxPollIntervalTitle => 'Mailbox Poll Interval';

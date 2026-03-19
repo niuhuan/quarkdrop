@@ -575,8 +575,14 @@ abstract class AppLocalizations {
   /// No description provided for @actionClearCompleted.
   ///
   /// In en, this message translates to:
-  /// **'Clear Completed'**
+  /// **'Clean Completed'**
   String get actionClearCompleted;
+
+  /// No description provided for @actionCleanupAllDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'Clean All Devices'**
+  String get actionCleanupAllDevices;
 
   /// No description provided for @tabUnfinished.
   ///
@@ -607,42 +613,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'All ({count})'**
   String tabAll(Object count);
-
-  /// No description provided for @selectTransferTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Select a transfer'**
-  String get selectTransferTitle;
-
-  /// No description provided for @selectTransferBody.
-  ///
-  /// In en, this message translates to:
-  /// **'Choose a row from the queue to inspect its state and available actions.'**
-  String get selectTransferBody;
-
-  /// No description provided for @selectedTransferTitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Selected Transfer'**
-  String get selectedTransferTitle;
-
-  /// No description provided for @selectedTransferSubtitle.
-  ///
-  /// In en, this message translates to:
-  /// **'Current status, direction, and recovery actions.'**
-  String get selectedTransferSubtitle;
-
-  /// No description provided for @sendJobLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Send job'**
-  String get sendJobLabel;
-
-  /// No description provided for @receiveJobLabel.
-  ///
-  /// In en, this message translates to:
-  /// **'Receive job'**
-  String get receiveJobLabel;
 
   /// No description provided for @actionResumeTransfer.
   ///
@@ -692,17 +662,17 @@ abstract class AppLocalizations {
   /// **'Latest Error'**
   String get latestErrorTitle;
 
-  /// No description provided for @directionSend.
+  /// No description provided for @transferSendingTo.
   ///
   /// In en, this message translates to:
-  /// **'Send'**
-  String get directionSend;
+  /// **'Send to {device}'**
+  String transferSendingTo(Object device);
 
-  /// No description provided for @directionReceive.
+  /// No description provided for @transferReceivingAt.
   ///
   /// In en, this message translates to:
-  /// **'Receive'**
-  String get directionReceive;
+  /// **'Receive at {device}'**
+  String transferReceivingAt(Object device);
 
   /// No description provided for @accountLabel.
   ///
@@ -1052,41 +1022,17 @@ abstract class AppLocalizations {
   /// **'Done'**
   String get stageDone;
 
-  /// No description provided for @transferFailedWaitingRecovery.
-  ///
-  /// In en, this message translates to:
-  /// **'Transfer failed and is waiting for recovery.'**
-  String get transferFailedWaitingRecovery;
-
-  /// No description provided for @transferCompletedSuccessfully.
-  ///
-  /// In en, this message translates to:
-  /// **'Transfer completed successfully.'**
-  String get transferCompletedSuccessfully;
-
   /// No description provided for @transferPercentComplete.
   ///
   /// In en, this message translates to:
-  /// **'{percent}% complete'**
+  /// **'{percent}%'**
   String transferPercentComplete(Object percent);
 
-  /// No description provided for @transferNeedsAttention.
+  /// No description provided for @transferWaitingRecovery.
   ///
   /// In en, this message translates to:
-  /// **'Needs attention'**
-  String get transferNeedsAttention;
-
-  /// No description provided for @transferCompleted.
-  ///
-  /// In en, this message translates to:
-  /// **'Completed'**
-  String get transferCompleted;
-
-  /// No description provided for @transferActive.
-  ///
-  /// In en, this message translates to:
-  /// **'Active'**
-  String get transferActive;
+  /// **'Waiting for recovery'**
+  String get transferWaitingRecovery;
 
   /// No description provided for @mailboxPollIntervalTitle.
   ///

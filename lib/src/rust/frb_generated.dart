@@ -2051,16 +2051,17 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
   TransferPreview dco_decode_transfer_preview(dynamic raw) {
     // Codec=Dco (DartCObject based), see doc to use other codecs
     final arr = raw as List<dynamic>;
-    if (arr.length != 7)
-      throw Exception('unexpected arr length: expect 7 but see ${arr.length}');
+    if (arr.length != 8)
+      throw Exception('unexpected arr length: expect 8 but see ${arr.length}');
     return TransferPreview(
       id: dco_decode_String(arr[0]),
       title: dco_decode_String(arr[1]),
-      subtitle: dco_decode_String(arr[2]),
+      counterpartLabel: dco_decode_String(arr[2]),
       sizeLabel: dco_decode_String(arr[3]),
-      progress: dco_decode_f_64(arr[4]),
-      stage: dco_decode_transfer_stage(arr[5]),
-      direction: dco_decode_transfer_direction(arr[6]),
+      transferredSizeLabel: dco_decode_String(arr[4]),
+      progress: dco_decode_f_64(arr[5]),
+      stage: dco_decode_transfer_stage(arr[6]),
+      direction: dco_decode_transfer_direction(arr[7]),
     );
   }
 
@@ -2402,16 +2403,18 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     var var_id = sse_decode_String(deserializer);
     var var_title = sse_decode_String(deserializer);
-    var var_subtitle = sse_decode_String(deserializer);
+    var var_counterpartLabel = sse_decode_String(deserializer);
     var var_sizeLabel = sse_decode_String(deserializer);
+    var var_transferredSizeLabel = sse_decode_String(deserializer);
     var var_progress = sse_decode_f_64(deserializer);
     var var_stage = sse_decode_transfer_stage(deserializer);
     var var_direction = sse_decode_transfer_direction(deserializer);
     return TransferPreview(
       id: var_id,
       title: var_title,
-      subtitle: var_subtitle,
+      counterpartLabel: var_counterpartLabel,
       sizeLabel: var_sizeLabel,
+      transferredSizeLabel: var_transferredSizeLabel,
       progress: var_progress,
       stage: var_stage,
       direction: var_direction,
@@ -2711,8 +2714,9 @@ class RustLibApiImpl extends RustLibApiImplPlatform implements RustLibApi {
     // Codec=Sse (Serialization based), see doc to use other codecs
     sse_encode_String(self.id, serializer);
     sse_encode_String(self.title, serializer);
-    sse_encode_String(self.subtitle, serializer);
+    sse_encode_String(self.counterpartLabel, serializer);
     sse_encode_String(self.sizeLabel, serializer);
+    sse_encode_String(self.transferredSizeLabel, serializer);
     sse_encode_f_64(self.progress, serializer);
     sse_encode_transfer_stage(self.stage, serializer);
     sse_encode_transfer_direction(self.direction, serializer);

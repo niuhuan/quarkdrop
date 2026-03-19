@@ -268,7 +268,10 @@ class AppLocalizationsJa extends AppLocalizations {
   String get transfersSubtitle => 'アップロードとダウンロードの履歴。';
 
   @override
-  String get actionClearCompleted => '完了済みを削除';
+  String get actionClearCompleted => '完了済みを整理';
+
+  @override
+  String get actionCleanupAllDevices => 'すべてのデバイスを整理';
 
   @override
   String tabUnfinished(Object count) {
@@ -296,24 +299,6 @@ class AppLocalizationsJa extends AppLocalizations {
   }
 
   @override
-  String get selectTransferTitle => '転送を選択';
-
-  @override
-  String get selectTransferBody => 'キューから行を選択すると、状態と利用可能な操作を確認できます。';
-
-  @override
-  String get selectedTransferTitle => '選択中の転送';
-
-  @override
-  String get selectedTransferSubtitle => '現在の状態、方向、回復操作。';
-
-  @override
-  String get sendJobLabel => '送信ジョブ';
-
-  @override
-  String get receiveJobLabel => '受信ジョブ';
-
-  @override
   String get actionResumeTransfer => '転送を再開';
 
   @override
@@ -339,10 +324,14 @@ class AppLocalizationsJa extends AppLocalizations {
   String get latestErrorTitle => '最新のエラー';
 
   @override
-  String get directionSend => '送信';
+  String transferSendingTo(Object device) {
+    return '$device に送信';
+  }
 
   @override
-  String get directionReceive => '受信';
+  String transferReceivingAt(Object device) {
+    return '$device で受信';
+  }
 
   @override
   String accountLabel(Object authSource) {
@@ -528,24 +517,12 @@ class AppLocalizationsJa extends AppLocalizations {
   String get stageDone => '完了';
 
   @override
-  String get transferFailedWaitingRecovery => '転送に失敗し、回復待ちです。';
-
-  @override
-  String get transferCompletedSuccessfully => '転送が正常に完了しました。';
-
-  @override
   String transferPercentComplete(Object percent) {
-    return '$percent% 完了';
+    return '$percent%';
   }
 
   @override
-  String get transferNeedsAttention => '要対応';
-
-  @override
-  String get transferCompleted => '完了';
-
-  @override
-  String get transferActive => '進行中';
+  String get transferWaitingRecovery => '回復待ち';
 
   @override
   String get mailboxPollIntervalTitle => 'メールボックス確認間隔';

@@ -86,8 +86,9 @@ pub struct RememberedDevice {
 pub struct TransferPreview {
     pub id: String,
     pub title: String,
-    pub subtitle: String,
+    pub counterpart_label: String,
     pub size_label: String,
+    pub transferred_size_label: String,
     pub progress: f64,
     pub stage: TransferStage,
     pub direction: TransferDirection,
@@ -781,40 +782,6 @@ fn map_task_snapshot(task: TaskSnapshot) -> TransferPreview {
         TaskDirection::Send => TransferDirection::Send,
         TaskDirection::Receive => TransferDirection::Receive,
     };
-    let base_subtitle = match task.stage {
-        TaskStage::Done => format!(
-            "Delivered {} to {}.",
-            size_label(task.size_bytes),
-            task.counterpart_label
-        ),
-        TaskStage::UploadingCommit => {
-            format!("Finalizing relay package for {}.", task.counterpart_label)
-        }
-        TaskStage::UploadingManifest => {
-            format!("Uploading manifest for {}.", task.counterpart_label)
-        }
-        TaskStage::UploadingBlobs => format!("Uploading file body to {}.", task.counterpart_label),
-        TaskStage::Scanning => format!("Preparing {} for upload.", task.display_name),
-        TaskStage::DownloadingBlobs => {
-            format!("Downloading relay payload from {}.", task.counterpart_label)
-        }
-        TaskStage::Verifying => format!("Verifying {}.", task.display_name),
-        TaskStage::CleanupRemote => "Cleaning up remote relay objects.".to_string(),
-        TaskStage::Failed => {
-            let reason = task.last_error_message.trim();
-            if reason.is_empty() {
-                "Transfer stopped before completion.".to_string()
-            } else {
-                format!("Failed: {reason}")
-            }
-        }
-    };
-    let subtitle = if matches!(task.stage, TaskStage::Done | TaskStage::Failed) {
-        base_subtitle
-    } else {
-        format!("{base_subtitle} Saved in the local JSON task file for recovery.")
-    };
-
     let byte_progress = if task.size_bytes > 0 {
         (task.transferred_bytes.min(task.size_bytes) as f64 / task.size_bytes as f64)
             .clamp(0.0, 1.0)
@@ -825,9 +792,14 @@ fn map_task_snapshot(task: TaskSnapshot) -> TransferPreview {
     TransferPreview {
         id: task.job_id,
         title: task.display_name,
-        subtitle,
+        counterpart_label: task.counterpart_label,
         size_label: if task.size_bytes > 0 {
             size_label(task.size_bytes)
+        } else {
+            String::new()
+        },
+        transferred_size_label: if task.size_bytes > 0 {
+            size_label(task.transferred_bytes.min(task.size_bytes))
         } else {
             String::new()
         },

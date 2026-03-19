@@ -269,7 +269,10 @@ class AppLocalizationsKo extends AppLocalizations {
   String get transfersSubtitle => '업로드 및 다운로드 기록.';
 
   @override
-  String get actionClearCompleted => '완료 항목 지우기';
+  String get actionClearCompleted => '완료 항목 정리';
+
+  @override
+  String get actionCleanupAllDevices => '모든 기기 정리';
 
   @override
   String tabUnfinished(Object count) {
@@ -297,24 +300,6 @@ class AppLocalizationsKo extends AppLocalizations {
   }
 
   @override
-  String get selectTransferTitle => '전송 선택';
-
-  @override
-  String get selectTransferBody => '대기열에서 항목을 선택하면 상태와 가능한 작업을 볼 수 있습니다.';
-
-  @override
-  String get selectedTransferTitle => '선택된 전송';
-
-  @override
-  String get selectedTransferSubtitle => '현재 상태, 방향 및 복구 작업.';
-
-  @override
-  String get sendJobLabel => '보내기 작업';
-
-  @override
-  String get receiveJobLabel => '받기 작업';
-
-  @override
   String get actionResumeTransfer => '전송 재개';
 
   @override
@@ -340,10 +325,14 @@ class AppLocalizationsKo extends AppLocalizations {
   String get latestErrorTitle => '최근 오류';
 
   @override
-  String get directionSend => '보내기';
+  String transferSendingTo(Object device) {
+    return '$device(으)로 보내기';
+  }
 
   @override
-  String get directionReceive => '받기';
+  String transferReceivingAt(Object device) {
+    return '$device에서 받기';
+  }
 
   @override
   String accountLabel(Object authSource) {
@@ -530,24 +519,12 @@ class AppLocalizationsKo extends AppLocalizations {
   String get stageDone => '완료';
 
   @override
-  String get transferFailedWaitingRecovery => '전송이 실패했고 복구를 기다리고 있습니다.';
-
-  @override
-  String get transferCompletedSuccessfully => '전송이 성공적으로 완료되었습니다.';
-
-  @override
   String transferPercentComplete(Object percent) {
-    return '$percent% 완료';
+    return '$percent%';
   }
 
   @override
-  String get transferNeedsAttention => '확인 필요';
-
-  @override
-  String get transferCompleted => '완료됨';
-
-  @override
-  String get transferActive => '진행 중';
+  String get transferWaitingRecovery => '복구 대기 중';
 
   @override
   String get mailboxPollIntervalTitle => '메일박스 확인 주기';

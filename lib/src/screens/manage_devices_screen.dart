@@ -74,10 +74,8 @@ class ManageDevicesScreen extends StatelessWidget {
           title: Text(l10n.existingDevicesTitle),
           actions: [
             Padding(
-              padding: const EdgeInsets.only(right: 12),
-              child: IconButton(
-                tooltip: l10n.garbageCleanupEntry,
-                color: Theme.of(context).colorScheme.error,
+              padding: const EdgeInsets.only(right: 16),
+              child: OutlinedButton.icon(
                 onPressed: busy
                     ? null
                     : () {
@@ -89,6 +87,10 @@ class ManageDevicesScreen extends StatelessWidget {
                         );
                       },
                 icon: const Icon(Icons.cleaning_services_outlined),
+                label: Text(l10n.actionCleanupAllDevices),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Theme.of(context).colorScheme.error,
+                ),
               ),
             ),
           ],
@@ -175,24 +177,26 @@ class ManageDevicesScreen extends StatelessWidget {
                                       Icons.cleaning_services_outlined,
                                     ),
                                   ),
-                                  if (!device.isCurrent)
-                                    IconButton(
-                                      icon: const Icon(Icons.delete_outline),
-                                      color:
-                                          Theme.of(context).colorScheme.error,
-                                      onPressed: busy
-                                          ? null
-                                          : () => _confirmDeletePeer(
-                                                context,
-                                                rust_api.PeerDevice(
-                                                  deviceId: device.deviceId,
-                                                  mailboxFolderId:
-                                                      device.mailboxFolderId,
-                                                  label: device.label,
-                                                  subtitle: device.subtitle,
-                                                ),
+                                  IconButton(
+                                    tooltip: device.isCurrent
+                                        ? l10n.currentDeviceSubtitle
+                                        : l10n.actionDeleteDevice,
+                                    icon: const Icon(Icons.delete_outline),
+                                    color:
+                                        Theme.of(context).colorScheme.error,
+                                    onPressed: device.isCurrent || busy
+                                        ? null
+                                        : () => _confirmDeletePeer(
+                                              context,
+                                              rust_api.PeerDevice(
+                                                deviceId: device.deviceId,
+                                                mailboxFolderId:
+                                                    device.mailboxFolderId,
+                                                label: device.label,
+                                                subtitle: device.subtitle,
                                               ),
-                                    ),
+                                            ),
+                                  ),
                                 ],
                               ),
                             );

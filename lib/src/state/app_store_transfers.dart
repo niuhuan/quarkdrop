@@ -65,8 +65,9 @@ extension AppStoreTransfers on AppStore {
     return TransferJob(
       id: preview.id,
       title: preview.title,
-      subtitle: preview.subtitle,
+      counterpartLabel: preview.counterpartLabel,
       sizeLabel: preview.sizeLabel,
+      transferredSizeLabel: preview.transferredSizeLabel,
       progress: preview.progress.clamp(0, 1),
       stage: switch (preview.stage) {
         rust_api.TransferStage.preparing => TransferStage.preparing,

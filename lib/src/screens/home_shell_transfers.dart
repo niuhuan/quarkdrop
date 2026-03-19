@@ -35,7 +35,6 @@ class _TransfersPaneState extends State<_TransfersPane>
     return Watch((context) {
       final store = widget.store;
       final jobs = store.transferJobs.value;
-      final selectedJob = store.selectedTransfer.value;
       final transferActionInProgress = store.transferActionInProgress.value;
       final hasCompletedJobs = jobs.any(
         (job) => job.stage == TransferStage.completed,
@@ -75,8 +74,7 @@ class _TransfersPaneState extends State<_TransfersPane>
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           itemCount: filtered.length,
           separatorBuilder: (_, _) => const SizedBox(height: 12),
-          itemBuilder: (_, index) =>
-              _TransferListTile(job: filtered[index], store: store),
+          itemBuilder: (_, index) => _TransferListTile(job: filtered[index]),
         );
       }
 
@@ -89,47 +87,15 @@ class _TransfersPaneState extends State<_TransfersPane>
             ),
           );
         }
-        return LayoutBuilder(
-          builder: (context, constraints) {
-            final wideLayout = constraints.maxWidth >= 1080;
-            final tabs = TabBarView(
-              controller: _tabController,
-              children: [
-                buildJobList(unfinishedJobs),
-                buildJobList(sendingJobs),
-                buildJobList(receivingJobs),
-                buildJobList(completedJobs),
-                buildJobList(allJobs),
-              ],
-            );
-            if (!wideLayout) {
-              return tabs;
-            }
-            return Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(flex: 5, child: tabs),
-                const SizedBox(width: 18),
-                Expanded(
-                  flex: 4,
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.only(right: 16),
-                    child: _TransferDetailCard(
-                      job: selectedJob,
-                      transferActionInProgress: transferActionInProgress,
-                      resumeInProgress: store.resumeInProgress.value,
-                      onResume: selectedJob == null
-                          ? null
-                          : () => store.resumeTransfer(selectedJob),
-                      onDeleteRemote: selectedJob == null
-                          ? null
-                          : () => store.deleteTransfer(selectedJob),
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
+        return TabBarView(
+          controller: _tabController,
+          children: [
+            buildJobList(unfinishedJobs),
+            buildJobList(sendingJobs),
+            buildJobList(receivingJobs),
+            buildJobList(completedJobs),
+            buildJobList(allJobs),
+          ],
         );
       }
 
@@ -183,281 +149,173 @@ class _TransfersPaneState extends State<_TransfersPane>
 }
 
 class _TransferListTile extends StatelessWidget {
-  const _TransferListTile({required this.job, required this.store});
+  const _TransferListTile({required this.job});
 
   final TransferJob job;
-  final AppStore store;
 
   @override
   Widget build(BuildContext context) {
-    final selected = store.selectedTransferId.value == job.id;
-    return InkWell(
-      borderRadius: BorderRadius.circular(22),
-      onTap: () => store.selectTransfer(job.id),
-      child: Container(
-        padding: const EdgeInsets.all(18),
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(22),
-          color: selected
-              ? Theme.of(context).colorScheme.surfaceContainerHighest
-              : Theme.of(context).colorScheme.surface,
-          border: Border.all(
-            color: selected
-                ? Theme.of(context).colorScheme.primary
-                : Theme.of(context).colorScheme.outlineVariant,
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                _DirectionChip(direction: job.direction),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    job.title,
-                    maxLines: 2,
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
-                  ),
-                ),
-                _StatusBadge(
-                  label: _stageLabel(context, job.stage),
-                  color: _stageColor(job.stage),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Text(job.subtitle, style: TextStyle(height: 1.45)),
-            const SizedBox(height: 14),
-            ClipRRect(
-              borderRadius: BorderRadius.circular(999),
-              child: LinearProgressIndicator(
-                minHeight: 10,
-                value: job.progress,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  _stageColor(job.stage),
-                ),
-                backgroundColor: Theme.of(
-                  context,
-                ).colorScheme.surfaceContainerHighest,
-              ),
-            ),
-            const SizedBox(height: 8),
-            Row(
-              children: [
-                Expanded(
-                  child: Text(
-                    _progressLabel(context, job),
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
-                  ),
-                ),
-                if (job.sizeLabel.isNotEmpty)
-                  Text(
-                    job.sizeLabel,
-                    style: TextStyle(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-              ],
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _TransferDetailCard extends StatelessWidget {
-  const _TransferDetailCard({
-    required this.job,
-    required this.transferActionInProgress,
-    required this.resumeInProgress,
-    required this.onResume,
-    required this.onDeleteRemote,
-  });
-
-  final TransferJob? job;
-  final bool transferActionInProgress;
-  final bool resumeInProgress;
-  final VoidCallback? onResume;
-  final VoidCallback? onDeleteRemote;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = context.l10n;
-    if (job == null) {
-      return Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Theme.of(context).colorScheme.surfaceContainerLow,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: Theme.of(context).colorScheme.outlineVariant,
-          ),
-        ),
-        child: _EmptyPaneMessage(
-          title: l10n.selectTransferTitle,
-          body: l10n.selectTransferBody,
-        ),
-      );
-    }
-
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainerLow,
-        borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
+        borderRadius: BorderRadius.circular(22),
+        color: Theme.of(context).colorScheme.surface,
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outlineVariant,
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _PaneTitle(
-            title: l10n.selectedTransferTitle,
-            subtitle: l10n.selectedTransferSubtitle,
-          ),
-          const SizedBox(height: 18),
           Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              _DirectionChip(direction: job!.direction),
-              const SizedBox(width: 10),
               Expanded(
-                child: Text(
-                  job!.title,
+                child: RichText(
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
-                  style: TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+                  text: TextSpan(
+                    style: DefaultTextStyle.of(context).style.copyWith(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w800,
+                      color: Theme.of(context).colorScheme.onSurface,
+                    ),
+                    children: [
+                      WidgetSpan(
+                        alignment: PlaceholderAlignment.middle,
+                        child: _TransferTypeIcon(title: job.title),
+                      ),
+                      const WidgetSpan(
+                        alignment: PlaceholderAlignment.middle,
+                        child: SizedBox(width: 10),
+                      ),
+                      TextSpan(text: job.title),
+                    ],
+                  ),
                 ),
               ),
+              const SizedBox(width: 12),
               _StatusBadge(
-                label: _stageLabel(context, job!.stage),
-                color: _stageColor(job!.stage),
+                label: _stageLabel(context, job.stage),
+                color: _stageColor(job.stage),
               ),
             ],
           ),
           const SizedBox(height: 14),
-          Text(
-            job!.subtitle,
-            style: TextStyle(
-              height: 1.5,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 18),
           ClipRRect(
             borderRadius: BorderRadius.circular(999),
             child: LinearProgressIndicator(
-              minHeight: 12,
-              value: job!.progress,
+              minHeight: 10,
+              value: job.progress,
               valueColor: AlwaysStoppedAnimation<Color>(
-                _stageColor(job!.stage),
+                _stageColor(job.stage),
               ),
               backgroundColor: Theme.of(
                 context,
               ).colorScheme.surfaceContainerHighest,
             ),
           ),
-          const SizedBox(height: 10),
-          Text(
-            _progressLabel(context, job!),
-            style: TextStyle(
-              fontSize: 15,
-              color: Theme.of(context).colorScheme.onSurfaceVariant,
-            ),
-          ),
-          const SizedBox(height: 18),
-          Wrap(
-            spacing: 10,
-            runSpacing: 10,
+          const SizedBox(height: 8),
+          Row(
             children: [
-              _DetailMetaChip(
-                icon: job!.direction == TransferDirection.send
-                    ? Icons.north_east_rounded
-                    : Icons.south_west_rounded,
-                label: job!.direction == TransferDirection.send
-                    ? l10n.sendJobLabel
-                    : l10n.receiveJobLabel,
+              Icon(
+                job.direction == TransferDirection.send
+                    ? Icons.arrow_upward_rounded
+                    : Icons.arrow_downward_rounded,
+                size: 18,
+                color: Theme.of(context).colorScheme.onSurfaceVariant,
               ),
-              _DetailMetaChip(
-                icon: Icons.flag_outlined,
-                label: _detailStateLabel(context, job!),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  _progressLabel(context, job),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
               ),
-              _DetailMetaChip(
-                icon: Icons.percent_rounded,
-                label: '${(job!.progress * 100).round()}%',
-              ),
-              if (job!.sizeLabel.isNotEmpty)
-                _DetailMetaChip(
-                  icon: Icons.data_usage_rounded,
-                  label: job!.sizeLabel,
+              if (job.sizeLabel.isNotEmpty)
+                Text(
+                  _sizeSummary(job),
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
             ],
           ),
-          if (job!.stage == TransferStage.failed) ...[
-            const SizedBox(height: 22),
-            Row(
-              children: [
-                Expanded(
-                  child: FilledButton.icon(
-                    onPressed: resumeInProgress ? null : onResume,
-                    icon: const Icon(Icons.restart_alt_rounded),
-                    label: Text(l10n.actionResumeTransfer),
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 10),
-            Row(
-              children: [
-                Expanded(
-                  child: OutlinedButton.icon(
-                    onPressed: transferActionInProgress ? null : onDeleteRemote,
-                    icon: const Icon(Icons.delete_outline_rounded),
-                    label: Text(l10n.actionDeleteRemoteJob),
-                  ),
-                ),
-              ],
-            ),
-          ],
         ],
       ),
     );
   }
+
+  String _sizeSummary(TransferJob job) {
+    if (job.sizeLabel.isEmpty) {
+      return '';
+    }
+    if (job.stage == TransferStage.completed ||
+        job.transferredSizeLabel.isEmpty ||
+        job.transferredSizeLabel == job.sizeLabel) {
+      return job.sizeLabel;
+    }
+    return '${job.transferredSizeLabel} / ${job.sizeLabel}';
+  }
 }
 
-class _DetailMetaChip extends StatelessWidget {
-  const _DetailMetaChip({required this.icon, required this.label});
+class _TransferTypeIcon extends StatelessWidget {
+  const _TransferTypeIcon({required this.title});
 
-  final IconData icon;
-  final String label;
+  final String title;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: Theme.of(context).colorScheme.outlineVariant),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 18,
-            color: Theme.of(context).colorScheme.onSurfaceVariant,
-          ),
-          const SizedBox(width: 8),
-          Text(label),
-        ],
-      ),
-    );
+    final (icon, color) = _iconForTitle(context, title);
+    return Icon(icon, size: 18, color: color);
+  }
+
+  (IconData, Color) _iconForTitle(BuildContext context, String title) {
+    final theme = Theme.of(context).colorScheme;
+    final normalized = title.trim().toLowerCase();
+    final extension = normalized.contains('.')
+        ? normalized.split('.').last
+        : '';
+    if (_matches(extension, const ['jpg', 'jpeg', 'png', 'gif', 'webp', 'heic', 'bmp', 'svg'])) {
+      return (Icons.image_rounded, theme.tertiary);
+    }
+    if (_matches(extension, const ['mp4', 'mov', 'mkv', 'avi', 'webm', 'm4v'])) {
+      return (Icons.videocam_rounded, const Color(0xFFD9485F));
+    }
+    if (_matches(extension, const ['mp3', 'wav', 'flac', 'aac', 'm4a', 'ogg'])) {
+      return (Icons.audio_file_rounded, const Color(0xFF1D6F6D));
+    }
+    if (_matches(extension, const ['zip', 'rar', '7z', 'tar', 'gz', 'xz'])) {
+      return (Icons.folder_zip_rounded, const Color(0xFF8A5B00));
+    }
+    if (_matches(extension, const ['pdf'])) {
+      return (Icons.picture_as_pdf_rounded, const Color(0xFFB42318));
+    }
+    if (_matches(extension, const ['doc', 'docx', 'pages', 'txt', 'md', 'rtf'])) {
+      return (Icons.description_rounded, theme.primary);
+    }
+    if (_matches(extension, const ['xls', 'xlsx', 'csv', 'numbers'])) {
+      return (Icons.table_chart_rounded, const Color(0xFF2F7D32));
+    }
+    if (_matches(extension, const ['ppt', 'pptx', 'key'])) {
+      return (Icons.slideshow_rounded, const Color(0xFFE56F00));
+    }
+    if (_matches(extension, const ['apk', 'dmg', 'pkg', 'exe', 'msi'])) {
+      return (Icons.inventory_2_rounded, theme.secondary);
+    }
+    if (extension.isEmpty && !normalized.contains('.')) {
+      return (Icons.folder_rounded, const Color(0xFF8A5B00));
+    }
+    return (Icons.insert_drive_file_rounded, theme.onSurfaceVariant);
+  }
+
+  bool _matches(String extension, List<String> candidates) {
+    return extension.isNotEmpty && candidates.contains(extension);
   }
 }

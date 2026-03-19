@@ -260,7 +260,10 @@ class AppLocalizationsZh extends AppLocalizations {
   String get transfersSubtitle => '上传和下载历史。';
 
   @override
-  String get actionClearCompleted => '清除已完成';
+  String get actionClearCompleted => '清理已完成';
+
+  @override
+  String get actionCleanupAllDevices => '清理所有设备';
 
   @override
   String tabUnfinished(Object count) {
@@ -288,24 +291,6 @@ class AppLocalizationsZh extends AppLocalizations {
   }
 
   @override
-  String get selectTransferTitle => '选择一个传输';
-
-  @override
-  String get selectTransferBody => '从队列中选择一项，以查看其状态和可用操作。';
-
-  @override
-  String get selectedTransferTitle => '已选传输';
-
-  @override
-  String get selectedTransferSubtitle => '当前状态、方向和恢复操作。';
-
-  @override
-  String get sendJobLabel => '发送任务';
-
-  @override
-  String get receiveJobLabel => '接收任务';
-
-  @override
   String get actionResumeTransfer => '恢复传输';
 
   @override
@@ -330,10 +315,14 @@ class AppLocalizationsZh extends AppLocalizations {
   String get latestErrorTitle => '最近错误';
 
   @override
-  String get directionSend => '发送';
+  String transferSendingTo(Object device) {
+    return '发送到 $device';
+  }
 
   @override
-  String get directionReceive => '接收';
+  String transferReceivingAt(Object device) {
+    return '接收于 $device';
+  }
 
   @override
   String accountLabel(Object authSource) {
@@ -518,24 +507,12 @@ class AppLocalizationsZh extends AppLocalizations {
   String get stageDone => '完成';
 
   @override
-  String get transferFailedWaitingRecovery => '传输失败，等待恢复。';
-
-  @override
-  String get transferCompletedSuccessfully => '传输已成功完成。';
-
-  @override
   String transferPercentComplete(Object percent) {
-    return '已完成 $percent%';
+    return '$percent%';
   }
 
   @override
-  String get transferNeedsAttention => '需要处理';
-
-  @override
-  String get transferCompleted => '已完成';
-
-  @override
-  String get transferActive => '进行中';
+  String get transferWaitingRecovery => '等待恢复';
 
   @override
   String get mailboxPollIntervalTitle => '收件箱轮询间隔';
@@ -1098,7 +1075,10 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get transfersSubtitle => '上传和下载历史。';
 
   @override
-  String get actionClearCompleted => '清除已完成';
+  String get actionClearCompleted => '清理已完成';
+
+  @override
+  String get actionCleanupAllDevices => '清理所有设备';
 
   @override
   String tabUnfinished(Object count) {
@@ -1126,24 +1106,6 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   }
 
   @override
-  String get selectTransferTitle => '选择一个传输';
-
-  @override
-  String get selectTransferBody => '从队列中选择一项，以查看其状态和可用操作。';
-
-  @override
-  String get selectedTransferTitle => '已选传输';
-
-  @override
-  String get selectedTransferSubtitle => '当前状态、方向和恢复操作。';
-
-  @override
-  String get sendJobLabel => '发送任务';
-
-  @override
-  String get receiveJobLabel => '接收任务';
-
-  @override
   String get actionResumeTransfer => '恢复传输';
 
   @override
@@ -1168,10 +1130,14 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get latestErrorTitle => '最近错误';
 
   @override
-  String get directionSend => '发送';
+  String transferSendingTo(Object device) {
+    return '发送到 $device';
+  }
 
   @override
-  String get directionReceive => '接收';
+  String transferReceivingAt(Object device) {
+    return '接收于 $device';
+  }
 
   @override
   String accountLabel(Object authSource) {
@@ -1356,24 +1322,12 @@ class AppLocalizationsZhHans extends AppLocalizationsZh {
   String get stageDone => '完成';
 
   @override
-  String get transferFailedWaitingRecovery => '传输失败，等待恢复。';
-
-  @override
-  String get transferCompletedSuccessfully => '传输已成功完成。';
-
-  @override
   String transferPercentComplete(Object percent) {
-    return '已完成 $percent%';
+    return '$percent%';
   }
 
   @override
-  String get transferNeedsAttention => '需要处理';
-
-  @override
-  String get transferCompleted => '已完成';
-
-  @override
-  String get transferActive => '进行中';
+  String get transferWaitingRecovery => '等待恢复';
 
   @override
   String get mailboxPollIntervalTitle => '收件箱轮询间隔';
@@ -1936,7 +1890,10 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get transfersSubtitle => '上傳與下載歷史。';
 
   @override
-  String get actionClearCompleted => '清除已完成';
+  String get actionClearCompleted => '清理已完成';
+
+  @override
+  String get actionCleanupAllDevices => '清理所有裝置';
 
   @override
   String tabUnfinished(Object count) {
@@ -1964,24 +1921,6 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   }
 
   @override
-  String get selectTransferTitle => '選擇一個傳輸';
-
-  @override
-  String get selectTransferBody => '從佇列中選擇一列，以查看其狀態與可用操作。';
-
-  @override
-  String get selectedTransferTitle => '已選傳輸';
-
-  @override
-  String get selectedTransferSubtitle => '目前狀態、方向與恢復操作。';
-
-  @override
-  String get sendJobLabel => '傳送任務';
-
-  @override
-  String get receiveJobLabel => '接收任務';
-
-  @override
   String get actionResumeTransfer => '恢復傳輸';
 
   @override
@@ -2006,10 +1945,14 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get latestErrorTitle => '最近錯誤';
 
   @override
-  String get directionSend => '傳送';
+  String transferSendingTo(Object device) {
+    return '傳送到 $device';
+  }
 
   @override
-  String get directionReceive => '接收';
+  String transferReceivingAt(Object device) {
+    return '接收於 $device';
+  }
 
   @override
   String accountLabel(Object authSource) {
@@ -2194,24 +2137,12 @@ class AppLocalizationsZhHant extends AppLocalizationsZh {
   String get stageDone => '完成';
 
   @override
-  String get transferFailedWaitingRecovery => '傳輸失敗，等待恢復。';
-
-  @override
-  String get transferCompletedSuccessfully => '傳輸已成功完成。';
-
-  @override
   String transferPercentComplete(Object percent) {
-    return '已完成 $percent%';
+    return '$percent%';
   }
 
   @override
-  String get transferNeedsAttention => '需要處理';
-
-  @override
-  String get transferCompleted => '已完成';
-
-  @override
-  String get transferActive => '進行中';
+  String get transferWaitingRecovery => '等待恢復';
 
   @override
   String get mailboxPollIntervalTitle => '收件匣輪詢間隔';

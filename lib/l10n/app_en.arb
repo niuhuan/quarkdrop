@@ -89,18 +89,13 @@
   "noTransferHistoryBody": "Send a file or receive a mailbox job to build the transfer queue.",
   "transfersTitle": "Transfers",
   "transfersSubtitle": "Upload and download history.",
-  "actionClearCompleted": "Clear Completed",
+  "actionClearCompleted": "Clean Completed",
+  "actionCleanupAllDevices": "Clean All Devices",
   "tabUnfinished": "Unfinished ({count})",
   "tabSending": "Sending ({count})",
   "tabReceiving": "Receiving ({count})",
   "tabCompleted": "Done ({count})",
   "tabAll": "All ({count})",
-  "selectTransferTitle": "Select a transfer",
-  "selectTransferBody": "Choose a row from the queue to inspect its state and available actions.",
-  "selectedTransferTitle": "Selected Transfer",
-  "selectedTransferSubtitle": "Current status, direction, and recovery actions.",
-  "sendJobLabel": "Send job",
-  "receiveJobLabel": "Receive job",
   "actionResumeTransfer": "Resume Transfer",
   "actionDeleteDevice": "Delete Device",
   "actionDeleteDeviceHint": "Are you sure you want to delete this device and its mailbox?",
@@ -109,8 +104,18 @@
   "settingsSubtitle": "Device, storage, and sign-out.",
   "downloadFolderChooseBeforeReceiving": "Choose a folder before receiving",
   "latestErrorTitle": "Latest Error",
-  "directionSend": "Send",
-  "directionReceive": "Receive",
+  "transferSendingTo": "Send to {device}",
+  "@transferSendingTo": {
+    "placeholders": {
+      "device": {}
+    }
+  },
+  "transferReceivingAt": "Receive at {device}",
+  "@transferReceivingAt": {
+    "placeholders": {
+      "device": {}
+    }
+  },
   "accountLabel": "Account: {authSource}",
   "deviceIdLabel": "Device ID: {deviceId}",
   "@deviceIdLabel": {
@@ -174,12 +179,8 @@
   "stageCleanup": "Cleanup",
   "stageFailed": "Failed",
   "stageDone": "Done",
-  "transferFailedWaitingRecovery": "Transfer failed and is waiting for recovery.",
-  "transferCompletedSuccessfully": "Transfer completed successfully.",
-  "transferPercentComplete": "{percent}% complete",
-  "transferNeedsAttention": "Needs attention",
-  "transferCompleted": "Completed",
-  "transferActive": "Active",
+  "transferPercentComplete": "{percent}%",
+  "transferWaitingRecovery": "Waiting for recovery",
   "mailboxPollIntervalTitle": "Mailbox Poll Interval",
   "mailboxPollIntervalSubtitle": "{seconds}s - how often to check for new files.",
   "secondsShort": "{seconds}s",
