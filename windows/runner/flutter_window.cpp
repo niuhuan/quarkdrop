@@ -27,9 +27,10 @@ bool FlutterWindow::OnCreate() {
   RegisterPlugins(flutter_controller_->engine());
   SetChildContent(flutter_controller_->view()->GetNativeWindow());
 
-  flutter_controller_->engine()->SetNextFrameCallback([&]() {
-    this->Show();
-  });
+  // Do not auto-show on the first Flutter frame. Flutter now decides whether
+  // startup should show normally or hide to tray, and forcing Show() here
+  // races with the immediate auto-minimize path on Windows.
+  flutter_controller_->engine()->SetNextFrameCallback([&]() {});
 
   // Flutter can complete the first frame before the "show window" callback is
   // registered. The following call ensures a frame is pending to ensure the

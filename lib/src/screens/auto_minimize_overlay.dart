@@ -45,7 +45,14 @@ class _AutoMinimizeOverlayState extends State<AutoMinimizeOverlay> {
   void _start() {
     if (!mounted) return;
     final enabled = widget.store.autoMinimizeOnStart.value;
-    if (!enabled) return;
+    if (!enabled) {
+      if (Platform.isWindows) {
+        // Windows no longer auto-shows in the runner, so explicitly show the
+        // window when startup auto-minimize is disabled.
+        windowManager.show();
+      }
+      return;
+    }
 
     final delay = widget.store.autoMinimizeDelaySeconds.value;
     if (delay == 0) {
@@ -53,6 +60,11 @@ class _AutoMinimizeOverlayState extends State<AutoMinimizeOverlay> {
       return;
     }
 
+    if (Platform.isWindows) {
+      // For delayed minimize on Windows, show first so the countdown overlay
+      // is visible before we hide the app to the tray.
+      windowManager.show();
+    }
     setState(() {
       _remainingSeconds = delay;
     });
