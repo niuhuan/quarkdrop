@@ -653,17 +653,13 @@ pub async fn delete_transfer(job_id: String) -> anyhow::Result<()> {
 
     if !task.remote_job_folder_id.trim().is_empty() {
         let cookie_session = session::current_session();
-        anyhow::ensure!(
-            cookie_session.is_configured(),
-            "Authenticate with Quark before deleting the remote transfer job.",
-        );
-        let quark = QuarkPan::builder()
-            .cookie(cookie_session.raw_cookie)
-            .prepare()?;
-        match quark.delete(&[&task.remote_job_folder_id]).await {
-            Ok(()) => {}
-            Err(libquarkpan::QuarkPanError::Api { status, .. }) if status == 404 => {}
-            Err(error) => return Err(error.into()),
+        if cookie_session.is_configured() {
+            if let Ok(quark) = QuarkPan::builder()
+                .cookie(cookie_session.raw_cookie)
+                .prepare()
+            {
+                let _ = quark.delete(&[&task.remote_job_folder_id]).await;
+            }
         }
     }
 

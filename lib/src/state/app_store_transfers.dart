@@ -2,7 +2,7 @@ part of 'app_store.dart';
 
 extension AppStoreTransfers on AppStore {
   Future<void> resumeTransfer(TransferJob job) async {
-    if (job.stage != TransferStage.failed) {
+    if (job.stage == TransferStage.completed) {
       return;
     }
     resumeInProgress.value = true;

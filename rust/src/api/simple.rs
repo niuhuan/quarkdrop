@@ -1,4 +1,5 @@
 use crate::auth::session;
+use crate::task::store;
 use crate::workspace;
 use flutter_rust_bridge::for_generated::anyhow;
 use std::sync::Once;
@@ -18,6 +19,7 @@ pub fn configure_app(config_dir: String) -> anyhow::Result<()> {
     crate::device::reset_runtime_state();
     workspace::set_config_dir_override(config_dir.into())?;
     session::initialize_session_from_disk()?;
+    let _ = store::mark_interrupted_tasks_failed();
     Ok(())
 }
 

@@ -74,7 +74,11 @@ class _TransfersPaneState extends State<_TransfersPane>
           padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
           itemCount: filtered.length,
           separatorBuilder: (_, _) => const SizedBox(height: 12),
-          itemBuilder: (_, index) => _TransferListTile(job: filtered[index]),
+          itemBuilder: (_, index) => _TransferListTile(
+            job: filtered[index],
+            store: store,
+            transferActionInProgress: transferActionInProgress,
+          ),
         );
       }
 
@@ -149,9 +153,15 @@ class _TransfersPaneState extends State<_TransfersPane>
 }
 
 class _TransferListTile extends StatelessWidget {
-  const _TransferListTile({required this.job});
+  const _TransferListTile({
+    required this.job,
+    required this.store,
+    required this.transferActionInProgress,
+  });
 
   final TransferJob job;
+  final AppStore store;
+  final bool transferActionInProgress;
 
   @override
   Widget build(BuildContext context) {
@@ -199,6 +209,12 @@ class _TransferListTile extends StatelessWidget {
                 label: _stageLabel(context, job.stage),
                 color: _stageColor(job.stage),
               ),
+              if (job.stage != TransferStage.completed)
+                _TransferJobMenuButton(
+                  job: job,
+                  store: store,
+                  enabled: !transferActionInProgress,
+                ),
             ],
           ),
           const SizedBox(height: 14),
@@ -264,6 +280,70 @@ class _TransferListTile extends StatelessWidget {
     return '${job.transferredSizeLabel} / ${job.sizeLabel}';
   }
 }
+
+class _TransferJobMenuButton extends StatelessWidget {
+  const _TransferJobMenuButton({
+    required this.job,
+    required this.store,
+    required this.enabled,
+  });
+
+  final TransferJob job;
+  final AppStore store;
+  final bool enabled;
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = context.l10n;
+    return PopupMenuButton<_TransferJobAction>(
+      enabled: enabled,
+      icon: Icon(
+        Icons.more_vert_rounded,
+        color: enabled
+            ? Theme.of(context).colorScheme.onSurfaceVariant
+            : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.38),
+      ),
+      padding: EdgeInsets.zero,
+      splashRadius: 20,
+      itemBuilder: (_) => [
+        PopupMenuItem(
+          value: _TransferJobAction.resume,
+          child: ListTile(
+            leading: const Icon(Icons.replay_rounded),
+            title: Text(l10n.actionResumeTransfer),
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+        PopupMenuItem(
+          value: _TransferJobAction.delete,
+          child: ListTile(
+            leading: Icon(
+              Icons.delete_outline_rounded,
+              color: Theme.of(context).colorScheme.error,
+            ),
+            title: Text(
+              l10n.actionDeleteRemoteJob,
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            ),
+            dense: true,
+            contentPadding: EdgeInsets.zero,
+          ),
+        ),
+      ],
+      onSelected: (action) {
+        switch (action) {
+          case _TransferJobAction.resume:
+            store.resumeTransfer(job);
+          case _TransferJobAction.delete:
+            store.deleteTransfer(job);
+        }
+      },
+    );
+  }
+}
+
+enum _TransferJobAction { resume, delete }
 
 class _TransferTypeIcon extends StatelessWidget {
   const _TransferTypeIcon({required this.title});

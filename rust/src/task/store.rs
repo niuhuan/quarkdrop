@@ -1,4 +1,4 @@
-use crate::task::state::TaskSnapshot;
+use crate::task::state::{TaskSnapshot, TaskStage};
 use crate::workspace::app_paths;
 use std::fs;
 use std::io;
@@ -57,10 +57,30 @@ pub fn remove_task_snapshot(job_id: &str) -> io::Result<bool> {
     Ok(true)
 }
 
+pub fn mark_interrupted_tasks_failed() -> io::Result<usize> {
+    let mut snapshots = load_task_snapshots()?;
+    let mut count = 0usize;
+    for snapshot in &mut snapshots {
+        match snapshot.stage {
+            TaskStage::Done | TaskStage::Failed => {}
+            _ => {
+                snapshot.stage = TaskStage::Failed;
+                snapshot.last_error_message =
+                    "Transfer was interrupted by app shutdown.".to_string();
+                count += 1;
+            }
+        }
+    }
+    if count > 0 {
+        save_task_snapshots(&snapshots)?;
+    }
+    Ok(count)
+}
+
 pub fn clear_completed_task_snapshots() -> io::Result<usize> {
     let mut snapshots = load_task_snapshots()?;
     let original_len = snapshots.len();
-    snapshots.retain(|snapshot| snapshot.stage != crate::task::state::TaskStage::Done);
+    snapshots.retain(|snapshot| snapshot.stage != TaskStage::Done);
     let removed = original_len.saturating_sub(snapshots.len());
     if removed > 0 {
         save_task_snapshots(&snapshots)?;
@@ -144,4 +164,110 @@ fn migrate_legacy_sqlite_to_json() -> io::Result<()> {
     save_task_snapshots(&snapshots)?;
     let _ = fs::remove_file(&paths.transfer_db_file);
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::task::state::{TaskDirection, TaskStage};
+    use crate::workspace;
+    use uuid::Uuid;
+
+    fn make_snapshot(
+        job_id: &str,
+        stage: TaskStage,
+        direction: TaskDirection,
+        updated_at: u64,
+    ) -> TaskSnapshot {
+        TaskSnapshot {
+            job_id: job_id.to_string(),
+            stage,
+            direction,
+            local_path: "/tmp/test-file.txt".to_string(),
+            remote_job_folder_id: "remote-folder-id".to_string(),
+            remote_mailbox_folder_id: "mailbox-folder-id".to_string(),
+            display_name: "test-file.txt".to_string(),
+            counterpart_device_id: "peer-device".to_string(),
+            counterpart_label: "Test Peer".to_string(),
+            size_bytes: 1024 * 1024,
+            transferred_bytes: 512 * 1024,
+            protocol_name: "encrypted-sized-v1".to_string(),
+            manifest_created_at_unix_ms: 1000000,
+            content_key_seed_hex: String::new(),
+            last_error_message: String::new(),
+            updated_at_unix_ms: updated_at,
+        }
+    }
+
+    /// Simulates a full app restart lifecycle:
+    /// 1. Tasks stuck in various in-progress stages survive raw reload
+    /// 2. `mark_interrupted_tasks_failed` (called at startup) moves them to Failed
+    /// 3. Done and already-Failed tasks are left untouched
+    /// 4. Stuck tasks can also be individually deleted or bulk-cleared
+    #[test]
+    fn stuck_task_lifecycle() {
+        let tmp = std::env::temp_dir().join(format!("quarkdrop-store-test-{}", Uuid::new_v4()));
+        workspace::set_config_dir_override(tmp.clone()).unwrap();
+
+        // --- Phase 1: create tasks in various stages ---
+        let uploading =
+            make_snapshot("upload-001", TaskStage::UploadingBlobs, TaskDirection::Send, 2000);
+        let downloading = make_snapshot(
+            "download-001",
+            TaskStage::DownloadingBlobs,
+            TaskDirection::Receive,
+            1900,
+        );
+        let scanning =
+            make_snapshot("scan-001", TaskStage::Scanning, TaskDirection::Send, 1850);
+        let failed =
+            make_snapshot("failed-001", TaskStage::Failed, TaskDirection::Send, 1800);
+        let done =
+            make_snapshot("done-001", TaskStage::Done, TaskDirection::Receive, 1700);
+
+        upsert_task_snapshot(&uploading).unwrap();
+        upsert_task_snapshot(&downloading).unwrap();
+        upsert_task_snapshot(&scanning).unwrap();
+        upsert_task_snapshot(&failed).unwrap();
+        upsert_task_snapshot(&done).unwrap();
+
+        // Raw reload: all stages are preserved as-is
+        let raw = load_task_snapshots().unwrap();
+        assert_eq!(raw.len(), 5);
+        assert_eq!(
+            raw.iter().find(|s| s.job_id == "upload-001").unwrap().stage,
+            TaskStage::UploadingBlobs
+        );
+
+        // --- Phase 2: simulate startup recovery ---
+        let recovered = mark_interrupted_tasks_failed().unwrap();
+        assert_eq!(recovered, 3); // uploading + downloading + scanning
+
+        let after_recovery = load_task_snapshots().unwrap();
+        for snapshot in &after_recovery {
+            match snapshot.job_id.as_str() {
+                "upload-001" | "download-001" | "scan-001" => {
+                    assert_eq!(snapshot.stage, TaskStage::Failed);
+                    assert!(!snapshot.last_error_message.is_empty());
+                }
+                "failed-001" => {
+                    assert_eq!(snapshot.stage, TaskStage::Failed);
+                    assert!(snapshot.last_error_message.is_empty());
+                }
+                "done-001" => assert_eq!(snapshot.stage, TaskStage::Done),
+                other => panic!("unexpected job_id: {other}"),
+            }
+        }
+
+        // --- Phase 3: delete one, clear completed ---
+        remove_task_snapshot("upload-001").unwrap();
+        let cleared = clear_completed_task_snapshots().unwrap();
+        assert_eq!(cleared, 1); // done-001
+
+        let final_list = load_task_snapshots().unwrap();
+        assert_eq!(final_list.len(), 3);
+        assert!(final_list.iter().all(|s| s.stage == TaskStage::Failed));
+
+        fs::remove_dir_all(tmp).unwrap();
+    }
 }

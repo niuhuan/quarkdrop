@@ -170,6 +170,10 @@ async fn receive_job_impl(
                         None
                     };
 
+                    let mut progress = DownloadProgress::new(
+                        completed_before_entry,
+                        snapshot.size_bytes,
+                    );
                     let mut completed_before_blob = 0u64;
                     for (blob_index, blob_id) in entry.blob_ids.iter().enumerate() {
                         let blob = blob_entries
@@ -211,6 +215,8 @@ async fn receive_job_impl(
                                 &mut writer,
                                 &mut hasher,
                                 &mut resumed_bytes,
+                                &mut progress,
+                                &mut snapshot,
                             )
                             .await?;
                         } else {
@@ -225,6 +231,7 @@ async fn receive_job_impl(
                                 hasher.update(&chunk);
                                 writer.write_all(&chunk).await?;
                                 resumed_bytes += chunk.len() as u64;
+                                progress.report(resumed_bytes, &mut snapshot)?;
                             }
                         }
                         completed_before_blob += blob_plain_size;
@@ -309,6 +316,8 @@ async fn download_encrypted_blob(
     writer: &mut fs::File,
     hasher: &mut Sha256,
     resumed_bytes: &mut u64,
+    progress: &mut DownloadProgress,
+    snapshot: &mut TaskSnapshot,
 ) -> anyhow::Result<()> {
     let frame_floor =
         (start_plain_offset / BLOB_FRAME_PLAIN_BYTES as u64) * BLOB_FRAME_PLAIN_BYTES as u64;
@@ -353,6 +362,7 @@ async fn download_encrypted_blob(
             hasher.update(&plain);
             written_for_blob += plain.len() as u64;
             *resumed_bytes += plain.len() as u64;
+            progress.report(*resumed_bytes, snapshot)?;
             frame_index += 1;
             if written_for_blob >= blob_plain_size {
                 break;
@@ -441,6 +451,47 @@ fn safe_relative_path(segments: &[String]) -> anyhow::Result<PathBuf> {
         "manifest path cannot be empty"
     );
     Ok(path)
+}
+
+struct DownloadProgress {
+    completed_before_entry: u64,
+    size_bytes: u64,
+    last_persisted_bytes: u64,
+    last_persisted_at_ms: u64,
+}
+
+impl DownloadProgress {
+    fn new(completed_before_entry: u64, size_bytes: u64) -> Self {
+        Self {
+            completed_before_entry,
+            size_bytes,
+            last_persisted_bytes: 0,
+            last_persisted_at_ms: 0,
+        }
+    }
+
+    fn report(
+        &mut self,
+        entry_bytes: u64,
+        snapshot: &mut TaskSnapshot,
+    ) -> anyhow::Result<()> {
+        let total = self
+            .completed_before_entry
+            .saturating_add(entry_bytes)
+            .min(self.size_bytes);
+        let now = now_unix_ms();
+        let delta_bytes = total.saturating_sub(self.last_persisted_bytes);
+        let delta_ms = now.saturating_sub(self.last_persisted_at_ms);
+        if total < self.size_bytes && delta_bytes < 512 * 1024 && delta_ms < 500 {
+            return Ok(());
+        }
+        self.last_persisted_bytes = total;
+        self.last_persisted_at_ms = now;
+        snapshot.transferred_bytes = total;
+        snapshot.updated_at_unix_ms = now;
+        persist_snapshot(snapshot)?;
+        Ok(())
+    }
 }
 
 fn persist_snapshot(snapshot: &TaskSnapshot) -> anyhow::Result<()> {
